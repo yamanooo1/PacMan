@@ -11,6 +11,8 @@ add_library(logic STATIC
         src/Random.cpp
         src/Subject.cpp
         src/Score.cpp
+        src/AbstractFactory.cpp
+        src/Observer.cpp
 )
 
 target_include_directories(logic PUBLIC include)
