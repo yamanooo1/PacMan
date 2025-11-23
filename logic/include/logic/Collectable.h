@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_COLLECTABLES_H
 #define PACMAN_COLLECTABLES_H
+#include "EntityModel.h"
 
-
-class Collectables {
+class Collectables: public EntityModel {
 };
 
 

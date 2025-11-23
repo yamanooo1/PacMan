@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_GHOSTVIEW_H
 #define PACMAN_GHOSTVIEW_H
+#include "EntityView.h"
 
-
-class GhostView {
+class GhostView: public EntityView {
 };
 
 

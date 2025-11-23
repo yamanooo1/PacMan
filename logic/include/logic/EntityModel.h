@@ -4,9 +4,10 @@
 
 #ifndef PACMAN_ENTITY_H
 #define PACMAN_ENTITY_H
+#include "Subject.h"
 
+class EntityModel: public Subject {
 
-class Entity {
 };
 
 

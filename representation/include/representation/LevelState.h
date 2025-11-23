@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_LEVELSTATE_H
 #define PACMAN_LEVELSTATE_H
+#include "State.h"
 
-
-class LevelState {
+class LevelState: public State {
 };
 
 

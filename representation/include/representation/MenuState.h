@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_MENUSTATE_H
 #define PACMAN_MENUSTATE_H
+#include "State.h"
 
-
-class MenuState {
+class MenuState: public State{
 };
 
 

@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_WALLVIEW_H
 #define PACMAN_WALLVIEW_H
+#include "EntityView.h"
 
-
-class WallView {
+class WallView: public EntityView {
 };
 
 

@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_GHOST_H
 #define PACMAN_GHOST_H
+#include "EntityModel.h"
 
-
-class Ghost {
+class Ghost: public EntityModel {
 };
 
 

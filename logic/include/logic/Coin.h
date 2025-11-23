@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_COIN_H
 #define PACMAN_COIN_H
+#include "Collectable.h"
 
-
-class Coin {
+class Coin: public Collectables {
 };
 
 

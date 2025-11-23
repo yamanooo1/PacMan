@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_PAUSEDSTATE_H
 #define PACMAN_PAUSEDSTATE_H
+#include "State.h"
 
-
-class PausedState {
+class PausedState: public State {
 };
 
 

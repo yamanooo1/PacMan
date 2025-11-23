@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_COINVIEW_H
 #define PACMAN_COINVIEW_H
+#include "EntityView.h"
 
-
-class CoinView {
+class CoinView: public EntityView {
 };
 
 

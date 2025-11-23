@@ -1,5 +1,5 @@
 add_library(logic STATIC
-        src/Entity.cpp
+        src/EntityModel.cpp
         src/PacMan.cpp
         src/Ghost.cpp
         src/Collectable.cpp

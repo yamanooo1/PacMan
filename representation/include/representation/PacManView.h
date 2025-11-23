@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_PACMANVIEW_H
 #define PACMAN_PACMANVIEW_H
+#include "EntityView.h"
 
-
-class PacManView {
+class PacManView: public EntityView {
 };
 
 

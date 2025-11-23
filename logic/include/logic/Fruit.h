@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_FRUIT_H
 #define PACMAN_FRUIT_H
+#include "Collectable.h"
 
-
-class Fruit {
+class Fruit: public Collectables {
 };
 
 
