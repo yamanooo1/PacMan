@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_CONCRETEFACTORY_H
 #define PACMAN_CONCRETEFACTORY_H
+#include "logic/AbstractFactory.h"
 
-
-class ConcreteFactory {
+class ConcreteFactory: public AbstractFactory{
 };
 
 

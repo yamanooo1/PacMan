@@ -4,9 +4,9 @@
 
 #ifndef PACMAN_ENTITYVIEW_H
 #define PACMAN_ENTITYVIEW_H
+#include "logic/Observer.h"
 
-
-class EntityView {
+class EntityView: public Observer {
 };
 
 

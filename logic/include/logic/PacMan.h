@@ -6,7 +6,7 @@
 #define PACMAN_PACMAN_H
 #include "EntityModel.h"
 
-class PacMan: EntityModel {
+class PacMan: public EntityModel {
 };
 
 

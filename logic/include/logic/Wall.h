@@ -6,7 +6,7 @@
 #define PACMAN_WALL_H
 #include "EntityModel.h"
 
-class Wall: EntityModel {
+class Wall: public EntityModel {
 };
 
 
