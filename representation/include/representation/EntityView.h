@@ -4,9 +4,17 @@
 
 #ifndef PACMAN_ENTITYVIEW_H
 #define PACMAN_ENTITYVIEW_H
+#include "logic/EntityModel.h"
 #include "logic/Observer.h"
 
 class EntityView: public Observer {
+private:
+public:
+  void update() override;
+
+  //todo virtual draw();
+protected:
+  EntityModel* model;
 };
 
 

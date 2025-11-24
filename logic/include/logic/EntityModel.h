@@ -7,7 +7,9 @@
 #include "Subject.h"
 
 class EntityModel: public Subject {
+private:
 
+public:
 };
 
 

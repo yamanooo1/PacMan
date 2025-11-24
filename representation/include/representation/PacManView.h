@@ -7,6 +7,10 @@
 #include "EntityView.h"
 
 class PacManView: public EntityView {
+private:
+public:
+//todo update() override
+//todo draw() override
 };
 
 

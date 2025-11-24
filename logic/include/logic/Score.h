@@ -7,6 +7,13 @@
 #include "Observer.h"
 
 class Score: public Observer{
+private:
+  int currentScore;
+public:
+  //todo
+  void update() override;
+
+  int getScore() const { return currentScore; }
 };
 
 
