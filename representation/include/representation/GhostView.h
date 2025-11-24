@@ -7,6 +7,8 @@
 #include "EntityView.h"
 
 class GhostView: public EntityView {
+public:
+  //todo update()
 };
 
 

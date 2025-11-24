@@ -7,6 +7,8 @@
 #include "EntityView.h"
 
 class FruitView: public EntityView {
+public:
+  //todo update()
 };
 
 

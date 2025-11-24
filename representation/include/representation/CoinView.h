@@ -7,6 +7,8 @@
 #include "EntityView.h"
 
 class CoinView: public EntityView {
+public:
+  //todo update()
 };
 
 

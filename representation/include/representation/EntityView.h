@@ -10,8 +10,6 @@
 class EntityView: public Observer {
 private:
 public:
-  void update() override;
-
   //todo virtual draw();
 protected:
   EntityModel* model;

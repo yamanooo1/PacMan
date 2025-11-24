@@ -9,7 +9,7 @@
 class PacManView: public EntityView {
 private:
 public:
-//todo update() override
+//todo update()
 //todo draw() override
 };
 
