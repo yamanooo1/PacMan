@@ -7,6 +7,8 @@
 #include "EntityModel.h"
 
 class PacMan: public EntityModel {
+public:
+  ~PacMan() override = default;
 };
 
 

@@ -7,6 +7,8 @@
 #include "EntityModel.h"
 
 class Ghost: public EntityModel {
+public:
+  ~Ghost() override = default;
 };
 
 
