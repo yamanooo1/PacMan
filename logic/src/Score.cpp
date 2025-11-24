@@ -4,3 +4,6 @@
 
 #include "logic/Score.h"
 
+void Score::update() {
+  currentScore+=10;
+}
