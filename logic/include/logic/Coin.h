@@ -14,7 +14,7 @@ public:
 
   ~Coin() override = default;
 
-  void onCollected() {
+  void onCollected() override{
     notify(GameEvent::COIN_COLLECTED);
   }
 };

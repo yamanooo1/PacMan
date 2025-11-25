@@ -7,6 +7,7 @@
 #include "EntityModel.h"
 
 class Wall: public EntityModel {
+public:
   Wall(float x, float y, float width, float height) : EntityModel(x, y, width, height) {};
 
   ~Wall() override = default;

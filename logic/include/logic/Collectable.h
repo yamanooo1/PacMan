@@ -12,6 +12,8 @@ public:
   Collectable(float x, float y, float width, float height) : EntityModel(x, y, width, height) {};
 
   ~Collectable() override = default;
+
+  virtual void onCollected() = 0;
 };
 
 

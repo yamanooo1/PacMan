@@ -12,6 +12,10 @@ public:
       : Collectable(x, y, 0.03f, 0.03f) {}  // Slightly bigger
 
   ~Fruit() override = default;
+
+  void onCollected() override {
+    notify(GameEvent::FRUIT_COLLECTED);
+  }
 };
 
 
