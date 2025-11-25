@@ -17,6 +17,7 @@
 #include "representation/CoinView.h"
 #include "representation/FruitView.h"
 
+ConcreteFactory::ConcreteFactory(sf::RenderWindow* win) : window(win) {}
 // CRITICAL: Define destructor where EntityView is complete
 ConcreteFactory::~ConcreteFactory() = default;
 

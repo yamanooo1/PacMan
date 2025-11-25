@@ -16,7 +16,7 @@ private:
   sf::RenderWindow* window;
   std::vector<std::unique_ptr<EntityView>> views;
 public:
-  explicit ConcreteFactory(sf::RenderWindow* win) : window(win) {}
+  explicit ConcreteFactory(sf::RenderWindow* win);
 
   ~ConcreteFactory() override;
 

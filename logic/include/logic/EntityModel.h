@@ -23,8 +23,9 @@ public:
 
   EntityModel(float posX, float posY, float w, float h)
     : x(posX),y(posY), width(w), height(h), direction(Direction::NONE){}
-
   ~EntityModel() override = default;
+
+
   std::pair<float,float> getPosition() const{ return {x,y};}
   float getWidth() const { return width; }
   float getHeight() const { return height; }
