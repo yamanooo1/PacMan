@@ -7,6 +7,7 @@
 #include "EntityView.h"
 
 class WallView: public EntityView {
+  void update() override;
 };
 
 

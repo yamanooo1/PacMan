@@ -37,9 +37,9 @@ public:
   virtual ~Subject() = default; // Virtual destructor
 
 protected:
-  void notify() {  // Derived classes call this when they change
+  void notify(GameEvent event) {  // Derived classes call this when they change
     for (Observer* observer: observers) {
-      observer->update();
+      observer->update(event);
     }
   }
 

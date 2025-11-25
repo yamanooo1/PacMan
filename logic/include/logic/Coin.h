@@ -6,7 +6,17 @@
 #define PACMAN_COIN_H
 #include "Collectable.h"
 
-class Coin: public Collectables {
+class Coin: public Collectable {
+
+public:
+  Coin(float x, float y)
+      : Collectable(x, y, 0.02f, 0.02f) {}
+
+  ~Coin() override = default;
+
+  void onCollected() {
+    notify(GameEvent::COIN_COLLECTED);
+  }
 };
 
 

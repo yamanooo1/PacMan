@@ -8,6 +8,8 @@
 
 class PacMan: public EntityModel {
 public:
+  PacMan(float x, float y) : EntityModel(x, y, 0.05f, 0.05f) {};
+
   ~PacMan() override = default;
 };
 

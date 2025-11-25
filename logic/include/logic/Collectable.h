@@ -6,7 +6,12 @@
 #define PACMAN_COLLECTABLES_H
 #include "EntityModel.h"
 
-class Collectables: public EntityModel {
+class Collectable: public EntityModel {
+public:
+
+  Collectable(float x, float y, float width, float height) : EntityModel(x, y, width, height) {};
+
+  ~Collectable() override = default;
 };
 
 

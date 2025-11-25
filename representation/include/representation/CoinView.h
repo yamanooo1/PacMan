@@ -9,6 +9,7 @@
 class CoinView: public EntityView {
 public:
   //todo update()
+  void update() override;
 };
 
 

@@ -9,6 +9,7 @@
 class GhostView: public EntityView {
 public:
   //todo update()
+  void update() override;
 };
 
 

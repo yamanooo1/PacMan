@@ -8,7 +8,13 @@
 
 class Ghost: public EntityModel {
 public:
+  Ghost(float x, float y) : EntityModel(x, y, 0.05f, 0.05f) {};
+
   ~Ghost() override = default;
+
+  void onEaten() {
+    notify(GameEvent::GHOST_EATEN);
+  }
 };
 
 
