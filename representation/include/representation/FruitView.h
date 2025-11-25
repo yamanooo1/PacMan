@@ -9,7 +9,7 @@
 class FruitView: public EntityView {
 public:
   //todo update()
-  void update() override;
+  void update(GameEvent) override;
 };
 
 
