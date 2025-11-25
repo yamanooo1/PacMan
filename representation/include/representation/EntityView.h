@@ -18,7 +18,7 @@ public:
   }
   void update(GameEvent event) override {}
 
-  //todo virtual draw();
+  virtual void draw() = 0;
 
   // Prevent copying (views shouldn't be copied)
   EntityView(const EntityView&) = delete;
