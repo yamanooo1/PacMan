@@ -14,7 +14,9 @@ public:
   Score() = default;
 
   // todo
-  void update() override;
+  void update() override {
+    // Calculate and add points
+  }
 
   int getScore() const { return currentScore; }
 };

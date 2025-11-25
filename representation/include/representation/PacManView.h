@@ -10,6 +10,9 @@ class PacManView: public EntityView {
 private:
 public:
 //todo update()
+  void update() override {
+    // Update sprite position/animation
+  }
 //todo draw() override
 };
 

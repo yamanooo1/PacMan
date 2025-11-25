@@ -11,7 +11,7 @@ public:
   virtual ~Observer() = default;  // Virtual destructor
 
   // This is THE method that gets called when Subject changes
-  virtual void update() = 0;  // Pure virtual = must be implemented
+  virtual void update() = 0;  // Pure virtual = todo must be implemented
 };
 
 
