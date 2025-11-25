@@ -1,0 +1,11 @@
+10 10
+WWWWWWWWWW
+W........W
+W.P......W
+W........W
+W...G....W
+W........W
+W........W
+W....F...W
+W........W
+WWWWWWWWWW

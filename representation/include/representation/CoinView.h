@@ -13,7 +13,7 @@ private:
   sf::CircleShape shape;
 public:
 
-  CoinView(EntityModel* model, sf::RenderWindow* win);
+  CoinView(EntityModel* model, sf::RenderWindow* win, Camera* cam);
   void update(GameEvent) override;
   void draw() override;
 

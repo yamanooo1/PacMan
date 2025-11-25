@@ -14,7 +14,7 @@ private:
 
 public:
 
-  GhostView(EntityModel* model, sf::RenderWindow* win);
+  GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam);
   void update(GameEvent) override;
   void draw() override;
 };

@@ -34,6 +34,9 @@ public:
   void createCoin(float x, float y);
   void createFruit(float x, float y);
 
+
+  bool loadFromFile(const std::string& filename);
+
   int getMapWidth() const { return mapWidth; }
   int getMapHeight() const { return mapHeight; }
   const std::vector<std::unique_ptr<EntityModel>>& getEntities() const { return entities; }

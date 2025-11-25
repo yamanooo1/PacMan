@@ -17,14 +17,14 @@
 #include "representation/CoinView.h"
 #include "representation/FruitView.h"
 
-ConcreteFactory::ConcreteFactory(sf::RenderWindow* win) : window(win) {}
+ConcreteFactory::ConcreteFactory(sf::RenderWindow* win, Camera* cam) : window(win), camera(cam) {}
 // CRITICAL: Define destructor where EntityView is complete
 ConcreteFactory::~ConcreteFactory() = default;
 
 std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
   auto model = std::make_unique<PacMan>(x, y);
   PacMan* modelPtr = model.get();
-  auto view = std::make_unique<PacManView>(modelPtr, window);
+  auto view = std::make_unique<PacManView>(modelPtr, window, camera);
   views.push_back(std::move(view));
   return model;
 }
@@ -32,7 +32,7 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
 std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y) {
   auto model = std::make_unique<Ghost>(x, y);
   Ghost* modelPtr = model.get();
-  auto view = std::make_unique<GhostView>(modelPtr, window);
+  auto view = std::make_unique<GhostView>(modelPtr, window, camera);
   views.push_back(std::move(view));
   return model;
 }
@@ -40,7 +40,7 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y) {
 std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, float h) {
   auto model = std::make_unique<Wall>(x, y, w, h);
   Wall* modelPtr = model.get();
-  auto view = std::make_unique<WallView>(modelPtr, window);
+  auto view = std::make_unique<WallView>(modelPtr, window, camera);
   views.push_back(std::move(view));
   return model;
 }
@@ -48,7 +48,7 @@ std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, flo
 std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
   auto model = std::make_unique<Coin>(x, y);
   Coin* modelPtr = model.get();
-  auto view = std::make_unique<CoinView>(modelPtr, window);
+  auto view = std::make_unique<CoinView>(modelPtr, window, camera);
   views.push_back(std::move(view));
   return model;
 }
@@ -56,7 +56,7 @@ std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
 std::unique_ptr<Fruit> ConcreteFactory::createFruit(float x, float y) {
   auto model = std::make_unique<Fruit>(x, y);
   Fruit* modelPtr = model.get();
-  auto view = std::make_unique<FruitView>(modelPtr, window);
+  auto view = std::make_unique<FruitView>(modelPtr, window, camera);
   views.push_back(std::move(view));
   return model;
 }

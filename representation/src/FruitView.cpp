@@ -3,9 +3,9 @@
 //
 
 #include "representation/FruitView.h"
-
-FruitView::FruitView(EntityModel* model, sf::RenderWindow* win)
-    : EntityView(model), window(win) {
+#include "representation/Camera.h"
+FruitView::FruitView(EntityModel* model, sf::RenderWindow* win, Camera* cam)
+    : EntityView(model, cam), window(win) {
   shape.setRadius(8.f);
   shape.setFillColor(sf::Color::Green);
 }
@@ -13,8 +13,20 @@ FruitView::FruitView(EntityModel* model, sf::RenderWindow* win)
 void FruitView::update(GameEvent event) {}
 
 void FruitView::draw() {
-  if (!model || !window) return;
+  if (!model || !window || !camera) return;
+
   auto [x, y] = model->getPosition();
-  shape.setPosition(x * 400 + 300, y * 400 + 300);
+
+  float screenX = camera->gridToScreenX(x + 0.5f);
+  float screenY = camera->gridToScreenY(y + 0.5f);
+
+  float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
+  float desiredSize = gridCellSize * 0.5f;
+  float radius = desiredSize / 2.f;
+
+  shape.setRadius(radius);
+  shape.setOrigin(radius, radius);
+  shape.setPosition(screenX, screenY);
+
   window->draw(shape);
 }

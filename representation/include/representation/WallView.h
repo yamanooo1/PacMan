@@ -15,7 +15,7 @@ private:
 
 public:
 
-  WallView(EntityModel* model, sf::RenderWindow* win);
+  WallView(EntityModel* model, sf::RenderWindow* win, Camera* cam);
   void update(GameEvent) override;
   void draw() override;
 };

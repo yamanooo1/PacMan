@@ -9,6 +9,9 @@
 #include "logic/Wall.h"
 #include "logic/Coin.h"
 #include "logic/Fruit.h"
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 World::World(AbstractFactory *f) : mapWidth(0), mapHeight(0) , factory(f){} //start with empty world
 
@@ -55,5 +58,55 @@ void World::createCoin(float x, float y) {
 void World::createFruit(float x, float y) {
   auto fruit = factory->createFruit(x, y);
   addEntity(std::move(fruit));
+}
+bool World::loadFromFile(const std::string &filename) {
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Failed to open map file: " << filename << std::endl;
+    return false;
+  }
+
+  // Clear existing entities
+  entities.clear();
+
+  // Read map dimensions
+  file >> mapWidth >> mapHeight;
+  file.ignore();  // Skip newline after dimensions
+
+  // Read the grid
+  std::string line;
+  int row = 0;
+  while (std::getline(file, line) && row < mapHeight) {
+    for (int col = 0; col < line.length() && col < mapWidth; ++col) {
+      char c = line[col];
+      float x = static_cast<float>(col);
+      float y = static_cast<float>(row);
+
+      switch (c) {
+      case 'W':
+        createWall(x, y, 1.0f, 1.0f);
+        break;
+      case '.':
+        createCoin(x, y);
+        break;
+      case 'P':
+        createPacMan(x, y);
+        break;
+      case 'G':
+        createGhost(x, y);
+        break;
+      case 'F':
+        createFruit(x, y);
+        break;
+      case ' ':
+        // Empty space
+        break;
+      }
+    }
+    row++;
+  }
+
+  file.close();
+  return true;
 }
 

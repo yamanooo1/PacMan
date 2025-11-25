@@ -10,13 +10,15 @@
 #include <memory>
 
 class EntityView;
+class Camera;
 
 class ConcreteFactory: public AbstractFactory{
 private:
   sf::RenderWindow* window;
+  Camera* camera;
   std::vector<std::unique_ptr<EntityView>> views;
 public:
-  explicit ConcreteFactory(sf::RenderWindow* win);
+  explicit ConcreteFactory(sf::RenderWindow* win, Camera* cam);
 
   ~ConcreteFactory() override;
 

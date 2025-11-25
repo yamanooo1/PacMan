@@ -12,7 +12,7 @@ private:
   sf::RenderWindow* window;
   sf::CircleShape shape;
 public:
-  FruitView(EntityModel* model, sf::RenderWindow* win);
+  FruitView(EntityModel* model, sf::RenderWindow* win, Camera* cam);
   void update(GameEvent) override;
   void draw() override;
 };

@@ -7,10 +7,11 @@
 #include "logic/EntityModel.h"
 #include "logic/Observer.h"
 
+class Camera;
 class EntityView: public Observer {
 private:
 public:
-  explicit EntityView(EntityModel* m) : model(m) {
+  explicit EntityView(EntityModel* m, Camera* cam) : model(m), camera(cam) {
     if (model) model ->attach(this);
   }
   ~EntityView() override {
@@ -26,6 +27,7 @@ public:
 
 protected:
   EntityModel* model;
+  Camera* camera;
 };
 
 
