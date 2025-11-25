@@ -12,8 +12,10 @@ enum class Direction {
 class EntityModel: public Subject {
 
 private:
+
   // x,y
   float x, y;
+
   //width, height
   const float width, height;
 
@@ -23,15 +25,16 @@ public:
 
   EntityModel(float posX, float posY, float w, float h)
     : x(posX),y(posY), width(w), height(h), direction(Direction::NONE){}
+
   ~EntityModel() override = default;
 
-
   std::pair<float,float> getPosition() const{ return {x,y};}
+  void setPosition(float newX, float newY){ x = newX; y = newY;}
+
   float getWidth() const { return width; }
   float getHeight() const { return height; }
-  Direction getDirection() const { return direction; }
 
-  void setPosition(float newX, float newY){ x = newX; y = newY;}
+  Direction getDirection() const { return direction; }
   void setDirection(Direction dir) { this->direction = dir; }
 };
 

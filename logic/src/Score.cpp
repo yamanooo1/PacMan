@@ -32,4 +32,11 @@ void Score::update(GameEvent event) {
   }
 }
 
-void Score::tick(float deltaTime) {}
+void Score::tick(float deltaTime) {
+  // Decrease score over time
+  currentScore -= static_cast<int>(10.0f * deltaTime);  // Lose 10 points/second
+
+  if (currentScore < 0) {
+    currentScore = 0;  // Don't go negative
+  }
+}

@@ -14,6 +14,7 @@ class Fruit;
 
 class AbstractFactory {
 public:
+
   virtual ~AbstractFactory() = default;
 
   // Return unique_ptrs - transfer ownership to caller (World)

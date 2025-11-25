@@ -9,9 +9,12 @@
 
 class WallView: public EntityView {
 private:
+
   sf::RenderWindow* window;
   sf::RectangleShape shape;
+
 public:
+
   WallView(EntityModel* model, sf::RenderWindow* win);
   void update(GameEvent) override;
   void draw() override;
