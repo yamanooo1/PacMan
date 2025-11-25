@@ -5,11 +5,16 @@
 #ifndef PACMAN_FRUITVIEW_H
 #define PACMAN_FRUITVIEW_H
 #include "EntityView.h"
+#include <SFML/Graphics.hpp>
 
 class FruitView: public EntityView {
+private:
+  sf::RenderWindow* window;
+  sf::CircleShape shape;
 public:
-  //todo update()
+  FruitView(EntityModel* model, sf::RenderWindow* win);
   void update(GameEvent) override;
+  void draw() override;
 };
 
 

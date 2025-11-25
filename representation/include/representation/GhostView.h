@@ -5,11 +5,18 @@
 #ifndef PACMAN_GHOSTVIEW_H
 #define PACMAN_GHOSTVIEW_H
 #include "EntityView.h"
+#include <SFML/Graphics.hpp>
 
 class GhostView: public EntityView {
+private:
+  sf::RenderWindow* window;
+  sf::CircleShape shape;
+
 public:
-  //todo update()
+
+  GhostView(EntityModel* model, sf::RenderWindow* win);
   void update(GameEvent) override;
+  void draw() override;
 };
 
 

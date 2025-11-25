@@ -5,15 +5,16 @@
 #ifndef PACMAN_PACMANVIEW_H
 #define PACMAN_PACMANVIEW_H
 #include "EntityView.h"
+#include <SFML/Graphics.hpp>
 
 class PacManView: public EntityView {
 private:
+  sf::RenderWindow* window;
+  sf::CircleShape shape;
 public:
-//todo update()
-  void update(GameEvent) override {
-    // Update sprite position/animation
-  }
-//todo draw() override
+  PacManView(EntityModel* model, sf::RenderWindow* win);
+  void update(GameEvent) override;
+  void draw() override;
 };
 
 
