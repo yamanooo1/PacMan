@@ -7,9 +7,7 @@
 
 PacManView::PacManView(EntityModel* model, sf::RenderWindow* win, Camera* cam)
     : EntityView(model, cam), window(win) {
-    // Setup temporary shape
-    shape.setRadius(20.f);
-    shape.setFillColor(sf::Color::Yellow);
+  shape.setFillColor(sf::Color::Yellow);
 }
 
 void PacManView::update(GameEvent event) {
@@ -21,17 +19,15 @@ void PacManView::draw() {
 
   auto [x, y] = model->getPosition();
 
-  // Center in grid cell
-  float screenX = camera->gridToScreenX(x + 0.5f);
-  float screenY = camera->gridToScreenY(y + 0.5f);
+  // Convert model position to screen position
+  float screenX = camera->gridToScreenX(x);
+  float screenY = camera->gridToScreenY(y);
 
-  // Size based on grid cell
-  float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
-  float desiredSize = gridCellSize * 0.8f;  // 80% of cell
-  float radius = desiredSize / 2.f;
+  // Convert model size to screen size (using scaleX and scaleY independently)
+  float screenWidth = camera->gridToScreenX(model->getWidth());
+  float screenHeight = camera->gridToScreenY(model->getHeight());
 
-  shape.setRadius(radius);
-  shape.setOrigin(radius, radius);  // Center the shape
+  shape.setSize(sf::Vector2f(screenWidth, screenHeight));
   shape.setPosition(screenX, screenY);
 
   window->draw(shape);

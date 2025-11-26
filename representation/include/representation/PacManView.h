@@ -10,7 +10,7 @@
 class PacManView: public EntityView {
 private:
   sf::RenderWindow* window;
-  sf::CircleShape shape;
+  sf::RectangleShape shape;
 public:
   PacManView(EntityModel* model, sf::RenderWindow* win, Camera* cam);
   void update(GameEvent) override;

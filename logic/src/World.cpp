@@ -13,7 +13,7 @@
 #include <sstream>
 #include <iostream>
 
-World::World(AbstractFactory *f) : mapWidth(0), mapHeight(0) , factory(f){} //start with empty world
+World::World(AbstractFactory *f) : mapWidth(0), mapHeight(0) , factory(f), pacman(nullptr){} //start with empty world
 
 // Set the dimensions of the map (called when loading from file)
 void World::setMapDimensions(int width, int height) {
@@ -29,11 +29,9 @@ void World::addEntity(std::unique_ptr<EntityModel> entity) {
 
 // Create PacMan using the factory
 void World::createPacMan(float x, float y) {
-  // Factory creates PacMan (and its view automatically)
-  auto pacman = factory->createPacMan(x, y);
-
-  // World takes ownership of the model
-  addEntity(std::move(pacman));
+  auto pacmanModel = factory->createPacMan(x, y);
+  pacman = pacmanModel.get();  // ADD THIS LINE - store pointer before moving
+  addEntity(std::move(pacmanModel));
 }
 
 // Create Ghost using the factory
@@ -68,6 +66,7 @@ bool World::loadFromFile(const std::string &filename) {
 
   // Clear existing entities
   entities.clear();
+  pacman = nullptr;
 
   // Read map dimensions
   file >> mapWidth >> mapHeight;
@@ -110,3 +109,59 @@ bool World::loadFromFile(const std::string &filename) {
   return true;
 }
 
+void World::update(float deltaTime) {
+  if (pacman) {
+    // Calculate where PacMan WOULD move
+    auto [x, y] = pacman->getPosition();
+    float nextX = x;
+    float nextY = y;
+
+    switch (pacman->getDirection()) {
+    case Direction::UP:
+      nextY = y - pacman->getSpeed() * deltaTime;
+      break;
+    case Direction::DOWN:
+      nextY = y + pacman->getSpeed() * deltaTime;
+      break;
+    case Direction::LEFT:
+      nextX = x - pacman->getSpeed() * deltaTime;
+      break;
+    case Direction::RIGHT:
+      nextX = x + pacman->getSpeed() * deltaTime;
+      break;
+    case Direction::NONE:
+      break;
+    }
+
+    // Check if the next position would hit a wall
+    // CHANGED: Pass PacMan's bounding box, not just a point
+    bool canMove = !isWall(nextX, nextY, pacman->getWidth(), pacman->getHeight());
+
+    // Update PacMan with collision info
+    pacman->update(deltaTime, canMove);
+  }
+}
+
+bool World::isWall(float x, float y, float width, float height) const {
+  // Check all entities to see if any wall overlaps with the given rectangle
+  for (const auto& entity : entities) {
+    auto [ex, ey] = entity->getPosition();
+    float ew = entity->getWidth();
+    float eh = entity->getHeight();
+
+    // Skip if not a wall (walls are approximately 1x1)
+    if (ew < 0.9f || eh < 0.9f) {
+      continue;
+    }
+
+    // AABB (Axis-Aligned Bounding Box) collision detection
+    // Check if rectangles overlap
+    if (x < ex + ew &&      // Left edge of PacMan is left of right edge of wall
+        x + width > ex &&   // Right edge of PacMan is right of left edge of wall
+        y < ey + eh &&      // Top edge of PacMan is above bottom edge of wall
+        y + height > ey) {  // Bottom edge of PacMan is below top edge of wall
+      return true;  // Collision detected!
+        }
+  }
+  return false;
+}

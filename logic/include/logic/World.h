@@ -18,6 +18,7 @@ private:
   int mapHeight;
 
   AbstractFactory* factory;
+  PacMan* pacman;
 
 public:
 
@@ -33,7 +34,7 @@ public:
   void createWall(float x, float y, float w, float h);
   void createCoin(float x, float y);
   void createFruit(float x, float y);
-
+  bool isWall(float x, float y, float width, float height) const;
 
   bool loadFromFile(const std::string& filename);
 
@@ -41,6 +42,9 @@ public:
   int getMapHeight() const { return mapHeight; }
   const std::vector<std::unique_ptr<EntityModel>>& getEntities() const { return entities; }
   size_t getEntityCount() const { return entities.size(); }
+
+  void update(float deltaTime);
+  PacMan* getPacMan() const { return pacman; }
 };
 
 
