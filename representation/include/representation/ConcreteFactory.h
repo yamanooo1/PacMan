@@ -30,6 +30,7 @@ public:
   std::unique_ptr<Fruit> createFruit(float x, float y) override;
 
   void drawAll();
+  void removeDeadViews();
 };
 
 

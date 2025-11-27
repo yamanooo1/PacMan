@@ -5,6 +5,8 @@
 #include "representation/ConcreteFactory.h"
 
 // Include complete types
+
+#include <iostream>
 #include "representation/EntityView.h"
 #include "logic/PacMan.h"
 #include "logic/Ghost.h"
@@ -65,4 +67,15 @@ void ConcreteFactory::drawAll() {
   for (const auto& view : views) {
     view->draw();
   }
+}
+
+void ConcreteFactory::removeDeadViews() {
+
+  views.erase(
+    std::remove_if(views.begin(), views.end(),
+      [](const std::unique_ptr<EntityView>& view) {
+        return view->getModel()->isDead();
+      }),
+    views.end()
+  );
 }

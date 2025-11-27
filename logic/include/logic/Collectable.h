@@ -14,6 +14,11 @@ public:
   ~Collectable() override = default;
 
   virtual void onCollected() = 0;
+
+  void onCollisionWithPacMan() override {
+    onCollected();  // Notify observers (Score)
+    markDead();     // Mark for removal
+  }
 };
 
 

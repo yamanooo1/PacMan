@@ -14,11 +14,13 @@ void CoinView::update(GameEvent event) {}
 
 void CoinView::draw() {
   if (!model || !window || !camera) return;
+  if (model->isDead()) return;
 
   auto [x, y] = model->getPosition();
 
-  float screenX = camera->gridToScreenX(x + 0.5f);
-  float screenY = camera->gridToScreenY(y + 0.5f);
+  // DON'T add 0.5f - entity is already centered in logic!
+  float screenX = camera->gridToScreenX(x);
+  float screenY = camera->gridToScreenY(y);
 
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.3f;

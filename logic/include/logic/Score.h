@@ -4,29 +4,27 @@
 
 #ifndef PACMAN_SCORE_H
 #define PACMAN_SCORE_H
+
 #include "Observer.h"
 
-class Score: public Observer{
-
+class Score : public Observer {
 private:
   int currentScore = 0;
-
-  float timeSinceLastCoin = 0.0f;  // Track time since last coin collected
-
-  const int BASE_COIN_VALUE = 20;
-  const float DECAY_INTERVAL = 0.5f;  // Decay every 0.5 seconds
-  const float DECAY_RATE = 0.9f;      // Lose 10% per interval
+  float lastCoinTime = 0.0f;      // Timestamp of last coin collected
+  float lastUpdateTime = 0.0f;    // For time-based score decay
+  float pointsLostAccumulator = 0.0f;  // Accumulate fractional points
 
 public:
-  Score() = default;
+  Score();
+  ~Score() override = default;
 
-  // todo
   void update(GameEvent event) override;
 
-  void tick(float deltaTime);
+  // Call this every frame to handle time-based score decay
+  void updateScoreDecay();
 
   int getScore() const { return currentScore; }
+  void reset();
 };
 
-
-#endif //PACMAN_SCORE_H
+#endif // PACMAN_SCORE_H

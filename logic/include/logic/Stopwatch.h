@@ -5,47 +5,55 @@
 #ifndef PACMAN_STOPWATCH_H
 #define PACMAN_STOPWATCH_H
 
-
 #include <chrono>
 
 class Stopwatch {
 private:
+  using Clock = std::chrono::high_resolution_clock;
+  using TimePoint = std::chrono::time_point<Clock>;
 
-    using Clock = std::chrono::high_resolution_clock; // most accurate clock
-    using TimePoint = std::chrono::time_point<Clock>; // represents point in time
+  TimePoint startTime;    // When stopwatch was created
+  TimePoint lastTime;     // Last recorded time for deltaTime
+  float deltaTime;        // Time difference between frames
 
-    TimePoint lastTime; // Stores the last recorded time
-    float deltaTime; // Time Difference between frames
-
-    //Private constructor, initialize deltaTime to 0
-    Stopwatch() : deltaTime(0.0f) {
-        lastTime = Clock::now(); // Get current time
-    }
+  // Private constructor
+  Stopwatch() : deltaTime(0.0f) {
+    startTime = Clock::now();
+    lastTime = startTime;
+  }
 
 public:
-    // The ONLY way to access the singleton.
-    static Stopwatch& getInstance() {
-        static Stopwatch instance;
-        return instance; //returns a reference to a StopWatch == you can access the original object == more efficient.
-    }
+  // Singleton access
+  static Stopwatch& getInstance() {
+    static Stopwatch instance;
+    return instance;
+  }
 
-    // Delete copy and move operations
-    Stopwatch(const Stopwatch&) = delete;
-    Stopwatch& operator=(const Stopwatch&) = delete;
-    Stopwatch(Stopwatch&&) = delete;
-    Stopwatch& operator=(Stopwatch&&) = delete;
+  // Delete copy and move operations
+  Stopwatch(const Stopwatch&) = delete;
+  Stopwatch& operator=(const Stopwatch&) = delete;
+  Stopwatch(Stopwatch&&) = delete;
+  Stopwatch& operator=(Stopwatch&&) = delete;
 
-    //updates lastTime and deltTime
-    void tick() {
-        TimePoint currentTime = Clock::now();
-        std::chrono::duration<float> elapsed = currentTime - lastTime;
-        deltaTime = elapsed.count();
-        lastTime = currentTime;
-    }
+  // Updates lastTime and deltaTime
+  void tick() {
+    TimePoint currentTime = Clock::now();
+    std::chrono::duration<float> elapsed = currentTime - lastTime;
+    deltaTime = elapsed.count();
+    lastTime = currentTime;
+  }
 
-    float getDeltaTime() const {
-        return deltaTime;
-    }
+  // Get time since last frame
+  float getDeltaTime() const {
+    return deltaTime;
+  }
+
+  // Get total elapsed time since stopwatch started
+  float getElapsedTime() const {
+    TimePoint currentTime = Clock::now();
+    std::chrono::duration<float> elapsed = currentTime - startTime;
+    return elapsed.count();
+  }
 };
 
 #endif //PACMAN_STOPWATCH_H

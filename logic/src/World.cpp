@@ -9,6 +9,7 @@
 #include "logic/Wall.h"
 #include "logic/Coin.h"
 #include "logic/Fruit.h"
+#include "logic/Score.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -54,16 +55,40 @@ void World::createWall(float x, float y, float w, float h) {
 }
 
 // Create Coin using the factory
+// Create Coin using the factory
 void World::createCoin(float x, float y) {
   auto coin = factory->createCoin(x, y);
+
+  // Center coin in the grid cell (just like PacMan)
+  float centeredX = x + (1.0f - coin->getWidth()) / 2.0f;
+  float centeredY = y + (1.0f - coin->getHeight()) / 2.0f;
+  coin->setPosition(centeredX, centeredY);
+
+  // Attach Score as observer if it exists
+  if (score) {
+    coin->attach(score);
+  }
+
   addEntity(std::move(coin));
 }
 
 // Create Fruit using the factory
 void World::createFruit(float x, float y) {
   auto fruit = factory->createFruit(x, y);
+
+  // Center fruit in the grid cell
+  float centeredX = x + (1.0f - fruit->getWidth()) / 2.0f;
+  float centeredY = y + (1.0f - fruit->getHeight()) / 2.0f;
+  fruit->setPosition(centeredX, centeredY);
+
+  // Attach Score as observer if it exists
+  if (score) {
+    fruit->attach(score);
+  }
+
   addEntity(std::move(fruit));
 }
+
 bool World::loadFromFile(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
@@ -241,6 +266,9 @@ void World::update(float deltaTime) {
     // No wall, move normally
     pacman->update(deltaTime, true);
   }
+
+  checkCollisions();
+  removeDeadEntities();
 }
 
 bool World::isWall(float x, float y, float width, float height) const {
@@ -288,4 +316,57 @@ bool World::hasWallInGridCell(int gridX, int gridY) const {
     }
   }
   return false;
+}
+
+void World::checkCollisions() {
+  if (!pacman) return;
+
+  auto [px, py] = pacman->getPosition();
+  float pw = pacman->getWidth();
+  float ph = pacman->getHeight();
+
+  // Check collision with all entities
+  for (auto& entity : entities) {
+    if (entity->isDead()) continue;
+    if (entity.get() == pacman) continue;
+
+    auto [ex, ey] = entity->getPosition();
+    float ew = entity->getWidth();
+    float eh = entity->getHeight();
+
+    // AABB collision detection
+    bool collision = (px < ex + ew &&
+                      px + pw > ex &&
+                      py < ey + eh &&
+                      py + ph > ey);
+
+    if (collision) {
+      entity->onCollisionWithPacMan();
+    }
+  }
+}
+
+void World::removeDeadEntities() {
+
+  // Count dead entities and show what they are
+  int deadCount = 0;
+  for (const auto& entity : entities) {
+    if (entity->isDead()) {
+      auto [x, y] = entity->getPosition();
+      deadCount++;
+    }
+  }
+
+  // First remove views
+  factory->removeDeadViews();
+
+  // Then remove the models themselves
+  entities.erase(
+    std::remove_if(entities.begin(), entities.end(),
+      [](const std::unique_ptr<EntityModel>& entity) {
+        return entity->isDead();
+      }),
+    entities.end()
+  );
+
 }

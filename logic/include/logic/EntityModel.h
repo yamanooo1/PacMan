@@ -21,10 +21,12 @@ private:
 
   Direction direction;
 
+  bool dead;
+
 public:
 
   EntityModel(float posX, float posY, float w, float h)
-    : x(posX),y(posY), width(w), height(h), direction(Direction::NONE){}
+    : x(posX),y(posY), width(w), height(h), direction(Direction::NONE), dead(false){}
 
   ~EntityModel() override = default;
 
@@ -36,6 +38,12 @@ public:
 
   Direction getDirection() const { return direction; }
   void setDirection(Direction dir) { this->direction = dir; }
+
+  bool isDead() const { return dead; }
+  void markDead() { dead = true; }
+
+  // NEW: Polymorphic collision handler - override in derived classes
+  virtual void onCollisionWithPacMan() {}
 };
 
 

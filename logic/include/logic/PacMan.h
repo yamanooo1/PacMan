@@ -12,7 +12,7 @@ private:
   Direction desiredDirection;
   bool isAlignedWithGrid() const;
 public:
-  PacMan(float x, float y) : EntityModel(x, y, 0.8f, 0.8f), speed(10.0f), desiredDirection(Direction::NONE) {};
+  PacMan(float x, float y) : EntityModel(x, y, 0.8f, 0.8f), speed(3.0f), desiredDirection(Direction::NONE) {};
 
   // NEW: Set desired direction (can be called before we can actually turn)
   void setDesiredDirection(Direction dir) {

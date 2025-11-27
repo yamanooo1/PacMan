@@ -14,6 +14,7 @@ void FruitView::update(GameEvent event) {}
 
 void FruitView::draw() {
   if (!model || !window || !camera) return;
+  if (model->isDead()) return;
 
   auto [x, y] = model->getPosition();
 

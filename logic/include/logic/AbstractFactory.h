@@ -24,6 +24,8 @@ public:
   virtual std::unique_ptr<Coin> createCoin(float x, float y) = 0;
   virtual std::unique_ptr<Fruit> createFruit(float x, float y) = 0;
 
+  virtual void removeDeadViews() = 0;
+
 };
 
 

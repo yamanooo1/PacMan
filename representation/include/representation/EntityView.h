@@ -25,6 +25,8 @@ public:
   EntityView(const EntityView&) = delete;
   EntityView& operator=(const EntityView&) = delete;
 
+  EntityModel* getModel() const { return model; }
+
 protected:
   EntityModel* model;
   Camera* camera;
