@@ -59,6 +59,9 @@ private:
   void updateGhosts(float deltaTime);
   void checkCollisions();
   void removeDeadEntities();
+
+  // Helper to check if a specific grid cell contains a wall
+  bool hasWallInGridCell(int gridX, int gridY) const;
 };
 
 #endif //PACMAN_WORLD_H

@@ -23,15 +23,7 @@ bool PacMan::isAlignedWithGrid() const {
 void PacMan::update(float deltaTime, bool canMove) {
   auto [x, y] = getPosition();
 
-  // Try to change to desired direction if we're aligned
-  if (desiredDirection != Direction::NONE &&
-      desiredDirection != getDirection()) {
-    // Can we turn in the desired direction?
-    // For now, just accept the turn (we'll add proper checking later)
-    setDirection(desiredDirection);
-      }
-
-  // Move in current direction if allowed
+  // Just move - turning is handled by World now
   if (canMove && getDirection() != Direction::NONE) {
     switch (getDirection()) {
     case Direction::UP:

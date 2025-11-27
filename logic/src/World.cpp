@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 World::World(AbstractFactory *f) : mapWidth(0), mapHeight(0) , factory(f), pacman(nullptr){} //start with empty world
 
@@ -116,35 +117,129 @@ bool World::loadFromFile(const std::string &filename) {
 }
 
 void World::update(float deltaTime) {
-  if (pacman) {
-    // Calculate where PacMan WOULD move
-    auto [x, y] = pacman->getPosition();
-    float nextX = x;
-    float nextY = y;
+  if (!pacman) return;
 
-    switch (pacman->getDirection()) {
-    case Direction::UP:
-      nextY = y - pacman->getSpeed() * deltaTime;
-      break;
-    case Direction::DOWN:
-      nextY = y + pacman->getSpeed() * deltaTime;
-      break;
-    case Direction::LEFT:
-      nextX = x - pacman->getSpeed() * deltaTime;
-      break;
-    case Direction::RIGHT:
-      nextX = x + pacman->getSpeed() * deltaTime;
-      break;
-    case Direction::NONE:
-      break;
+  auto [x, y] = pacman->getPosition();
+  Direction currentDir = pacman->getDirection();
+  Direction desiredDir = pacman->getDesiredDirection();
+
+  // Calculate PacMan's center
+  float centerX = x + pacman->getWidth() / 2.0f;
+  float centerY = y + pacman->getHeight() / 2.0f;
+
+  // Determine current grid cell
+  int currentGridX = static_cast<int>(std::floor(centerX));
+  int currentGridY = static_cast<int>(std::floor(centerY));
+  float gridCenterX = currentGridX + 0.5f;
+  float gridCenterY = currentGridY + 0.5f;
+
+  // Check if at center
+  const float centerTolerance = 0.05f;
+  bool atCenterX = std::abs(centerX - gridCenterX) < centerTolerance;
+  bool atCenterY = std::abs(centerY - gridCenterY) < centerTolerance;
+  bool atCenter = atCenterX && atCenterY;
+
+  // Check if desired direction is a perpendicular turn (90 degrees)
+  bool isPerpendicular = false;
+  if (desiredDir != Direction::NONE && desiredDir != currentDir) {
+    if ((currentDir == Direction::UP || currentDir == Direction::DOWN) &&
+        (desiredDir == Direction::LEFT || desiredDir == Direction::RIGHT)) {
+      isPerpendicular = true;
+    } else if ((currentDir == Direction::LEFT || currentDir == Direction::RIGHT) &&
+               (desiredDir == Direction::UP || desiredDir == Direction::DOWN)) {
+      isPerpendicular = true;
+    }
+  }
+
+  // Try to turn
+  if (desiredDir != Direction::NONE && desiredDir != currentDir) {
+    // For perpendicular turns, must be at center. For reversals, can turn immediately
+    if (!isPerpendicular || atCenter) {
+      // Check if desired direction leads to a wall
+      int desiredGridX = currentGridX;
+      int desiredGridY = currentGridY;
+
+      switch (desiredDir) {
+        case Direction::UP:    desiredGridY--; break;
+        case Direction::DOWN:  desiredGridY++; break;
+        case Direction::LEFT:  desiredGridX--; break;
+        case Direction::RIGHT: desiredGridX++; break;
+        case Direction::NONE: break;
+      }
+
+      bool wallInDesiredDirection = hasWallInGridCell(desiredGridX, desiredGridY);
+
+      if (!wallInDesiredDirection) {
+        // Only snap if it's a perpendicular turn at center
+        if (isPerpendicular && atCenter) {
+          float exactCenterX = currentGridX + 0.5f;
+          float exactCenterY = currentGridY + 0.5f;
+          float exactX = exactCenterX - pacman->getWidth() / 2.0f;
+          float exactY = exactCenterY - pacman->getHeight() / 2.0f;
+          pacman->setPosition(exactX, exactY);
+        }
+
+        // Execute the turn
+        pacman->executeTurn();
+        currentDir = desiredDir;
+      }
+    }
+  }
+
+  // Now handle movement in current direction
+  int nextGridX = currentGridX;
+  int nextGridY = currentGridY;
+
+  switch (currentDir) {
+    case Direction::UP:    nextGridY--; break;
+    case Direction::DOWN:  nextGridY++; break;
+    case Direction::LEFT:  nextGridX--; break;
+    case Direction::RIGHT: nextGridX++; break;
+    case Direction::NONE: break;
+  }
+
+  bool wallAhead = hasWallInGridCell(nextGridX, nextGridY);
+
+  if (wallAhead) {
+    // Wall ahead - move toward center then stop
+    float targetCenterX = currentGridX + 0.5f;
+    float targetCenterY = currentGridY + 0.5f;
+
+    bool atTargetCenter = (std::abs(centerX - targetCenterX) < 0.01f &&
+                           std::abs(centerY - targetCenterY) < 0.01f);
+
+    if (!atTargetCenter) {
+      float speed = pacman->getSpeed();
+      float moveDistance = speed * deltaTime;
+      float newCenterX = centerX;
+      float newCenterY = centerY;
+
+      switch (currentDir) {
+        case Direction::UP:
+          newCenterY = std::max(centerY - moveDistance, targetCenterY);
+          break;
+        case Direction::DOWN:
+          newCenterY = std::min(centerY + moveDistance, targetCenterY);
+          break;
+        case Direction::LEFT:
+          newCenterX = std::max(centerX - moveDistance, targetCenterX);
+          break;
+        case Direction::RIGHT:
+          newCenterX = std::min(centerX + moveDistance, targetCenterX);
+          break;
+        case Direction::NONE:
+          break;
+      }
+
+      float newX = newCenterX - pacman->getWidth() / 2.0f;
+      float newY = newCenterY - pacman->getHeight() / 2.0f;
+      pacman->setPosition(newX, newY);
     }
 
-    // Check if the next position would hit a wall
-    // CHANGED: Pass PacMan's bounding box, not just a point
-    bool canMove = !isWall(nextX, nextY, pacman->getWidth(), pacman->getHeight());
-
-    // Update PacMan with collision info
-    pacman->update(deltaTime, canMove);
+    pacman->update(deltaTime, false);
+  } else {
+    // No wall, move normally
+    pacman->update(deltaTime, true);
   }
 }
 
@@ -168,6 +263,29 @@ bool World::isWall(float x, float y, float width, float height) const {
         y + height > ey) {  // Bottom edge of PacMan is below top edge of wall
       return true;  // Collision detected!
         }
+  }
+  return false;
+}
+
+bool World::hasWallInGridCell(int gridX, int gridY) const {
+  // Check if there's a wall entity at this grid position
+  for (const auto& entity : entities) {
+    auto [ex, ey] = entity->getPosition();
+    float ew = entity->getWidth();
+    float eh = entity->getHeight();
+
+    // Only check walls (walls are 1x1)
+    if (ew < 0.9f || eh < 0.9f) {
+      continue;
+    }
+
+    // Check if this wall occupies the grid cell
+    int wallGridX = static_cast<int>(std::floor(ex));
+    int wallGridY = static_cast<int>(std::floor(ey));
+
+    if (wallGridX == gridX && wallGridY == gridY) {
+      return true;
+    }
   }
   return false;
 }
