@@ -10,9 +10,21 @@ class PacMan: public EntityModel {
 private:
   float speed;
   Direction desiredDirection;
+
+  // Spawn position for respawning
+  float spawnX, spawnY;
+
   bool isAlignedWithGrid() const;
+
 public:
-  PacMan(float x, float y) : EntityModel(x, y, 0.8f, 0.8f), speed(3.0f), desiredDirection(Direction::NONE) {};
+  PacMan(float x, float y)
+      : EntityModel(x, y, 0.8f, 0.8f)
+      , speed(3.0f)
+      , desiredDirection(Direction::NONE)
+      , spawnX(x)
+      , spawnY(y) {}
+
+  ~PacMan() override = default;
 
   // NEW: Set desired direction (can be called before we can actually turn)
   void setDesiredDirection(Direction dir) {
@@ -28,13 +40,26 @@ public:
     }
   }
 
-  ~PacMan() override = default;
-
   void update(float deltaTime, bool canMove);
 
   float getSpeed() const { return speed; }
   void setSpeed(float s) { speed = s; }
-};
 
+  // NEW: Death and respawn methods
+  void die() {
+    notify(GameEvent::PACMAN_DIED);
+  }
+
+  void respawn() {
+    setPosition(spawnX, spawnY);
+    setDirection(Direction::NONE);
+    desiredDirection = Direction::NONE;
+  }
+
+  void setSpawnPosition(float x, float y) {
+    spawnX = x;
+    spawnY = y;
+  }
+};
 
 #endif //PACMAN_PACMAN_H

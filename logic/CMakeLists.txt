@@ -13,6 +13,7 @@ add_library(logic STATIC
         src/Score.cpp
         src/AbstractFactory.cpp
         src/Observer.cpp
+        src/Lives.cpp
 )
 
 target_include_directories(logic PUBLIC include)

@@ -6,6 +6,7 @@
 #include "logic/World.h"
 #include "logic/PacMan.h"
 #include "logic/Score.h"
+#include "logic/Lives.h"
 #include "logic/Stopwatch.h"
 #include "representation/ConcreteFactory.h"
 #include "representation/Camera.h"
@@ -17,6 +18,7 @@ Game::Game()
     , factory(nullptr)
     , world(nullptr)
     , score(nullptr)
+    , lives(nullptr)
     , isRunning(false)
 {
 }
@@ -25,11 +27,12 @@ Game::~Game() {
     // CRITICAL: Destruction order matters!
     // Factory must be destroyed BEFORE World to avoid use-after-free
     // unique_ptr destroys in reverse order of declaration, so we're safe:
-    // 1. score (last declared, destroyed first)
-    // 2. world
-    // 3. factory (destroyed BEFORE world, this is correct!)
-    // 4. camera
-    // 5. window (first declared, destroyed last)
+    // 1. lives (last declared, destroyed first)
+    // 2. score
+    // 3. world
+    // 4. factory (destroyed BEFORE world, this is correct!)
+    // 5. camera
+    // 6. window (first declared, destroyed last)
 }
 
 bool Game::initialize(const std::string& mapFile) {
@@ -50,11 +53,13 @@ bool Game::initialize(const std::string& mapFile) {
     // Create world (needs factory)
     world = std::make_unique<World>(factory.get());
 
-    // Create score
+    // Create score and lives
     score = std::make_unique<Score>();
+    lives = std::make_unique<Lives>(3);  // Start with 3 lives
 
-    // Connect score to world
+    // Connect score and lives to world
     world->setScore(score.get());
+    world->setLives(lives.get());
 
     // Load map
     if (!world->loadFromFile(mapFile)) {
@@ -68,6 +73,7 @@ bool Game::initialize(const std::string& mapFile) {
     std::cout << "Map loaded: " << world->getMapWidth() << "x"
               << world->getMapHeight() << std::endl;
     std::cout << "Entities: " << world->getEntityCount() << std::endl;
+    std::cout << "Lives: " << lives->getLives() << std::endl;
     std::cout << "Use ARROW KEYS or WASD to move PacMan!" << std::endl;
 
     isRunning = true;
@@ -141,14 +147,15 @@ void Game::handleInput(float deltaTime) {
 }
 
 void Game::update(float deltaTime) {
-    // Update score decay (uses Stopwatch internally, no deltaTime needed)
+    // Update score decay
     score->updateScoreDecay();
 
-    // Update world (PacMan movement, future: ghost AI, etc.)
+    // Update world (PacMan movement, collisions, etc.)
     world->update(deltaTime);
 
-    // Optional: Display score in console (comment out to reduce noise)
-    // std::cout << "\rScore: " << score->getScore() << std::flush;
+    // Optional: Display score and lives in console
+    // std::cout << "\rScore: " << score->getScore()
+    //           << " | Lives: " << lives->getLives() << std::flush;
 }
 
 void Game::render() {

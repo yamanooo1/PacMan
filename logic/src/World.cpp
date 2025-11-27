@@ -10,12 +10,21 @@
 #include "logic/Coin.h"
 #include "logic/Fruit.h"
 #include "logic/Score.h"
+#include "logic/Lives.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <cmath>
 
-World::World(AbstractFactory *f) : mapWidth(0), mapHeight(0) , factory(f), pacman(nullptr){} //start with empty world
+World::World(AbstractFactory *f)
+    : mapWidth(0)
+    , mapHeight(0)
+    , factory(f)
+    , pacman(nullptr)
+    , score(nullptr)
+    , lives(nullptr)
+    , pacmanSpawnX(0.0f)
+    , pacmanSpawnY(0.0f) {}
 
 // Set the dimensions of the map (called when loading from file)
 void World::setMapDimensions(int width, int height) {
@@ -39,12 +48,31 @@ void World::createPacMan(float x, float y) {
   float centeredY = y + (1.0f - pacman->getHeight()) / 2.0f;
   pacman->setPosition(centeredX, centeredY);
 
+  // Store spawn position
+  pacmanSpawnX = centeredX;
+  pacmanSpawnY = centeredY;
+  pacman->setSpawnPosition(centeredX, centeredY);
+
+  // Attach Lives as observer if it exists
+  if (lives) {
+    pacman->attach(lives);
+  }
+
   addEntity(std::move(pacmanModel));
 }
 
 // Create Ghost using the factory
 void World::createGhost(float x, float y) {
   auto ghost = factory->createGhost(x, y);
+
+  // Center ghost in grid cell
+  float centeredX = x + (1.0f - ghost->getWidth()) / 2.0f;
+  float centeredY = y + (1.0f - ghost->getHeight()) / 2.0f;
+  ghost->setPosition(centeredX, centeredY);
+
+  // Store spawn position for respawning
+  ghostSpawnPositions.push_back({centeredX, centeredY});
+
   addEntity(std::move(ghost));
 }
 
@@ -54,7 +82,6 @@ void World::createWall(float x, float y, float w, float h) {
   addEntity(std::move(wall));
 }
 
-// Create Coin using the factory
 // Create Coin using the factory
 void World::createCoin(float x, float y) {
   auto coin = factory->createCoin(x, y);
@@ -96,9 +123,10 @@ bool World::loadFromFile(const std::string &filename) {
     return false;
   }
 
-  // Clear existing entities
+  // Clear existing entities and spawn positions
   entities.clear();
   pacman = nullptr;
+  ghostSpawnPositions.clear();
 
   // Read map dimensions
   file >> mapWidth >> mapHeight;
@@ -126,7 +154,7 @@ bool World::loadFromFile(const std::string &filename) {
       case 'G':
         createGhost(x, y);
         break;
-      case 'F':
+      case 'f':  // lowercase 'f'
         createFruit(x, y);
         break;
       case ' ':
@@ -141,8 +169,37 @@ bool World::loadFromFile(const std::string &filename) {
   return true;
 }
 
+void World::respawnPacManAndGhosts() {
+  if (!pacman) return;
+
+  std::cout << "[WORLD] Respawning PacMan and Ghosts..." << std::endl;
+
+  // Respawn PacMan
+  pacman->respawn();
+
+  // Respawn all ghosts to their spawn positions
+  int ghostIndex = 0;
+  for (auto& entity : entities) {
+    // Check if this is a ghost (size ~0.05)
+    if (entity->getWidth() < 0.1f && entity->getWidth() > 0.04f) {
+      if (ghostIndex < ghostSpawnPositions.size()) {
+        auto [spawnX, spawnY] = ghostSpawnPositions[ghostIndex];
+        entity->setPosition(spawnX, spawnY);
+        entity->setDirection(Direction::NONE);
+        ghostIndex++;
+      }
+    }
+  }
+}
+
 void World::update(float deltaTime) {
   if (!pacman) return;
+
+  // Check if game over
+  if (lives && lives->isGameOver()) {
+    std::cout << "[WORLD] Game Over! Press ESC to quit." << std::endl;
+    return;  // Stop updating
+  }
 
   auto [x, y] = pacman->getPosition();
   Direction currentDir = pacman->getDirection();
@@ -325,6 +382,8 @@ void World::checkCollisions() {
   float pw = pacman->getWidth();
   float ph = pacman->getHeight();
 
+  bool pacmanDied = false;
+
   // Check collision with all entities
   for (auto& entity : entities) {
     if (entity->isDead()) continue;
@@ -341,22 +400,30 @@ void World::checkCollisions() {
                       py + ph > ey);
 
     if (collision) {
-      entity->onCollisionWithPacMan();
+      // Check if it's a ghost (size ~0.05)
+      if (ew < 0.1f && ew > 0.04f) {
+        // Ghost collision - PacMan dies!
+        pacmanDied = true;
+        std::cout << "[COLLISION] Ghost hit PacMan!" << std::endl;
+      } else {
+        // Other entity collision (coin, fruit)
+        entity->onCollisionWithPacMan();
+      }
+    }
+  }
+
+  // Handle death after collision loop
+  if (pacmanDied && lives) {
+    pacman->die();  // Notifies Lives observer
+
+    // Respawn if still alive
+    if (!lives->isGameOver()) {
+      respawnPacManAndGhosts();
     }
   }
 }
 
 void World::removeDeadEntities() {
-
-  // Count dead entities and show what they are
-  int deadCount = 0;
-  for (const auto& entity : entities) {
-    if (entity->isDead()) {
-      auto [x, y] = entity->getPosition();
-      deadCount++;
-    }
-  }
-
   // First remove views
   factory->removeDeadViews();
 
@@ -368,5 +435,4 @@ void World::removeDeadEntities() {
       }),
     entities.end()
   );
-
 }

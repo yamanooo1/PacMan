@@ -11,6 +11,7 @@ class Wall;
 class Coin;
 class Fruit;
 class Score;
+class Lives;
 
 class World {
 private:
@@ -22,15 +23,18 @@ private:
   AbstractFactory* factory;
   PacMan* pacman;
   Score* score;
+  Lives* lives;  // NEW: Lives system
 
   // Spawn positions for reset
   float pacmanSpawnX, pacmanSpawnY;
+  std::vector<std::pair<float, float>> ghostSpawnPositions;  // NEW: Track ghost spawns
 
 public:
   explicit World(AbstractFactory* f);
 
   void setMapDimensions(int w, int h);
   void setScore(Score* s) { score = s; }
+  void setLives(Lives* l) { lives = l; }  // NEW: Connect Lives
 
   void addEntity(std::unique_ptr<EntityModel> entity);
 
@@ -49,6 +53,9 @@ public:
 
   void update(float deltaTime);
   PacMan* getPacMan() const { return pacman; }
+
+  // NEW: Respawn methods
+  void respawnPacManAndGhosts();
 
   // Collision helpers
   bool isWall(float x, float y, float width, float height) const;

@@ -18,8 +18,8 @@ void FruitView::draw() {
 
   auto [x, y] = model->getPosition();
 
-  float screenX = camera->gridToScreenX(x + 0.5f);
-  float screenY = camera->gridToScreenY(y + 0.5f);
+  float screenX = camera->gridToScreenX(x);
+  float screenY = camera->gridToScreenY(y);
 
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.5f;

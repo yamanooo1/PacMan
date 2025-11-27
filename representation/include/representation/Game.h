@@ -13,6 +13,7 @@ class World;
 class ConcreteFactory;
 class Camera;
 class Score;
+class Lives;
 
 class Game {
 private:
@@ -24,6 +25,7 @@ private:
   // Game logic
   std::unique_ptr<World> world;
   std::unique_ptr<Score> score;
+  std::unique_ptr<Lives> lives;
 
   // Game state
   bool isRunning;
