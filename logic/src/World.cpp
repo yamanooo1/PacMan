@@ -30,7 +30,13 @@ void World::addEntity(std::unique_ptr<EntityModel> entity) {
 // Create PacMan using the factory
 void World::createPacMan(float x, float y) {
   auto pacmanModel = factory->createPacMan(x, y);
-  pacman = pacmanModel.get();  // ADD THIS LINE - store pointer before moving
+  pacman = pacmanModel.get();
+
+  // Center PacMan in the grid cell (grid cell size is 1.0 x 1.0)
+  float centeredX = x + (1.0f - pacman->getWidth()) / 2.0f;
+  float centeredY = y + (1.0f - pacman->getHeight()) / 2.0f;
+  pacman->setPosition(centeredX, centeredY);
+
   addEntity(std::move(pacmanModel));
 }
 
