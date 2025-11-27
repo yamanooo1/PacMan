@@ -1,11 +1,22 @@
-10 10
-WWWWWWWWWW
-W........W
-W.P......W
-W........W
-W...G....W
-W........W
-W........W
-W....F...W
-W........W
-WWWWWWWWWW
+19 21
+xxxxxxxxxxxxxxxxxxx
+x........x........x
+xfxx.xxx.x.xxx.xxfx
+x.................x
+x.xx.x.xxxxx.x.xx.x
+x....x...x...x....x
+xxxx.xxx.x.xxx.xxxx
+xxxx.x.......x.xxxx
+xxxx.x.xxrxx.x.xxxx
+x......xbpox......x
+xxxx.x.xxxxx.x.xxxx
+xxxx.x.......x.xxxx
+xxxx.x.xxxxx.x.xxxx
+x........x........x
+x.xx.xxx.x.xxx.xx.x
+x..x.....P.....x..x
+xx.x.x.xxxxx.x.x.xx
+x....x...x...x....x
+xfxxxxxx.x.xxxxxxfx
+x.................x
+xxxxxxxxxxxxxxxxxxx

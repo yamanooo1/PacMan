@@ -82,7 +82,7 @@ bool World::loadFromFile(const std::string &filename) {
       float y = static_cast<float>(row);
 
       switch (c) {
-      case 'W':
+      case 'x':
         createWall(x, y, 1.0f, 1.0f);
         break;
       case '.':

@@ -6,6 +6,7 @@
 #include "logic/Stopwatch.h"
 #include "representation/ConcreteFactory.h"
 #include "representation/Camera.h"
+#include "logic/Score.h"
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "PacMan Test");
@@ -13,6 +14,8 @@ int main() {
     Camera camera(800, 600, 10, 10);
     ConcreteFactory factory(&window, &camera);
     World world(&factory);
+    Score score;
+    world.setScore(&score);
 
     if (!world.loadFromFile("../../logic/include/map/map1.txt")) {
         std::cerr << "Failed to load map!" << std::endl;
@@ -65,6 +68,7 @@ int main() {
       }
 
         world.update(deltaTime);
+        std::cout << "\rScore: " << score.getScore() << std::flush;
 
         window.clear(sf::Color::Black);
         factory.drawAll();
