@@ -17,8 +17,12 @@ void GhostView::draw() {
 
   auto [x, y] = model->getPosition();
 
-  float screenX = camera->gridToScreenX(x);
-  float screenY = camera->gridToScreenY(y);
+  // CircleShape needs CENTER position!
+  float centerX = x + model->getWidth() / 2.0f;   // Add this line
+  float centerY = y + model->getHeight() / 2.0f;  // Add this line
+
+  float screenX = camera->gridToScreenX(centerX);  // Use centerX
+  float screenY = camera->gridToScreenY(centerY);  // Use centerY
 
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.8f;

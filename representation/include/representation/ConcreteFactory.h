@@ -24,7 +24,7 @@ public:
 
   // Return unique_ptrs
   std::unique_ptr<PacMan> createPacMan(float x, float y) override;
-  std::unique_ptr<Ghost> createGhost(float x, float y) override;
+  std::unique_ptr<Ghost> createGhost(float x, float y, GhostType type, float waitTime) override;
   std::unique_ptr<Wall> createWall(float x, float y, float w, float h) override;
   std::unique_ptr<Coin> createCoin(float x, float y) override;
   std::unique_ptr<Fruit> createFruit(float x, float y) override;

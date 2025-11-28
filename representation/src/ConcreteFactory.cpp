@@ -31,8 +31,8 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
   return model;
 }
 
-std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y) {
-  auto model = std::make_unique<Ghost>(x, y);
+std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType type, float waitTime) {
+  auto model = std::make_unique<Ghost>(x, y, type, waitTime);  // ← Pass new parameters
   Ghost* modelPtr = model.get();
   auto view = std::make_unique<GhostView>(modelPtr, window, camera);
   views.push_back(std::move(view));

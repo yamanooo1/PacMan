@@ -7,15 +7,18 @@
 
 class PacMan;
 class Ghost;
+enum class GhostType;
 class Wall;
 class Coin;
 class Fruit;
 class Score;
 class Lives;
 
+
 class World {
 private:
   std::vector<std::unique_ptr<EntityModel>> entities;
+  std::vector<Ghost*> ghosts;
 
   int mapWidth;
   int mapHeight;
@@ -39,7 +42,7 @@ public:
   void addEntity(std::unique_ptr<EntityModel> entity);
 
   void createPacMan(float x, float y);
-  void createGhost(float x, float y);
+  void createGhost(float x, float y, GhostType type, float waitTime);
   void createWall(float x, float y, float w, float h);
   void createCoin(float x, float y);
   void createFruit(float x, float y);
@@ -61,14 +64,14 @@ public:
   bool isWall(float x, float y, float width, float height) const;
   bool canMoveInDirection(float x, float y, float w, float h, Direction dir, float distance) const;
 
+  // Helper to check if a specific grid cell contains a wall
+  bool hasWallInGridCell(int gridX, int gridY) const;
+
 private:
   void updatePacMan(float deltaTime);
   void updateGhosts(float deltaTime);
   void checkCollisions();
   void removeDeadEntities();
-
-  // Helper to check if a specific grid cell contains a wall
-  bool hasWallInGridCell(int gridX, int gridY) const;
 };
 
 #endif //PACMAN_WORLD_H

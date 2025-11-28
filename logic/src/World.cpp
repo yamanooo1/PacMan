@@ -62,16 +62,28 @@ void World::createPacMan(float x, float y) {
 }
 
 // Create Ghost using the factory
-void World::createGhost(float x, float y) {
-  auto ghost = factory->createGhost(x, y);
+void World::createGhost(float x, float y, GhostType type, float waitTime) {
+  auto ghost = factory->createGhost(x, y, type, waitTime);
+  Ghost* ghostPtr = ghost.get();  // Add this line - get pointer before moving
 
   // Center ghost in grid cell
   float centeredX = x + (1.0f - ghost->getWidth()) / 2.0f;
   float centeredY = y + (1.0f - ghost->getHeight()) / 2.0f;
   ghost->setPosition(centeredX, centeredY);
 
+  // Add this debug:
+  float centerX = centeredX + ghost->getWidth() / 2.0f;
+  float centerY = centeredY + ghost->getHeight() / 2.0f;
+  std::cout << "[SPAWN] Ghost type " << static_cast<int>(type)
+            << " at grid (" << x << "," << y << ")"
+            << " position (" << centeredX << "," << centeredY << ")"
+            << " center (" << centerX << "," << centerY << ")" << std::endl;
+
   // Store spawn position for respawning
   ghostSpawnPositions.push_back({centeredX, centeredY});
+
+  // Track ghost for updates
+  ghosts.push_back(ghostPtr);  // Add this line
 
   addEntity(std::move(ghost));
 }
@@ -126,6 +138,7 @@ bool World::loadFromFile(const std::string &filename) {
   // Clear existing entities and spawn positions
   entities.clear();
   pacman = nullptr;
+  ghosts.clear();
   ghostSpawnPositions.clear();
 
   // Read map dimensions
@@ -151,8 +164,17 @@ bool World::loadFromFile(const std::string &filename) {
       case 'P':
         createPacMan(x, y);
         break;
-      case 'G':
-        createGhost(x, y);
+      case 'r':  // Red ghost: Chaser, leaves immediately
+        createGhost(x, y, GhostType::CHASER, 0.0f);
+        break;
+      case 'b':  // Blue ghost: Ambusher, leaves immediately
+        createGhost(x, y, GhostType::AMBUSHER, 0.0f);
+        break;
+      case 'o':  // Orange ghost: Ambusher, leaves after 5s
+        createGhost(x, y, GhostType::AMBUSHER, 5.0f);
+        break;
+      case 'p':  // Pink ghost: Random, leaves after 10s
+        createGhost(x, y, GhostType::RANDOM, 10.0f);
         break;
       case 'f':  // lowercase 'f'
         createFruit(x, y);
@@ -193,6 +215,7 @@ void World::respawnPacManAndGhosts() {
 }
 
 void World::update(float deltaTime) {
+
   if (!pacman) return;
 
   // Check if game over
@@ -208,6 +231,7 @@ void World::update(float deltaTime) {
   // Calculate PacMan's center
   float centerX = x + pacman->getWidth() / 2.0f;
   float centerY = y + pacman->getHeight() / 2.0f;
+
 
   // Determine current grid cell
   int currentGridX = static_cast<int>(std::floor(centerX));
@@ -324,8 +348,18 @@ void World::update(float deltaTime) {
     pacman->update(deltaTime, true);
   }
 
+  updateGhosts(deltaTime);
+
   checkCollisions();
   removeDeadEntities();
+}
+
+void World::updateGhosts(float deltaTime) {
+  for (Ghost* ghost : ghosts) {
+    if (ghost) {
+      ghost->update(deltaTime, this);
+    }
+  }
 }
 
 bool World::isWall(float x, float y, float width, float height) const {
@@ -401,7 +435,7 @@ void World::checkCollisions() {
 
     if (collision) {
       // Check if it's a ghost (size ~0.05)
-      if (ew < 0.1f && ew > 0.04f) {
+      if (ew > 0.7f && ew < 0.9f && eh > 0.7f && eh < 0.9f) {
         // Ghost collision - PacMan dies!
         pacmanDied = true;
         std::cout << "[COLLISION] Ghost hit PacMan!" << std::endl;
