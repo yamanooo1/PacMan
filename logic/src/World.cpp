@@ -24,7 +24,11 @@ World::World(AbstractFactory *f)
     , score(nullptr)
     , lives(nullptr)
     , pacmanSpawnX(0.0f)
-    , pacmanSpawnY(0.0f) {}
+    , pacmanSpawnY(0.0f)
+    , fearModeActive(false)      // NEW
+    , fearModeTimer(0.0f)         // NEW
+    , fearModeDuration(7.0f)
+{}
 
 // Set the dimensions of the map (called when loading from file)
 void World::setMapDimensions(int width, int height) {
@@ -124,6 +128,9 @@ void World::createFruit(float x, float y) {
   if (score) {
     fruit->attach(score);
   }
+
+  // NEW: Store pointer to fruit so we can detect when it's collected
+  Fruit* fruitPtr = fruit.get();
 
   addEntity(std::move(fruit));
 }
@@ -349,6 +356,7 @@ void World::update(float deltaTime) {
   }
 
   updateGhosts(deltaTime);
+  updateFearMode(deltaTime);  // NEW: Update fear mode timer
 
   checkCollisions();
   removeDeadEntities();
@@ -408,7 +416,6 @@ bool World::hasWallInGridCell(int gridX, int gridY) const {
   }
   return false;
 }
-
 void World::checkCollisions() {
   if (!pacman) return;
 
@@ -434,13 +441,48 @@ void World::checkCollisions() {
                       py + ph > ey);
 
     if (collision) {
-      // Check if it's a ghost (size ~0.05)
+      // Check if it's a ghost (size ~0.8)
       if (ew > 0.7f && ew < 0.9f && eh > 0.7f && eh < 0.9f) {
-        // Ghost collision - PacMan dies!
-        pacmanDied = true;
-        std::cout << "[COLLISION] Ghost hit PacMan!" << std::endl;
-      } else {
-        // Other entity collision (coin, fruit)
+        // Ghost collision - check in ghosts vector
+        Ghost* collidedGhost = nullptr;
+        int ghostIndex = -1;
+
+        for (size_t i = 0; i < ghosts.size(); ++i) {
+          auto [gx, gy] = ghosts[i]->getPosition();
+          if (std::abs(gx - ex) < 0.01f && std::abs(gy - ey) < 0.01f) {
+            collidedGhost = ghosts[i];
+            ghostIndex = i;
+            break;
+          }
+        }
+
+        if (collidedGhost && collidedGhost->isInFearMode()) {
+          // PacMan eats ghost in fear mode!
+          std::cout << "[COLLISION] PacMan ate a ghost!" << std::endl;
+          collidedGhost->onEaten();
+
+          // Respawn ghost in center
+          if (ghostIndex >= 0 && ghostIndex < ghostSpawnPositions.size()) {
+            auto [spawnX, spawnY] = ghostSpawnPositions[ghostIndex];
+            collidedGhost->setPosition(spawnX, spawnY);
+            collidedGhost->setDirection(Direction::UP);
+            collidedGhost->exitFearMode();
+          }
+        } else {
+          // Normal ghost - PacMan dies!
+          pacmanDied = true;
+          std::cout << "[COLLISION] Ghost hit PacMan!" << std::endl;
+        }
+      }
+      // Check if it's a fruit (size ~0.03)
+      else if (ew > 0.02f && ew < 0.04f && eh > 0.02f && eh < 0.04f) {
+        // Fruit collision!
+        std::cout << "[COLLISION] PacMan ate a fruit!" << std::endl;
+        entity->onCollisionWithPacMan();
+        activateFearMode();
+      }
+      else {
+        // Other entity (coin)
         entity->onCollisionWithPacMan();
       }
     }
@@ -448,9 +490,8 @@ void World::checkCollisions() {
 
   // Handle death after collision loop
   if (pacmanDied && lives) {
-    pacman->die();  // Notifies Lives observer
+    pacman->die();
 
-    // Respawn if still alive
     if (!lives->isGameOver()) {
       respawnPacManAndGhosts();
     }
@@ -469,4 +510,36 @@ void World::removeDeadEntities() {
       }),
     entities.end()
   );
+}
+
+void World::activateFearMode() {
+  fearModeActive = true;
+  fearModeTimer = fearModeDuration;
+
+  std::cout << "[WORLD] Fear mode activated for " << fearModeDuration << " seconds!" << std::endl;
+
+  // Put all ghosts in fear mode
+  for (Ghost* ghost : ghosts) {
+    if (ghost) {
+      ghost->enterFearMode();
+    }
+  }
+}
+
+void World::updateFearMode(float deltaTime) {
+  if (!fearModeActive) return;
+
+  fearModeTimer -= deltaTime;
+
+  if (fearModeTimer <= 0.0f) {
+    fearModeActive = false;
+    std::cout << "[WORLD] Fear mode ended!" << std::endl;
+
+    // Return all ghosts to chasing mode
+    for (Ghost* ghost : ghosts) {
+      if (ghost) {
+        ghost->exitFearMode();
+      }
+    }
+  }
 }

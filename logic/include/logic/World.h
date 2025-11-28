@@ -26,11 +26,16 @@ private:
   AbstractFactory* factory;
   PacMan* pacman;
   Score* score;
-  Lives* lives;  // NEW: Lives system
+  Lives* lives;
 
   // Spawn positions for reset
   float pacmanSpawnX, pacmanSpawnY;
-  std::vector<std::pair<float, float>> ghostSpawnPositions;  // NEW: Track ghost spawns
+  std::vector<std::pair<float, float>> ghostSpawnPositions;
+
+  // NEW: Fear mode management
+  bool fearModeActive;
+  float fearModeTimer;
+  float fearModeDuration;  // How long fear mode lasts
 
 public:
   explicit World(AbstractFactory* f);
@@ -66,6 +71,10 @@ public:
 
   // Helper to check if a specific grid cell contains a wall
   bool hasWallInGridCell(int gridX, int gridY) const;
+
+  // NEW: Fear mode methods
+  void activateFearMode();
+  void updateFearMode(float deltaTime);
 
 private:
   void updatePacMan(float deltaTime);

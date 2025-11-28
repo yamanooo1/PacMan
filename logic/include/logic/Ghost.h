@@ -17,8 +17,9 @@ enum class GhostType {
 };
 
 enum class GhostState {
-  WAITING,     // In center, not moving
-  CHASING      // Hunting PacMan
+  WAITING,      // In center, not moving
+  CHASING,      // Hunting PacMan
+  FEAR
 };
 
 class Ghost: public EntityModel {
@@ -27,6 +28,8 @@ private:
   GhostState state;
   float waitTimer;  // Countdown before leaving
   float speed;
+  float normalSpeed;    // NEW: Store normal speed
+  float fearSpeed;      // NEW: Speed when in fear mode
 
   // NEW: Track where we last made a decision
   int lastDecisionGridX;
@@ -43,8 +46,14 @@ public:
 
   ~Ghost() override = default;
 
+
   GhostType getType() const { return type; }
   GhostState getState() const { return state; }
+
+  // NEW: Fear mode methods
+  void enterFearMode();
+  void exitFearMode();
+  bool isInFearMode() const { return state == GhostState::FEAR; }
 
   void onEaten() {
     notify(GameEvent::GHOST_EATEN);

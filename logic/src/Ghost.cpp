@@ -20,6 +20,8 @@ Ghost::Ghost(float x, float y, GhostType t, float waitTime)
     , speed(2.5f)
     , lastDecisionGridX(-999)  // Initialize to impossible value
     , lastDecisionGridY(-999)
+    , normalSpeed(2.5f)   // NEW: Store normal speed
+    , fearSpeed(1.5f)     // NEW: Slower speed in fear mode
 {
   setDirection(Direction::UP);
 }
@@ -231,10 +233,11 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
         return viable[0];  // Only one choice
     }
 
-    // Multiple choices - use AI based on type
+    // Multiple choices - use AI based on type and state
     Random& random = Random::getInstance();
 
     if (type == GhostType::RANDOM) {
+        // RANDOM ghost: same behavior in CHASING and FEAR modes
         // With p=0.5, reconsider direction
         if (random.getBool()) {
             // Pick random viable direction
@@ -288,9 +291,11 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
         }
     }
 
-    // Find direction that minimizes Manhattan distance
+    // NEW: In FEAR mode, MAXIMIZE distance instead of minimizing
+    bool shouldMaximize = (state == GhostState::FEAR);
+
     std::vector<Direction> bestDirections;
-    int bestDistance = 999999;
+    int bestDistance = shouldMaximize ? -1 : 999999;  // Start with worst possible
 
     for (Direction dir : viable) {
         int nextGridX = gridX;
@@ -306,12 +311,24 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
 
         int distance = manhattanDistance(nextGridX, nextGridY, targetX, targetY);
 
-        if (distance < bestDistance) {
-            bestDistance = distance;
-            bestDirections.clear();
-            bestDirections.push_back(dir);
-        } else if (distance == bestDistance) {
-            bestDirections.push_back(dir);
+        if (shouldMaximize) {
+            // FEAR mode: pick direction that MAXIMIZES distance (flee)
+            if (distance > bestDistance) {
+                bestDistance = distance;
+                bestDirections.clear();
+                bestDirections.push_back(dir);
+            } else if (distance == bestDistance) {
+                bestDirections.push_back(dir);
+            }
+        } else {
+            // CHASING mode: pick direction that MINIMIZES distance (chase)
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestDirections.clear();
+                bestDirections.push_back(dir);
+            } else if (distance == bestDistance) {
+                bestDirections.push_back(dir);
+            }
         }
     }
 
@@ -327,4 +344,45 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
 
     int index = random.getInt(0, bestDirections.size() - 1);
     return bestDirections[index];
+}
+
+void Ghost::enterFearMode() {
+  if (state == GhostState::WAITING) return;  // Don't affect waiting ghosts
+
+  state = GhostState::FEAR;
+  speed = fearSpeed;  // Slow down
+
+  // Reverse direction immediately
+  Direction current = getDirection();
+  Direction opposite = Direction::NONE;
+
+  if (current == Direction::UP) opposite = Direction::DOWN;
+  else if (current == Direction::DOWN) opposite = Direction::UP;
+  else if (current == Direction::LEFT) opposite = Direction::RIGHT;
+  else if (current == Direction::RIGHT) opposite = Direction::LEFT;
+
+  if (opposite != Direction::NONE) {
+    setDirection(opposite);
+  }
+
+  // Reset decision tracking so ghost can make new decision immediately
+  lastDecisionGridX = -999;
+  lastDecisionGridY = -999;
+
+  std::cout << "[FEAR] Ghost type " << static_cast<int>(type)
+            << " entered FEAR mode!" << std::endl;
+}
+
+void Ghost::exitFearMode() {
+  if (state != GhostState::FEAR) return;
+
+  state = GhostState::CHASING;
+  speed = normalSpeed;  // Back to normal speed
+
+  // Reset decision tracking
+  lastDecisionGridX = -999;
+  lastDecisionGridY = -999;
+
+  std::cout << "[FEAR] Ghost type " << static_cast<int>(type)
+            << " exited FEAR mode!" << std::endl;
 }

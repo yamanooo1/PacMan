@@ -33,5 +33,16 @@ void GhostView::draw() {
   shape.setOrigin(radius, radius);
   shape.setPosition(screenX, screenY);
 
+  // NEW: Temporarily change color for fear mode
+  Ghost* ghost = static_cast<Ghost*>(model);
+  sf::Color originalColor = shape.getFillColor();
+
+  if (ghost && ghost->isInFearMode()) {
+    shape.setFillColor(sf::Color::Blue);
+  }
+
   window->draw(shape);
+
+  // Restore original color
+  shape.setFillColor(originalColor);
 }
