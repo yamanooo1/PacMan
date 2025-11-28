@@ -4,10 +4,12 @@
 
 #include "representation/GhostView.h"
 #include "representation/Camera.h"
+#include "logic/Ghost.h"
+
 GhostView::GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam)
     : EntityView(model, cam), window(win) {
   shape.setRadius(20.f);
-  shape.setFillColor(sf::Color::Red);
+  shape.setFillColor(sf::Color::Red);  // Default color (will be overridden by factory)
 }
 
 void GhostView::update(GameEvent event) {}
@@ -17,12 +19,11 @@ void GhostView::draw() {
 
   auto [x, y] = model->getPosition();
 
-  // CircleShape needs CENTER position!
-  float centerX = x + model->getWidth() / 2.0f;   // Add this line
-  float centerY = y + model->getHeight() / 2.0f;  // Add this line
+  float centerX = x + model->getWidth() / 2.0f;
+  float centerY = y + model->getHeight() / 2.0f;
 
-  float screenX = camera->gridToScreenX(centerX);  // Use centerX
-  float screenY = camera->gridToScreenY(centerY);  // Use centerY
+  float screenX = camera->gridToScreenX(centerX);
+  float screenY = camera->gridToScreenY(centerY);
 
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.8f;

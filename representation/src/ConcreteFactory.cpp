@@ -32,9 +32,23 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
 }
 
 std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType type, float waitTime) {
-  auto model = std::make_unique<Ghost>(x, y, type, waitTime);  // ← Pass new parameters
+  auto model = std::make_unique<Ghost>(x, y, type, waitTime);
   Ghost* modelPtr = model.get();
   auto view = std::make_unique<GhostView>(modelPtr, window, camera);
+
+  // Set color based on type (Factory knows the type!)
+  switch (type) {
+  case GhostType::CHASER:
+    view->setColor(sf::Color::Red);      // Red
+    break;
+  case GhostType::AMBUSHER:
+    view->setColor(sf::Color::Cyan);     // Cyan/Blue
+    break;
+  case GhostType::RANDOM:
+    view->setColor(sf::Color::Magenta);  // Pink/Magenta
+    break;
+  }
+
   views.push_back(std::move(view));
   return model;
 }

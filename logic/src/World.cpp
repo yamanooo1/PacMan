@@ -357,7 +357,7 @@ void World::update(float deltaTime) {
 void World::updateGhosts(float deltaTime) {
   for (Ghost* ghost : ghosts) {
     if (ghost) {
-      ghost->update(deltaTime, this);
+      ghost->update(deltaTime, this, pacman);  // Pass pacman pointer!
     }
   }
 }

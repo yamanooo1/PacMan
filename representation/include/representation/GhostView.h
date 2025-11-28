@@ -17,6 +17,9 @@ public:
   GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam);
   void update(GameEvent) override;
   void draw() override;
+
+  // NEW: Allow factory to set color
+  void setColor(const sf::Color& color) { shape.setFillColor(color); }
 };
 
 

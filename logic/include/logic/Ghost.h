@@ -5,8 +5,10 @@
 #ifndef PACMAN_GHOST_H
 #define PACMAN_GHOST_H
 #include "EntityModel.h"
+#include <vector>
 
 class World;
+class PacMan;
 
 enum class GhostType {
   RANDOM,      // Locked direction
@@ -26,14 +28,18 @@ private:
   float waitTimer;  // Countdown before leaving
   float speed;
 
+  // NEW: Track where we last made a decision
+  int lastDecisionGridX;
+  int lastDecisionGridY;
+
+  // NEW: AI helper methods
+  std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
+  bool isAtIntersection(int gridX, int gridY, World* world) const;
+  Direction chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman);
+  int manhattanDistance(int x1, int y1, int x2, int y2) const;
+
 public:
-  Ghost(float x, float y, GhostType t, float waitTime)
-      : EntityModel(x, y, 0.8f, 0.8f)  // ← Change size to 0.8 (same as PacMan)
-      , type(t)
-      , state(GhostState::WAITING)
-      , waitTimer(waitTime)
-      , speed(2.5f)
-  {setDirection(Direction::UP);}
+  Ghost(float x, float y, GhostType t, float waitTime);
 
   ~Ghost() override = default;
 
@@ -45,8 +51,7 @@ public:
   }
 
   // Update ghost (movement logic)
-  void update(float deltaTime, World* world);
+  void update(float deltaTime, World* world, PacMan* pacman);  // Add PacMan parameter
 };
-
 
 #endif //PACMAN_GHOST_H
