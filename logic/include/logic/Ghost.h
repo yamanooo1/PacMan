@@ -18,6 +18,7 @@ enum class GhostType {
 
 enum class GhostState {
   WAITING,      // In center, not moving
+  EXITING,      // Leaving spawn, navigating to 'w' exit
   CHASING,      // Hunting PacMan
   FEAR
 };
@@ -28,41 +29,48 @@ private:
   GhostState state;
   float waitTimer;  // Countdown before leaving
   float speed;
-  float normalSpeed;    // NEW: Store normal speed
-  float fearSpeed;      // NEW: Speed when in fear mode
+  float normalSpeed;    // Store normal speed
+  float fearSpeed;      // Speed when in fear mode
 
-  // NEW: Track where we last made a decision
+  // Track where we last made a decision (for RANDOM ghost)
   int lastDecisionGridX;
   int lastDecisionGridY;
 
-  Direction lastPacManDirection;
+  // NEW: Track if ghost has left spawn area
+  bool hasLeftSpawn;
 
-  // NEW: AI helper methods
+  // AI helper methods
   std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
   bool isAtIntersection(int gridX, int gridY, World* world) const;
   Direction chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman);
+  Direction chooseDirectionToExit(int gridX, int gridY, World* world) const;  // NEW: Navigate to exit
   int manhattanDistance(int x1, int y1, int x2, int y2) const;
+
+  // NEW: Check if position is in spawn area
+  bool isInSpawnArea(int gridX, int gridY) const;
 
 public:
   Ghost(float x, float y, GhostType t, float waitTime);
 
   ~Ghost() override = default;
 
-
   GhostType getType() const { return type; }
   GhostState getState() const { return state; }
 
-  // NEW: Fear mode methods
+  // Fear mode methods
   void enterFearMode();
   void exitFearMode();
   bool isInFearMode() const { return state == GhostState::FEAR; }
+
+  // NEW: Reset spawn flag when respawning
+  void resetSpawnFlag();
 
   void onEaten() {
     notify(GameEvent::GHOST_EATEN);
   }
 
   // Update ghost (movement logic)
-  void update(float deltaTime, World* world, PacMan* pacman);  // Add PacMan parameter
+  void update(float deltaTime, World* world, PacMan* pacman);
 };
 
 #endif //PACMAN_GHOST_H
