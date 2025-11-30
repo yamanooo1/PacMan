@@ -35,6 +35,8 @@ private:
   int lastDecisionGridX;
   int lastDecisionGridY;
 
+  Direction lastPacManDirection;
+
   // NEW: AI helper methods
   std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
   bool isAtIntersection(int gridX, int gridY, World* world) const;
