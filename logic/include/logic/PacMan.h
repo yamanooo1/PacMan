@@ -1,5 +1,6 @@
 //
-// Created by yamanooo on 11/22/25.
+// PacMan.h - IMPROVED VERSION
+// Adds notifyDirectionChange() for Observer pattern compliance
 //
 
 #ifndef PACMAN_PACMAN_H
@@ -26,7 +27,7 @@ public:
 
   ~PacMan() override = default;
 
-  // NEW: Set desired direction (can be called before we can actually turn)
+  // Set desired direction (can be called before we can actually turn)
   void setDesiredDirection(Direction dir) {
     desiredDirection = dir;
   }
@@ -45,7 +46,7 @@ public:
   float getSpeed() const { return speed; }
   void setSpeed(float s) { speed = s; }
 
-  // NEW: Death and respawn methods
+  // Death and respawn methods
   void die() {
     notify(GameEvent::PACMAN_DIED);
   }
@@ -59,6 +60,12 @@ public:
   void setSpawnPosition(float x, float y) {
     spawnX = x;
     spawnY = y;
+  }
+
+  // ✅ NEW: Notify observers when direction changes (for sprite updates)
+  // Should be called by World after successful turn
+  void notifyDirectionChange() {
+    notify(GameEvent::DIRECTION_CHANGED);
   }
 };
 

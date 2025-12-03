@@ -68,14 +68,14 @@ void World::createPacMan(float x, float y) {
 // Create Ghost using the factory
 void World::createGhost(float x, float y, GhostType type, float waitTime) {
   auto ghost = factory->createGhost(x, y, type, waitTime);
-  Ghost* ghostPtr = ghost.get();  // Add this line - get pointer before moving
+  Ghost* ghostPtr = ghost.get();
 
   // Center ghost in grid cell
   float centeredX = x + (1.0f - ghost->getWidth()) / 2.0f;
   float centeredY = y + (1.0f - ghost->getHeight()) / 2.0f;
   ghost->setPosition(centeredX, centeredY);
 
-  // Add this debug:
+  // Debug output
   float centerX = centeredX + ghost->getWidth() / 2.0f;
   float centerY = centeredY + ghost->getHeight() / 2.0f;
   std::cout << "[SPAWN] Ghost type " << static_cast<int>(type)
@@ -83,11 +83,17 @@ void World::createGhost(float x, float y, GhostType type, float waitTime) {
             << " position (" << centeredX << "," << centeredY << ")"
             << " center (" << centerX << "," << centerY << ")" << std::endl;
 
+  // ✅ CRITICAL FIX: Attach Score as observer
+  // This ensures Score receives GHOST_EATEN events and awards +200 points
+  if (score) {
+    ghost->attach(score);
+  }
+
   // Store spawn position for respawning
   ghostSpawnPositions.push_back({centeredX, centeredY});
 
   // Track ghost for updates
-  ghosts.push_back(ghostPtr);  // Add this line
+  ghosts.push_back(ghostPtr);
 
   addEntity(std::move(ghost));
 }
@@ -225,38 +231,34 @@ void World::respawnPacManAndGhosts() {
   }
 }
 
-void World::update(float deltaTime) {
+// World.cpp - IMPROVED update() method
+// Shows where to call pacman->notifyDirectionChange()
 
+void World::update(float deltaTime) {
   if (!pacman) return;
 
-  // Check if game over
   if (lives && lives->isGameOver()) {
     std::cout << "[WORLD] Game Over! Press ESC to quit." << std::endl;
-    return;  // Stop updating
+    return;
   }
 
   auto [x, y] = pacman->getPosition();
   Direction currentDir = pacman->getDirection();
   Direction desiredDir = pacman->getDesiredDirection();
 
-  // Calculate PacMan's center
   float centerX = x + pacman->getWidth() / 2.0f;
   float centerY = y + pacman->getHeight() / 2.0f;
 
-
-  // Determine current grid cell
   int currentGridX = static_cast<int>(std::floor(centerX));
   int currentGridY = static_cast<int>(std::floor(centerY));
   float gridCenterX = currentGridX + 0.5f;
   float gridCenterY = currentGridY + 0.5f;
 
-  // Check if at center
   const float centerTolerance = 0.05f;
   bool atCenterX = std::abs(centerX - gridCenterX) < centerTolerance;
   bool atCenterY = std::abs(centerY - gridCenterY) < centerTolerance;
   bool atCenter = atCenterX && atCenterY;
 
-  // Check if desired direction is a perpendicular turn (90 degrees)
   bool isPerpendicular = false;
   if (desiredDir != Direction::NONE && desiredDir != currentDir) {
     if ((currentDir == Direction::UP || currentDir == Direction::DOWN) &&
@@ -270,9 +272,7 @@ void World::update(float deltaTime) {
 
   // Try to turn
   if (desiredDir != Direction::NONE && desiredDir != currentDir) {
-    // For perpendicular turns, must be at center. For reversals, can turn immediately
     if (!isPerpendicular || atCenter) {
-      // Check if desired direction leads to a wall
       int desiredGridX = currentGridX;
       int desiredGridY = currentGridY;
 
@@ -287,7 +287,6 @@ void World::update(float deltaTime) {
       bool wallInDesiredDirection = hasWallInGridCell(desiredGridX, desiredGridY);
 
       if (!wallInDesiredDirection) {
-        // Only snap if it's a perpendicular turn at center
         if (isPerpendicular && atCenter) {
           float exactCenterX = currentGridX + 0.5f;
           float exactCenterY = currentGridY + 0.5f;
@@ -296,14 +295,17 @@ void World::update(float deltaTime) {
           pacman->setPosition(exactX, exactY);
         }
 
-        // Execute the turn
+        // ✅ CRITICAL: Notify observers AFTER successful turn
         pacman->executeTurn();
+        pacman->notifyDirectionChange();  // ← ADD THIS LINE!
+
         currentDir = desiredDir;
       }
     }
   }
 
-  // Now handle movement in current direction
+  // ... rest of update logic (movement, ghosts, collisions) ...
+
   int nextGridX = currentGridX;
   int nextGridY = currentGridY;
 
@@ -318,7 +320,6 @@ void World::update(float deltaTime) {
   bool wallAhead = hasWallInGridCell(nextGridX, nextGridY);
 
   if (wallAhead) {
-    // Wall ahead - move toward center then stop
     float targetCenterX = currentGridX + 0.5f;
     float targetCenterY = currentGridY + 0.5f;
 
@@ -355,23 +356,13 @@ void World::update(float deltaTime) {
 
     pacman->update(deltaTime, false);
   } else {
-    // No wall, move normally
     pacman->update(deltaTime, true);
   }
 
   updateGhosts(deltaTime);
-  updateFearMode(deltaTime);  // NEW: Update fear mode timer
-
+  updateFearMode(deltaTime);
   checkCollisions();
   removeDeadEntities();
-}
-
-void World::updateGhosts(float deltaTime) {
-  for (Ghost* ghost : ghosts) {
-    if (ghost) {
-      ghost->update(deltaTime, this, pacman);  // Pass pacman pointer!
-    }
-  }
 }
 
 bool World::isWall(float x, float y, float width, float height) const {
@@ -561,4 +552,12 @@ bool World::isExitPosition(int gridX, int gridY) const {
 
 std::vector<std::pair<int, int>> World::getExitPositions() const {
   return exitPositions;
+}
+
+void World::updateGhosts(float deltaTime) {
+  for (Ghost* ghost : ghosts) {
+    if (ghost) {
+      ghost->update(deltaTime, this, pacman);
+    }
+  }
 }
