@@ -76,11 +76,16 @@ public:
   void activateFearMode();
   void updateFearMode(float deltaTime);
 
+  bool isExitPosition(int gridX, int gridY) const;
+  std::vector<std::pair<int, int>> getExitPositions() const;
+
 private:
   void updatePacMan(float deltaTime);
   void updateGhosts(float deltaTime);
   void checkCollisions();
   void removeDeadEntities();
+
+  std::vector<std::pair<int, int>> exitPositions;
 };
 
 #endif //PACMAN_WORLD_H

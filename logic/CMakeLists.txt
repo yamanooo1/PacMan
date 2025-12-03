@@ -14,6 +14,7 @@ add_library(logic STATIC
         src/AbstractFactory.cpp
         src/Observer.cpp
         src/Lives.cpp
+        include/logic/Exit.h
 )
 
 target_include_directories(logic PUBLIC include)

@@ -4,7 +4,7 @@
 int main() {
   Game game;
 
-  if (!game.initialize("../../logic/include/map/map1.txt")) {
+  if (!game.initialize("../../resources/map/map1.txt")) {
     std::cerr << "Failed to initialize game!" << std::endl;
     return 1;
   }

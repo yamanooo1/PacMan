@@ -186,6 +186,10 @@ bool World::loadFromFile(const std::string &filename) {
       case 'f':  // lowercase 'f'
         createFruit(x, y);
         break;
+      case 'w':  // Exit gate
+        exitPositions.push_back({col, row});
+        std::cout << "[MAP] Exit gate at (" << col << "," << row << ")" << std::endl;
+        break;
       case ' ':
         // Empty space
         break;
@@ -542,4 +546,19 @@ void World::updateFearMode(float deltaTime) {
       }
     }
   }
+}
+
+// Add these methods at the end of the file, before the closing brace
+
+bool World::isExitPosition(int gridX, int gridY) const {
+  for (const auto& [ex, ey] : exitPositions) {
+    if (ex == gridX && ey == gridY) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::vector<std::pair<int, int>> World::getExitPositions() const {
+  return exitPositions;
 }

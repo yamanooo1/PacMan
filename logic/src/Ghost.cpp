@@ -1,5 +1,5 @@
 //
-// Created by yamanooo on 11/22/25.
+// Ghost.cpp - Complete with EXITING state and spawn prevention
 //
 
 #include "logic/Ghost.h"
@@ -20,55 +20,80 @@ Ghost::Ghost(float x, float y, GhostType t, float waitTime)
     , lastDecisionGridY(-999)
     , normalSpeed(2.5f)
     , fearSpeed(1.5f)
+    , hasLeftSpawn(false)
 {
   setDirection(Direction::UP);
+}
+
+bool Ghost::isInSpawnArea(int gridX, int gridY) const {
+  // Spawn area: columns 7-11, rows 8-10
+  return (gridX >= 7 && gridX <= 11 && gridY >= 8 && gridY <= 10);
 }
 
 void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   if (!world) return;
 
-  // Handle WAITING state
+  // WAITING state
   if (state == GhostState::WAITING) {
     waitTimer -= deltaTime;
     if (waitTimer <= 0.0f) {
-      state = GhostState::CHASING;
+      state = GhostState::EXITING;
 
-      // NEW: Choose intelligent initial direction when leaving center
       auto [x, y] = getPosition();
       float centerX = x + getWidth() / 2.0f;
       float centerY = y + getHeight() / 2.0f;
       int gridX = static_cast<int>(std::floor(centerX));
       int gridY = static_cast<int>(std::floor(centerY));
 
-      // Get an intelligent direction based on AI type
-      Direction smartDirection = chooseNextDirection(gridX, gridY, world, pacman);
-      if (smartDirection != Direction::NONE) {
-        setDirection(smartDirection);
+      Direction exitDir = chooseDirectionToExit(gridX, gridY, world);
+      if (exitDir != Direction::NONE) {
+        setDirection(exitDir);
         lastDecisionGridX = gridX;
         lastDecisionGridY = gridY;
       }
 
-      std::cout << "[GHOST] Ghost leaving center! Type: "
-                << static_cast<int>(type)
-                << " Initial direction: " << static_cast<int>(smartDirection) << std::endl;
+      std::cout << "[GHOST] Type " << static_cast<int>(type)
+                << " starting to exit via 'w'" << std::endl;
     }
-    return;  // Don't move while waiting
+    return;
   }
 
-  // Movement logic for CHASING or FEAR states
+  // EXITING state
+  if (state == GhostState::EXITING) {
+    auto [x, y] = getPosition();
+    float centerX = x + getWidth() / 2.0f;
+    float centerY = y + getHeight() / 2.0f;
+    int gridX = static_cast<int>(std::floor(centerX));
+    int gridY = static_cast<int>(std::floor(centerY));
+
+    if (world->isExitPosition(gridX, gridY)) {
+      state = GhostState::CHASING;
+      hasLeftSpawn = true;
+
+      std::cout << "[GHOST] Type " << static_cast<int>(type)
+                << " passed through 'w' at (" << gridX << "," << gridY
+                << ") - now CHASING!" << std::endl;
+
+      Direction chaseDir = chooseNextDirection(gridX, gridY, world, pacman);
+      if (chaseDir != Direction::NONE) {
+        setDirection(chaseDir);
+        lastDecisionGridX = gridX;
+        lastDecisionGridY = gridY;
+      }
+    }
+  }
+
+  // Movement
   auto [x, y] = getPosition();
   Direction currentDir = getDirection();
 
   if (currentDir == Direction::NONE) return;
 
-  // Calculate center position
   float centerX = x + getWidth() / 2.0f;
   float centerY = y + getHeight() / 2.0f;
-
   int gridX = static_cast<int>(std::floor(centerX));
   int gridY = static_cast<int>(std::floor(centerY));
 
-  // Check next grid cell for walls
   int nextGridX = gridX;
   int nextGridY = gridY;
   switch (currentDir) {
@@ -80,7 +105,6 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   }
   bool wallAhead = world->hasWallInGridCell(nextGridX, nextGridY);
 
-  // Check if at grid center (for making decisions)
   float gridCenterX = gridX + 0.5f;
   float gridCenterY = gridY + 0.5f;
   const float centerTolerance = 0.1f;
@@ -88,23 +112,24 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   bool atCenterY = std::abs(centerY - gridCenterY) < centerTolerance;
   bool atCenter = atCenterX && atCenterY;
 
-  // Make AI decision when at center AND (at intersection OR wall ahead) AND haven't decided here yet
   bool needsDecision = atCenter && (gridX != lastDecisionGridX || gridY != lastDecisionGridY);
   bool canMakeDecision = isAtIntersection(gridX, gridY, world) || wallAhead;
 
   if (needsDecision && canMakeDecision) {
-    Direction newDir = chooseNextDirection(gridX, gridY, world, pacman);
+    Direction newDir = Direction::NONE;
+
+    if (state == GhostState::EXITING) {
+      newDir = chooseDirectionToExit(gridX, gridY, world);
+    } else {
+      newDir = chooseNextDirection(gridX, gridY, world, pacman);
+    }
+
     if (newDir != Direction::NONE) {
       setDirection(newDir);
       lastDecisionGridX = gridX;
       lastDecisionGridY = gridY;
       currentDir = newDir;
 
-      std::cout << "[AI] Ghost type " << static_cast<int>(type)
-                << " at (" << gridX << "," << gridY << ") chose direction "
-                << static_cast<int>(newDir) << std::endl;
-
-      // Recalculate next grid with new direction
       nextGridX = gridX;
       nextGridY = gridY;
       switch (currentDir) {
@@ -118,7 +143,6 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
     }
   }
 
-  // Move if no wall ahead
   if (!wallAhead) {
     float moveDistance = speed * deltaTime;
     float newX = x;
@@ -134,7 +158,6 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
 
     setPosition(newX, newY);
   } else {
-    // Wall ahead - move toward grid center then stop
     float targetCenterX = gridX + 0.5f;
     float targetCenterY = gridY + 0.5f;
 
@@ -170,27 +193,83 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   }
 }
 
+Direction Ghost::chooseDirectionToExit(int gridX, int gridY, World* world) const {
+  auto exitPositions = world->getExitPositions();
+
+  if (exitPositions.empty()) {
+    std::cerr << "[ERROR] No exit positions!" << std::endl;
+    return Direction::UP;
+  }
+
+  int nearestDist = 999999;
+  int targetX = exitPositions[0].first;
+  int targetY = exitPositions[0].second;
+
+  for (const auto& [ex, ey] : exitPositions) {
+    int dist = manhattanDistance(gridX, gridY, ex, ey);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      targetX = ex;
+      targetY = ey;
+    }
+  }
+
+  auto viable = getViableDirections(gridX, gridY, world);
+
+  if (viable.empty()) return getDirection();
+  if (viable.size() == 1) return viable[0];
+
+  std::vector<Direction> bestDirections;
+  int bestDistance = 999999;
+
+  for (Direction dir : viable) {
+    int nextGridX = gridX;
+    int nextGridY = gridY;
+
+    switch (dir) {
+      case Direction::UP:    nextGridY--; break;
+      case Direction::DOWN:  nextGridY++; break;
+      case Direction::LEFT:  nextGridX--; break;
+      case Direction::RIGHT: nextGridX++; break;
+      case Direction::NONE: break;
+    }
+
+    int distance = manhattanDistance(nextGridX, nextGridY, targetX, targetY);
+
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestDirections.clear();
+      bestDirections.push_back(dir);
+    } else if (distance == bestDistance) {
+      bestDirections.push_back(dir);
+    }
+  }
+
+  if (bestDirections.empty()) return viable[0];
+  if (bestDirections.size() == 1) return bestDirections[0];
+
+  Random& random = Random::getInstance();
+  int index = random.getInt(0, bestDirections.size() - 1);
+  return bestDirections[index];
+}
+
 std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* world) const {
     std::vector<Direction> viable;
     Direction current = getDirection();
 
-    // Calculate opposite direction (we don't want to go backwards)
     Direction opposite = Direction::NONE;
     if (current == Direction::UP) opposite = Direction::DOWN;
     else if (current == Direction::DOWN) opposite = Direction::UP;
     else if (current == Direction::LEFT) opposite = Direction::RIGHT;
     else if (current == Direction::RIGHT) opposite = Direction::LEFT;
 
-    // Check all 4 directions
     std::vector<Direction> allDirections = {
         Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT
     };
 
     for (Direction dir : allDirections) {
-        // Skip opposite direction (don't go backwards) UNLESS it's the only option
         if (dir == opposite) continue;
 
-        // Calculate next grid position
         int nextGridX = gridX;
         int nextGridY = gridY;
         switch (dir) {
@@ -201,13 +280,18 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
             case Direction::NONE: break;
         }
 
-        // If no wall, it's viable
-        if (!world->hasWallInGridCell(nextGridX, nextGridY)) {
-            viable.push_back(dir);
+        if (world->hasWallInGridCell(nextGridX, nextGridY)) {
+            continue;
         }
+
+        // PREVENT RE-ENTERING SPAWN
+        if (hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY)) {
+            continue;
+        }
+
+        viable.push_back(dir);
     }
 
-    // If no viable directions (stuck at dead-end), MUST go backwards
     if (viable.empty() && opposite != Direction::NONE) {
         int nextGridX = gridX;
         int nextGridY = gridY;
@@ -218,7 +302,11 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
             case Direction::RIGHT: nextGridX++; break;
             case Direction::NONE: break;
         }
-        if (!world->hasWallInGridCell(nextGridX, nextGridY)) {
+
+        bool hasWall = world->hasWallInGridCell(nextGridX, nextGridY);
+        bool wouldEnterSpawn = hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY);
+
+        if (!hasWall && !wouldEnterSpawn) {
             viable.push_back(opposite);
         }
     }
@@ -228,7 +316,6 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
 
 bool Ghost::isAtIntersection(int gridX, int gridY, World* world) const {
   auto viable = getViableDirections(gridX, gridY, world);
-  // Intersection = 2+ viable directions (includes T-intersections and 4-way)
   return viable.size() >= 2;
 }
 
@@ -239,24 +326,14 @@ int Ghost::manhattanDistance(int x1, int y1, int x2, int y2) const {
 Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman) {
     auto viable = getViableDirections(gridX, gridY, world);
 
-    if (viable.empty()) {
-        return getDirection();  // Keep current direction if stuck (shouldn't happen)
-    }
+    if (viable.empty()) return getDirection();
+    if (viable.size() == 1) return viable[0];
 
-    if (viable.size() == 1) {
-        return viable[0];  // Only one choice - no AI needed
-    }
-
-    // Multiple choices - use AI based on type and state
     Random& random = Random::getInstance();
 
-    // ===== RANDOM GHOST =====
-    // Assignment: "With probability p=0.5, ghost will lock to a random direction"
-    // This means: 50% chance to pick new random, 50% chance to keep current (if viable)
     if (type == GhostType::RANDOM) {
         Direction current = getDirection();
 
-        // Check if current direction is in viable options
         bool currentViable = false;
         for (Direction dir : viable) {
             if (dir == current) {
@@ -265,80 +342,60 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
             }
         }
 
-        // With p=0.5, reconsider direction (pick random)
-        // With p=0.5, keep current direction (if viable)
         if (random.getBool()) {
-            // Reconsider: pick a random viable direction
             int index = random.getInt(0, viable.size() - 1);
-            std::cout << "[AI] RANDOM ghost reconsidering (p=0.5) - picked random direction" << std::endl;
             return viable[index];
         } else {
-            // Don't reconsider: keep current if viable, else pick random
             if (currentViable) {
-                std::cout << "[AI] RANDOM ghost keeping current direction (p=0.5)" << std::endl;
                 return current;
             } else {
-                // Current not viable (shouldn't happen at intersection), pick random
                 int index = random.getInt(0, viable.size() - 1);
                 return viable[index];
             }
         }
     }
 
-    // ===== AMBUSHER and CHASER GHOSTS =====
-    // These ghosts use Manhattan distance to a target position
-
     if (!pacman) {
-        // Fallback if no pacman (shouldn't happen)
         int index = random.getInt(0, viable.size() - 1);
         return viable[index];
     }
 
-    // Get Pac-Man's grid position
     auto [px, py] = pacman->getPosition();
     float centerX = px + pacman->getWidth() / 2.0f;
     float centerY = py + pacman->getHeight() / 2.0f;
     int pacmanGridX = static_cast<int>(std::floor(centerX));
     int pacmanGridY = static_cast<int>(std::floor(centerY));
 
-    // Determine target position based on ghost type
     int targetX, targetY;
 
-    if (type == GhostType::CHASER) {
-        // CHASER: Target Pac-Man's current position directly
+    if (state == GhostState::FEAR) {
         targetX = pacmanGridX;
         targetY = pacmanGridY;
-    } else {  // GhostType::AMBUSHER
-        // AMBUSHER: Target 4 tiles ahead of Pac-Man in the direction he's facing
-        // Assignment: "move in the direction that minimizes the Manhattan distance
-        // to the locations "in front of" Pac-Man"
+    } else if (type == GhostType::CHASER) {
+        targetX = pacmanGridX;
+        targetY = pacmanGridY;
+    } else {
         targetX = pacmanGridX;
         targetY = pacmanGridY;
 
         Direction pacmanDir = pacman->getDirection();
-        int lookAhead = 4;  // Look 4 tiles ahead
+        int lookAhead = 4;
 
         switch (pacmanDir) {
             case Direction::UP:    targetY -= lookAhead; break;
             case Direction::DOWN:  targetY += lookAhead; break;
             case Direction::LEFT:  targetX -= lookAhead; break;
             case Direction::RIGHT: targetX += lookAhead; break;
-            case Direction::NONE:
-                // If Pac-Man isn't moving, just target his current position
-                break;
+            case Direction::NONE: break;
         }
     }
 
-    // In FEAR mode, ghosts flee (maximize distance from target)
-    // In CHASING mode, ghosts chase (minimize distance to target)
     bool shouldMaximize = (state == GhostState::FEAR);
 
-    // Find the best direction(s) based on Manhattan distance
     std::vector<Direction> bestDirections;
     int bestDistance = shouldMaximize ? -1 : 999999;
 
     for (Direction dir : viable) {
-        // Calculate where we'd be after moving in this direction
         int nextGridX = gridX;
         int nextGridY = gridY;
 
@@ -350,55 +407,46 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
             case Direction::NONE: break;
         }
 
-        // Calculate Manhattan distance from that position to target
         int distance = manhattanDistance(nextGridX, nextGridY, targetX, targetY);
 
         if (shouldMaximize) {
-            // FEAR mode: we want to be as FAR as possible from target
             if (distance > bestDistance) {
                 bestDistance = distance;
                 bestDirections.clear();
                 bestDirections.push_back(dir);
             } else if (distance == bestDistance) {
-                bestDirections.push_back(dir);  // Tie
+                bestDirections.push_back(dir);
             }
         } else {
-            // CHASING mode: we want to be as CLOSE as possible to target
             if (distance < bestDistance) {
                 bestDistance = distance;
                 bestDirections.clear();
                 bestDirections.push_back(dir);
             } else if (distance == bestDistance) {
-                bestDirections.push_back(dir);  // Tie
+                bestDirections.push_back(dir);
             }
         }
     }
 
-    // Break ties randomly (assignment requirement: "Ties between the best actions are broken at random")
     if (bestDirections.empty()) {
-        // Shouldn't happen, but fallback
         int index = random.getInt(0, viable.size() - 1);
         return viable[index];
     }
 
     if (bestDirections.size() == 1) {
-        return bestDirections[0];  // Clear winner
+        return bestDirections[0];
     }
 
-    // Multiple directions tied for best - pick randomly
     int index = random.getInt(0, bestDirections.size() - 1);
-    std::cout << "[AI] " << (state == GhostState::FEAR ? "FEAR" : "CHASE")
-              << " mode tie-break: chose 1 of " << bestDirections.size() << " options" << std::endl;
     return bestDirections[index];
 }
 
 void Ghost::enterFearMode() {
-  if (state == GhostState::WAITING) return;  // Don't affect waiting ghosts
+  if (state == GhostState::WAITING || state == GhostState::EXITING) return;
 
   state = GhostState::FEAR;
-  speed = fearSpeed;  // Slow down
+  speed = fearSpeed;
 
-  // Reverse direction immediately (assignment: "reverses their direction")
   Direction current = getDirection();
   Direction opposite = Direction::NONE;
 
@@ -411,24 +459,16 @@ void Ghost::enterFearMode() {
     setDirection(opposite);
   }
 
-  // Reset decision tracking so ghost can make new decision immediately
   lastDecisionGridX = -999;
   lastDecisionGridY = -999;
-
-  std::cout << "[FEAR] Ghost type " << static_cast<int>(type)
-            << " entered FEAR mode - reversed direction!" << std::endl;
 }
 
 void Ghost::exitFearMode() {
   if (state != GhostState::FEAR) return;
 
   state = GhostState::CHASING;
-  speed = normalSpeed;  // Back to normal speed
+  speed = normalSpeed;
 
-  // Reset decision tracking so ghost can reconsider direction
   lastDecisionGridX = -999;
   lastDecisionGridY = -999;
-
-  std::cout << "[FEAR] Ghost type " << static_cast<int>(type)
-            << " exited FEAR mode - back to chasing!" << std::endl;
 }

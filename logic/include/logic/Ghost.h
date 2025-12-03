@@ -18,6 +18,7 @@ enum class GhostType {
 
 enum class GhostState {
   WAITING,      // In center, not moving
+  EXITING,      // Navigating to 'w' exit
   CHASING,      // Hunting PacMan
   FEAR
 };
@@ -28,41 +29,43 @@ private:
   GhostState state;
   float waitTimer;  // Countdown before leaving
   float speed;
-  float normalSpeed;    // NEW: Store normal speed
-  float fearSpeed;      // NEW: Speed when in fear mode
+  float normalSpeed;
+  float fearSpeed;
 
-  // NEW: Track where we last made a decision
   int lastDecisionGridX;
   int lastDecisionGridY;
 
-  Direction lastPacManDirection;
+  bool hasLeftSpawn;  // Track if ghost has exited through 'w'
 
-  // NEW: AI helper methods
+  // AI helper methods
   std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
   bool isAtIntersection(int gridX, int gridY, World* world) const;
   Direction chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman);
+  Direction chooseDirectionToExit(int gridX, int gridY, World* world) const;
   int manhattanDistance(int x1, int y1, int x2, int y2) const;
+  bool isInSpawnArea(int gridX, int gridY) const;
 
 public:
   Ghost(float x, float y, GhostType t, float waitTime);
-
   ~Ghost() override = default;
-
 
   GhostType getType() const { return type; }
   GhostState getState() const { return state; }
 
-  // NEW: Fear mode methods
   void enterFearMode();
   void exitFearMode();
   bool isInFearMode() const { return state == GhostState::FEAR; }
+
+  void resetSpawnFlag() {
+    hasLeftSpawn = false;
+    state = GhostState::EXITING;
+  }
 
   void onEaten() {
     notify(GameEvent::GHOST_EATEN);
   }
 
-  // Update ghost (movement logic)
-  void update(float deltaTime, World* world, PacMan* pacman);  // Add PacMan parameter
+  void update(float deltaTime, World* world, PacMan* pacman);
 };
 
 #endif //PACMAN_GHOST_H
