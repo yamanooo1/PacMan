@@ -15,6 +15,7 @@ public:
 
   void loadFont(const std::string& fontPath);
   void draw(World* world, Score* score, Lives* lives);
+  void drawReadyText(World* world);  // ✅ ADD THIS
 
 private:
   sf::RenderWindow* window;

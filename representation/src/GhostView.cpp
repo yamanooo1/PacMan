@@ -1,11 +1,8 @@
-//
-// GhostView.cpp - WITH ANIMATION
-//
-
 #include "representation/GhostView.h"
 #include "representation/Camera.h"
 #include "representation/SpriteAtlas.h"
 #include "logic/Ghost.h"
+#include "logic/World.h"
 #include "logic/Stopwatch.h"
 #include <iostream>
 
@@ -16,21 +13,39 @@ GhostView::GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
     , spriteType(SpriteGhostType::RED)
     , animationTimer(0.0f)
     , currentFrame(0)
-    , frameDuration(0.15f)  // Switch frames every 0.15 seconds
+    , frameDuration(0.15f)
+    , flashTimer(0.0f)      // ✅ NEW
+    , showWhite(false)      // ✅ NEW
 {
   shape.setRadius(20.f);
   shape.setFillColor(sf::Color::Red);
 }
 
 void GhostView::update(GameEvent event) {
-  // ✅ Update animation timer every frame
-  Stopwatch& stopwatch = Stopwatch::getInstance();
-  animationTimer += stopwatch.getDeltaTime();
+  // Empty - we use updateAnimation instead
+}
 
-  // Switch frames when timer exceeds duration
+void GhostView::updateAnimation(float deltaTime) {
+  // Update walking animation timer
+  animationTimer += deltaTime;
+
   if (animationTimer >= frameDuration) {
     animationTimer = 0.0f;
-    currentFrame = (currentFrame + 1) % 2;  // Toggle between 0 and 1
+    currentFrame = (currentFrame + 1) % 2;
+  }
+
+  // ✅ Flash when fear mode is ending OR when waiting to enter fear mode
+  Ghost* ghost = static_cast<Ghost*>(model);
+  if (ghost && ghost->shouldShowFearMode() && ghost->isFearModeEnding()) {
+    flashTimer += deltaTime;
+
+    if (flashTimer >= 0.2f) {
+      flashTimer = 0.0f;
+      showWhite = !showWhite;
+    }
+  } else {
+    showWhite = false;
+    flashTimer = 0.0f;
   }
 }
 
@@ -43,11 +58,9 @@ void GhostView::draw() {
   float screenX = camera->gridToScreenX(centerX);
   float screenY = camera->gridToScreenY(centerY);
 
-  // Get ghost state for fear mode
   Ghost* ghost = static_cast<Ghost*>(model);
-  bool inFearMode = (ghost && ghost->isInFearMode());
+  bool shouldShowFear = (ghost && ghost->shouldShowFearMode());  // ✅ CHANGED
 
-  // ✅ Try to use sprite with animation
   if (spriteAtlas) {
     std::shared_ptr<sf::Texture> texture = spriteAtlas->getTexture();
 
@@ -58,12 +71,14 @@ void GhostView::draw() {
 
         sf::IntRect rect;
 
-        // Get appropriate sprite rect
-        if (inFearMode) {
-          // ✅ Animate fear mode sprites too (alternate between 0 and 1)
-          rect = spriteAtlas->getFearSprite(currentFrame);
+        if (shouldShowFear) {
+          int fearFrame = currentFrame;
+          if (showWhite) {
+            fearFrame += 2;
+          }
+
+          rect = spriteAtlas->getFearSprite(fearFrame);
         } else {
-          // ✅ Use animated ghost sprite
           Direction dir = model->getDirection();
           GhostFrame frame = (currentFrame == 0) ? GhostFrame::FRAME_1 : GhostFrame::FRAME_2;
           rect = spriteAtlas->getGhostSprite(spriteType, dir, frame);
@@ -86,7 +101,7 @@ void GhostView::draw() {
           sprite.setPosition(screenX, screenY);
 
           window->draw(sprite);
-          return;  // Successfully drew sprite
+          return;
         }
       } catch (const std::exception& e) {
         std::cerr << "[GHOST] Error drawing sprite: " << e.what() << std::endl;
@@ -103,22 +118,11 @@ void GhostView::draw() {
   shape.setOrigin(radius, radius);
   shape.setPosition(screenX, screenY);
 
-  // Change color for fear mode
   sf::Color originalColor = shape.getFillColor();
-  if (inFearMode) {
+  if (shouldShowFear) {
     shape.setFillColor(sf::Color::Blue);
   }
 
   window->draw(shape);
   shape.setFillColor(originalColor);
-}
-
-void GhostView::updateAnimation(float deltaTime) {  // ✅ MOVED from update()
-  // Update animation timer every frame
-  animationTimer += deltaTime;
-
-  if (animationTimer >= frameDuration) {
-    animationTimer = 0.0f;
-    currentFrame = (currentFrame + 1) % 2;
-  }
 }

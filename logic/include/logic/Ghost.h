@@ -45,6 +45,8 @@ private:
   int lastDecisionGridY;
 
   bool hasLeftSpawn;
+  bool fearModeEnding;
+  bool shouldEnterFearWhenLeaving;
 
   // AI helper methods
   std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
@@ -65,6 +67,7 @@ public:
   void enterFearMode();
   void exitFearMode();
   bool isInFearMode() const { return state == GhostState::FEAR; }
+  bool shouldShowFearMode() const { return state == GhostState::FEAR || shouldEnterFearWhenLeaving; }
 
   // ✅ FIXED: Now properly resets wait timer
   void resetSpawnFlag() {
@@ -85,6 +88,9 @@ public:
   }
 
   void update(float deltaTime, World* world, PacMan* pacman);
+
+  bool isFearModeEnding() const { return fearModeEnding; }  // ✅ ADD THIS
+  void setFearModeEnding(bool ending) { fearModeEnding = ending; }
 
 
 };

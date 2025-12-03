@@ -20,7 +20,7 @@ private:
 public:
   PacMan(float x, float y)
       : EntityModel(x, y, 0.8f, 0.8f)
-      , speed(3.0f)
+      , speed(10.0f)
       , desiredDirection(Direction::LEFT)
       , spawnX(x)
       , spawnY(y) {}

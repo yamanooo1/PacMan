@@ -16,13 +16,15 @@ Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime)
     , color(c)
     , state(GhostState::WAITING)
     , waitTimer(waitTime)
-    , originalWaitTime(waitTime)  // ✅ NEW: Store original for reset
+    , originalWaitTime(waitTime)
     , speed(2.5f)
     , lastDecisionGridX(-999)
     , lastDecisionGridY(-999)
     , normalSpeed(2.5f)
     , fearSpeed(1.5f)
     , hasLeftSpawn(false)
+    , fearModeEnding(false)
+    , shouldEnterFearWhenLeaving(false)  // ✅ ADD THIS
 {
   setDirection(Direction::UP);
 }
@@ -68,12 +70,22 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
     int gridY = static_cast<int>(std::floor(centerY));
 
     if (world->isExitPosition(gridX, gridY)) {
-      state = GhostState::CHASING;
+      // ✅ Check if we should enter fear mode instead of chasing
+      if (shouldEnterFearWhenLeaving) {
+        state = GhostState::FEAR;
+        speed = fearSpeed;
+        shouldEnterFearWhenLeaving = false;
+        std::cout << "[GHOST] Type " << static_cast<int>(type)
+                  << " exited spawn and entered FEAR mode!" << std::endl;
+      } else {
+        state = GhostState::CHASING;
+      }
+
       hasLeftSpawn = true;
 
       std::cout << "[GHOST] Type " << static_cast<int>(type)
                 << " passed through 'w' at (" << gridX << "," << gridY
-                << ") - now CHASING!" << std::endl;
+                << ") - now " << (state == GhostState::FEAR ? "FEAR" : "CHASING") << "!" << std::endl;
 
       Direction chaseDir = chooseNextDirection(gridX, gridY, world, pacman);
       if (chaseDir != Direction::NONE) {
@@ -510,10 +522,16 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
 }
 
 void Ghost::enterFearMode() {
-  if (state == GhostState::WAITING || state == GhostState::EXITING) return;
+  // If ghost hasn't left spawn yet, just mark it to enter fear mode later
+  if (state == GhostState::WAITING || state == GhostState::EXITING) {
+    shouldEnterFearWhenLeaving = true;
+    return;
+  }
 
+  // Ghost is already chasing, enter fear mode immediately
   state = GhostState::FEAR;
   speed = fearSpeed;
+  fearModeEnding = false;
 
   Direction current = getDirection();
   Direction opposite = Direction::NONE;
@@ -532,10 +550,16 @@ void Ghost::enterFearMode() {
 }
 
 void Ghost::exitFearMode() {
-  if (state != GhostState::FEAR) return;
+  if (state != GhostState::FEAR) {
+    // Clear the flag if fear mode ends before ghost leaves spawn
+    shouldEnterFearWhenLeaving = false;
+    return;
+  }
 
   state = GhostState::CHASING;
   speed = normalSpeed;
+  fearModeEnding = false;
+  shouldEnterFearWhenLeaving = false;  // ✅ Clear flag
 
   lastDecisionGridX = -999;
   lastDecisionGridY = -999;

@@ -28,10 +28,30 @@ World::World(AbstractFactory *f)
     , fearModeActive(false)
     , fearModeTimer(0.0f)
     , fearModeDuration(7.0f)
-    , deathAnimationActive(false)      // ✅ NEW
-    , deathAnimationTimer(0.0f)        // ✅ NEW
-    , deathAnimationDuration(2.0f)     // ✅ NEW: 2 second death animation
+    , deathAnimationActive(false)
+    , deathAnimationTimer(0.0f)
+    , deathAnimationDuration(2.0f)
+    , readyStateActive(false)        // ✅ ADD
+    , readyStateTimer(0.0f)           // ✅ ADD
+    , readyStateDuration(2.0f)        // ✅ ADD
 {}
+
+void World::startReadyState() {
+  readyStateActive = true;
+  readyStateTimer = readyStateDuration;
+  std::cout << "[WORLD] READY state started (" << readyStateDuration << " seconds)" << std::endl;
+}
+
+void World::updateReadyState(float deltaTime) {
+  if (!readyStateActive) return;
+
+  readyStateTimer -= deltaTime;
+
+  if (readyStateTimer <= 0.0f) {
+    readyStateActive = false;
+    std::cout << "[WORLD] READY state complete - game starting!" << std::endl;
+  }
+}
 
 void World::setMapDimensions(int width, int height) {
   mapWidth = width;
@@ -202,6 +222,12 @@ void World::respawnPacManAndGhosts() {
 
 void World::update(float deltaTime) {
   if (!pacman) return;
+
+  // ✅ NEW: Handle ready state - freeze game during "READY!"
+  if (readyStateActive) {
+    updateReadyState(deltaTime);
+    return;  // Don't update anything else during ready state
+  }
 
   // ✅ NEW: Handle death animation - freeze game during animation
   if (deathAnimationActive) {
@@ -478,6 +504,16 @@ void World::updateFearMode(float deltaTime) {
 
   fearModeTimer -= deltaTime;
 
+  // ✅ Notify ALL ghosts when fear mode is ending (last 2 seconds)
+  // This includes ghosts waiting in spawn
+  if (fearModeTimer <= 2.0f && fearModeTimer > 0.0f) {
+    for (Ghost* ghost : ghosts) {
+      if (ghost) {
+        ghost->setFearModeEnding(true);  // ✅ REMOVED the isInFearMode() check
+      }
+    }
+  }
+
   if (fearModeTimer <= 0.0f) {
     fearModeActive = false;
     std::cout << "[WORLD] Fear mode ended!" << std::endl;
@@ -489,7 +525,6 @@ void World::updateFearMode(float deltaTime) {
     }
   }
 }
-
 // ✅ NEW: Start death animation
 void World::startDeathAnimation() {
   deathAnimationActive = true;
@@ -509,8 +544,11 @@ void World::updateDeathAnimation(float deltaTime) {
 
     std::cout << "[WORLD] Death animation complete - respawning!" << std::endl;
 
-    // Now respawn everything
+    // Respawn everything
     respawnPacManAndGhosts();
+
+    // ✅ NEW: Start ready state after respawn
+    startReadyState();
   }
 }
 

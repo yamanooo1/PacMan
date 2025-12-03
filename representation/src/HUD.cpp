@@ -64,3 +64,40 @@ void HUD::draw(World* world, Score* score, Lives* lives) {
     livesText.setPosition(window->getSize().x - textBounds.width - 20.f, hudYPosition + 20.f);
     window->draw(livesText);
 }
+
+void HUD::drawReadyText(World* world) {
+  if (!window || !world || !fontLoaded) return;
+  if (!world->isReadyStateActive()) return;
+
+  // Draw "READY!" text - smaller and positioned below spawn box
+  sf::Text readyText;
+  readyText.setFont(font);
+  readyText.setString("READY!");
+  readyText.setCharacterSize(24);  // ✅ Smaller text
+  readyText.setFillColor(sf::Color::Yellow);
+
+  // Position it at grid position (10, 11) - below the spawn box
+  // The spawn box is at around (10, 9), so we put text at row 11
+  float gridX = 10.5f;  // Center of the map (21 width / 2)
+  float gridY = 10.4f;  // Below spawn box
+
+  // We need access to Camera to convert grid to screen coordinates
+  // Since HUD doesn't have Camera, we'll position it manually
+  // Calculate screen position based on window size
+  float gameHeight = static_cast<float>(window->getSize().y) - hudHeight;
+  float gameWidth = static_cast<float>(window->getSize().x);
+
+  // Assuming map is 21x21
+  float cellWidth = gameWidth / 21.0f;
+  float cellHeight = gameHeight / 21.0f;
+
+  float screenX = gridX * cellWidth;
+  float screenY = gridY * cellHeight;
+
+  // Center the text at this position
+  sf::FloatRect textBounds = readyText.getLocalBounds();
+  readyText.setOrigin(textBounds.width / 2.0f, textBounds.height / 2.0f);
+  readyText.setPosition(screenX, screenY);
+
+  window->draw(readyText);
+}

@@ -77,6 +77,8 @@ bool Game::initialize(const std::string& mapFile) {
     std::cout << "Lives: " << lives->getLives() << std::endl;
     std::cout << "Use ARROW KEYS or WASD to move PacMan!" << std::endl;
 
+    world->startReadyState();
+
     isRunning = true;
     return true;
 }
@@ -161,13 +163,14 @@ void Game::update(float deltaTime) {
 }
 
 void Game::render() {
-    window->clear(sf::Color::Black);
+  window->clear(sf::Color::Black);
 
-    if (world) {
-        factory->updateAll();
-        factory->drawAll();
-        hud->draw(world.get(), score.get(), lives.get());
-    }
+  if (world) {
+    factory->updateAll();
+    factory->drawAll();
+    hud->draw(world.get(), score.get(), lives.get());
+    hud->drawReadyText(world.get());  // ✅ ADD THIS - Draw ready text on top
+  }
 
-    window->display();
+  window->display();
 }

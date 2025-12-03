@@ -42,6 +42,11 @@ private:
   float deathAnimationTimer;
   float deathAnimationDuration;
 
+  // ✅ ADD THESE - Ready state management
+  bool readyStateActive;
+  float readyStateTimer;
+  float readyStateDuration;
+
 public:
   explicit World(AbstractFactory* f);
 
@@ -80,11 +85,16 @@ public:
   // Fear mode methods
   void activateFearMode();
   void updateFearMode(float deltaTime);
+  bool isFearModeEnding() const { return fearModeActive && fearModeTimer <= 2.0f; }
 
   // ✅ NEW: Death animation methods
   void startDeathAnimation();
   void updateDeathAnimation(float deltaTime);
   bool isDeathAnimationActive() const { return deathAnimationActive; }
+
+  void startReadyState();
+  void updateReadyState(float deltaTime);
+  bool isReadyStateActive() const { return readyStateActive; }
 
   bool isExitPosition(int gridX, int gridY) const;
   std::vector<std::pair<int, int>> getExitPositions() const;

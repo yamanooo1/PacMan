@@ -16,10 +16,14 @@ private:
   sf::CircleShape shape;
   SpriteGhostType spriteType;
 
-  // ✅ Animation state
+  // Animation state
   float animationTimer;
   int currentFrame;  // 0 or 1 (for FRAME_1 or FRAME_2)
-  float frameDuration;  // How long each frame lasts
+  float frameDuration;
+
+  // ✅ ADD THESE
+  float flashTimer;
+  bool showWhite;
 
 public:
   GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
