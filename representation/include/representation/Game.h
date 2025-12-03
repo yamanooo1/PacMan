@@ -5,44 +5,34 @@
 #include <memory>
 
 // Forward declarations
-class World;
-class ConcreteFactory;
-class Camera;
-class Score;
-class Lives;
-class HUD;
+class StateManager;
 
 class Game {
 private:
-  // Window and rendering
+  // Window
   std::unique_ptr<sf::RenderWindow> window;
-  std::unique_ptr<Camera> camera;
-  std::unique_ptr<ConcreteFactory> factory;
-  std::unique_ptr<HUD> hud;
 
-  // Game logic
-  std::unique_ptr<World> world;
-  std::unique_ptr<Score> score;
-  std::unique_ptr<Lives> lives;
+  // State management
+  std::unique_ptr<StateManager> stateManager;
 
   // Game state
   bool isRunning;
 
   // Private methods
   void handleEvents();
-  void handleInput(float deltaTime);
-  void update(float deltaTime);
-  void render();
 
 public:
   Game();
   ~Game();
 
-  // Initialize the game (load map, etc.)
-  bool initialize(const std::string& mapFile);
+  // Initialize the game (create window, setup initial state)
+  bool initialize();
 
   // Main game loop
   void run();
+
+  // Get window (needed by states)
+  sf::RenderWindow* getWindow() const { return window.get(); }
 };
 
-#endif //PACMAN_GAME_H
+#endif // PACMAN_GAME_H

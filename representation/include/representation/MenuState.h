@@ -1,13 +1,34 @@
-//
-// Created by yamanooo on 11/22/25.
-//
-
 #ifndef PACMAN_MENUSTATE_H
 #define PACMAN_MENUSTATE_H
-#include "State.h"
 
-class MenuState: public State{
+#include "State.h"
+#include <SFML/Graphics.hpp>
+#include <memory>
+
+class MenuState : public State {
+private:
+  sf::Font font;
+  sf::Text titleText;
+  sf::Text playText;
+  sf::Text instructionsText;
+  sf::Text leaderboardTitle;
+  // TODO: Add leaderboard scores display later
+
+  bool fontLoaded;
+
+public:
+  MenuState();
+  ~MenuState() override = default;
+
+  void onEnter() override;
+  void onExit() override;
+
+  void handleEvents(sf::RenderWindow& window) override;
+  void update(float deltaTime) override;
+  void render(sf::RenderWindow& window) override;
+
+private:
+  void setupTexts();
 };
 
-
-#endif //PACMAN_MENUSTATE_H
+#endif // PACMAN_MENUSTATE_H
