@@ -32,17 +32,22 @@ private:
   float pacmanSpawnX, pacmanSpawnY;
   std::vector<std::pair<float, float>> ghostSpawnPositions;
 
-  // NEW: Fear mode management
+  // Fear mode management
   bool fearModeActive;
   float fearModeTimer;
-  float fearModeDuration;  // How long fear mode lasts
+  float fearModeDuration;
+
+  // ✅ NEW: Death animation management
+  bool deathAnimationActive;
+  float deathAnimationTimer;
+  float deathAnimationDuration;
 
 public:
   explicit World(AbstractFactory* f);
 
   void setMapDimensions(int w, int h);
   void setScore(Score* s) { score = s; }
-  void setLives(Lives* l) { lives = l; }  // NEW: Connect Lives
+  void setLives(Lives* l) { lives = l; }
 
   void addEntity(std::unique_ptr<EntityModel> entity);
 
@@ -62,7 +67,7 @@ public:
   void update(float deltaTime);
   PacMan* getPacMan() const { return pacman; }
 
-  // NEW: Respawn methods
+  // Respawn methods
   void respawnPacManAndGhosts();
 
   // Collision helpers
@@ -72,9 +77,14 @@ public:
   // Helper to check if a specific grid cell contains a wall
   bool hasWallInGridCell(int gridX, int gridY) const;
 
-  // NEW: Fear mode methods
+  // Fear mode methods
   void activateFearMode();
   void updateFearMode(float deltaTime);
+
+  // ✅ NEW: Death animation methods
+  void startDeathAnimation();
+  void updateDeathAnimation(float deltaTime);
+  bool isDeathAnimationActive() const { return deathAnimationActive; }
 
   bool isExitPosition(int gridX, int gridY) const;
   std::vector<std::pair<int, int>> getExitPositions() const;
@@ -84,6 +94,7 @@ private:
   void updateGhosts(float deltaTime);
   void checkCollisions();
   void removeDeadEntities();
+  void checkLevelComplete();
 
   std::vector<std::pair<int, int>> exitPositions;
 };

@@ -1,5 +1,5 @@
 //
-// Created by yamanooo on 11/22/25.
+// Ghost.h - FIXED: Wait timers properly reset on respawn
 //
 
 #ifndef PACMAN_GHOST_H
@@ -27,7 +27,8 @@ class Ghost: public EntityModel {
 private:
   GhostType type;
   GhostState state;
-  float waitTimer;  // Countdown before leaving
+  float waitTimer;          // Current countdown timer
+  float originalWaitTime;   // ✅ NEW: Original wait time for reset
   float speed;
   float normalSpeed;
   float fearSpeed;
@@ -35,7 +36,7 @@ private:
   int lastDecisionGridX;
   int lastDecisionGridY;
 
-  bool hasLeftSpawn;  // Track if ghost has exited through 'w'
+  bool hasLeftSpawn;
 
   // AI helper methods
   std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
@@ -56,9 +57,11 @@ public:
   void exitFearMode();
   bool isInFearMode() const { return state == GhostState::FEAR; }
 
+  // ✅ FIXED: Now properly resets wait timer
   void resetSpawnFlag() {
     hasLeftSpawn = false;
-    state = GhostState::EXITING;
+    state = GhostState::WAITING;  // ← Changed to WAITING (not EXITING)
+    waitTimer = originalWaitTime; // ← NEW: Reset timer to original value
   }
 
   void onEaten() {

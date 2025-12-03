@@ -1,5 +1,5 @@
 //
-// Ghost.cpp - Complete with EXITING state and spawn prevention
+// Ghost.cpp - FIXED: Store and reset original wait time
 //
 
 #include "logic/Ghost.h"
@@ -15,6 +15,7 @@ Ghost::Ghost(float x, float y, GhostType t, float waitTime)
     , type(t)
     , state(GhostState::WAITING)
     , waitTimer(waitTime)
+    , originalWaitTime(waitTime)  // ✅ NEW: Store original for reset
     , speed(2.5f)
     , lastDecisionGridX(-999)
     , lastDecisionGridY(-999)
@@ -26,7 +27,6 @@ Ghost::Ghost(float x, float y, GhostType t, float waitTime)
 }
 
 bool Ghost::isInSpawnArea(int gridX, int gridY) const {
-  // Spawn area: columns 7-11, rows 8-10
   return (gridX >= 7 && gridX <= 11 && gridY >= 8 && gridY <= 10);
 }
 
@@ -284,7 +284,6 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
             continue;
         }
 
-        // PREVENT RE-ENTERING SPAWN
         if (hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY)) {
             continue;
         }
