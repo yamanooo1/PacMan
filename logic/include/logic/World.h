@@ -47,12 +47,20 @@ private:
   float readyStateTimer;
   float readyStateDuration;
 
+  bool levelCleared;  // ✅ Already added
+  bool levelClearedDisplayActive;  // ✅ ADD THIS
+  float levelClearedDisplayTimer;   // ✅ ADD THIS
+  float levelClearedDisplayDuration;
+
 public:
   explicit World(AbstractFactory* f);
 
   void setMapDimensions(int w, int h);
   void setScore(Score* s) { score = s; }
   void setLives(Lives* l) { lives = l; }
+
+  bool isLevelCleared() const { return levelCleared; }  // ✅ ADD THIS
+  bool isLevelClearedDisplayActive() const { return levelClearedDisplayActive; }  // ✅ ADD THIS
 
   void addEntity(std::unique_ptr<EntityModel> entity);
 

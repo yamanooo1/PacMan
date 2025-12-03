@@ -170,6 +170,7 @@ void Game::render() {
     factory->drawAll();
     hud->draw(world.get(), score.get(), lives.get());
     hud->drawReadyText(world.get());  // ✅ ADD THIS - Draw ready text on top
+    hud->drawLevelClearedText(world.get());
   }
 
   window->display();

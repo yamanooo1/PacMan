@@ -31,9 +31,13 @@ World::World(AbstractFactory *f)
     , deathAnimationActive(false)
     , deathAnimationTimer(0.0f)
     , deathAnimationDuration(2.0f)
-    , readyStateActive(false)        // ✅ ADD
-    , readyStateTimer(0.0f)           // ✅ ADD
-    , readyStateDuration(2.0f)        // ✅ ADD
+    , readyStateActive(false)
+    , readyStateTimer(0.0f)
+    , readyStateDuration(2.0f)
+    , levelCleared(false)
+    , levelClearedDisplayActive(false)  // ✅ ADD
+    , levelClearedDisplayTimer(0.0f)     // ✅ ADD
+    , levelClearedDisplayDuration(3.0f)  // ✅ ADD - 3 seconds display
 {}
 
 void World::startReadyState() {
@@ -209,19 +213,36 @@ void World::respawnPacManAndGhosts() {
 
   pacman->respawn();
 
-  // ✅ This is CORRECT - full reset when PacMan dies
+  // ✅ Exit fear mode for all ghosts on respawn
+  for (Ghost* ghost : ghosts) {
+    if (ghost) {
+      ghost->exitFearMode();
+    }
+  }
+
+  // Reset ghost positions and states
   for (size_t i = 0; i < ghosts.size(); ++i) {
     if (i < ghostSpawnPositions.size()) {
       auto [spawnX, spawnY] = ghostSpawnPositions[i];
       ghosts[i]->setPosition(spawnX, spawnY);
       ghosts[i]->setDirection(Direction::UP);
-      ghosts[i]->resetSpawnFlag();  // ✅ Keep this - resets wait timer
+      ghosts[i]->resetSpawnFlag();
     }
   }
 }
 
+
 void World::update(float deltaTime) {
   if (!pacman) return;
+
+  if (levelClearedDisplayActive) {
+    levelClearedDisplayTimer -= deltaTime;
+    if (levelClearedDisplayTimer <= 0.0f) {
+      levelClearedDisplayActive = false;
+      // TODO: Load next level here
+    }
+    return;  // Freeze all game logic during display
+  }
 
   // ✅ NEW: Handle ready state - freeze game during "READY!"
   if (readyStateActive) {
@@ -443,8 +464,8 @@ void World::checkCollisions() {
             auto [spawnX, spawnY] = ghostSpawnPositions[ghostIndex];
             collidedGhost->setPosition(spawnX, spawnY);
             collidedGhost->setDirection(Direction::UP);
-            collidedGhost->exitFearMode();  // Exit fear mode first
-            collidedGhost->respawnAfterEaten();  // ✅ Then set to exit spawn immediately
+            collidedGhost->exitFearMode();
+            collidedGhost->respawnAfterEaten();
 
             std::cout << "[GHOST] Ghost respawned after being eaten - will exit immediately" << std::endl;
           }
@@ -464,12 +485,25 @@ void World::checkCollisions() {
     }
   }
 
-  // ✅ NEW: Start death animation instead of immediate respawn
   if (pacmanDied && lives) {
-    pacman->die();  // Notify observers (Lives, Views)
+    pacman->die();
+
+    // ✅ ADD THIS - Deactivate fear mode immediately when PacMan dies
+    if (fearModeActive) {
+      fearModeActive = false;
+      fearModeTimer = 0.0f;
+      std::cout << "[WORLD] Fear mode cancelled - PacMan died!" << std::endl;
+
+      // Exit fear mode for all ghosts
+      for (Ghost* ghost : ghosts) {
+        if (ghost) {
+          ghost->exitFearMode();
+        }
+      }
+    }
 
     if (!lives->isGameOver()) {
-      startDeathAnimation();  // Start animation, respawn happens after
+      startDeathAnimation();
     }
   }
 }
@@ -574,6 +608,8 @@ void World::updateGhosts(float deltaTime) {
 }
 
 void World::checkLevelComplete() {
+  if (levelCleared) return;
+
   int remainingCollectables = 0;
 
   for (const auto& entity : entities) {
@@ -591,6 +627,10 @@ void World::checkLevelComplete() {
   }
 
   if (remainingCollectables == 0) {
+    levelCleared = true;
+    levelClearedDisplayActive = true;  // ✅ ADD THIS
+    levelClearedDisplayTimer = levelClearedDisplayDuration;  // ✅ ADD THIS
+
     std::cout << "\n========================================" << std::endl;
     std::cout << "       🎉 LEVEL CLEARED! 🎉" << std::endl;
     std::cout << "========================================\n" << std::endl;
@@ -599,7 +639,6 @@ void World::checkLevelComplete() {
       score->update(GameEvent::LEVEL_CLEARED);
     }
 
-    std::cout << "[WORLD] TODO: Load next level with increased difficulty" << std::endl;
-    std::cout << "[WORLD] Press ESC to quit for now" << std::endl;
+    std::cout << "[WORLD] Press ESC to quit" << std::endl;
   }
 }

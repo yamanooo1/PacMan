@@ -101,3 +101,34 @@ void HUD::drawReadyText(World* world) {
 
   window->draw(readyText);
 }
+
+void HUD::drawLevelClearedText(World* world) {
+  if (!window || !world || !fontLoaded) return;
+  if (!world->isLevelClearedDisplayActive()) return;
+
+  // Draw "LEVEL CLEARED!" text
+  sf::Text clearedText;
+  clearedText.setFont(font);
+  clearedText.setString("LEVEL CLEARED!");
+  clearedText.setCharacterSize(30);  // Bigger than "READY!"
+  clearedText.setFillColor(sf::Color::Yellow);
+
+  // Position at center of screen
+  float gridX = 10.5f;
+  float gridY = 10.5f;
+
+  float gameHeight = static_cast<float>(window->getSize().y) - hudHeight;
+  float gameWidth = static_cast<float>(window->getSize().x);
+
+  float cellWidth = gameWidth / 21.0f;
+  float cellHeight = gameHeight / 21.0f;
+
+  float screenX = gridX * cellWidth;
+  float screenY = gridY * cellHeight;
+
+  sf::FloatRect textBounds = clearedText.getLocalBounds();
+  clearedText.setOrigin(textBounds.width / 2.0f, textBounds.height / 2.0f);
+  clearedText.setPosition(screenX, screenY);
+
+  window->draw(clearedText);
+}
