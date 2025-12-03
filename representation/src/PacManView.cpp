@@ -25,24 +25,29 @@ PacManView::PacManView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
 // ✅ Handle events ONLY (not called every frame)
 void PacManView::update(GameEvent event) {
   switch (event) {
-    case GameEvent::PACMAN_DIED:
-      std::cout << "[VIEW] PacMan died - starting death animation" << std::endl;
-      playingDeathAnimation = true;
+  case GameEvent::PACMAN_DIED:
+    std::cout << "[VIEW] PacMan died - starting death animation" << std::endl;
+    playingDeathAnimation = true;
+    deathFrame = 0;
+    deathAnimationTimer = 0.0f;
+    currentMouthFrame = 0;
+    animationTimer = 0.0f;
+    break;
+
+  case GameEvent::DIRECTION_CHANGED:
+    // ✅ If death animation finished and PacMan moves, respawn happened
+    if (playingDeathAnimation && deathFrame >= 10) {
+      std::cout << "[VIEW] Detected respawn - resetting death animation" << std::endl;
+      playingDeathAnimation = false;
       deathFrame = 0;
       deathAnimationTimer = 0.0f;
-      currentMouthFrame = 0;
-      animationTimer = 0.0f;
-      break;
+    } else if (!playingDeathAnimation) {
+      std::cout << "[VIEW] PacMan changed direction" << std::endl;
+    }
+    break;
 
-    case GameEvent::DIRECTION_CHANGED:
-      // Only reset if we're NOT already dead
-      if (!playingDeathAnimation) {
-        std::cout << "[VIEW] PacMan changed direction" << std::endl;
-      }
-      break;
-
-    default:
-      break;
+  default:
+    break;
   }
 }
 
@@ -58,23 +63,8 @@ void PacManView::updateAnimation(float deltaTime) {
 
       // Death animation has 11 frames (0-10)
       if (deathFrame > 10) {
-        // Stay on last frame until game resets position
+        // Stay on last frame until respawn detected via DIRECTION_CHANGED event
         deathFrame = 10;
-      }
-    }
-
-    // Check if PacMan has been respawned (position reset)
-    if (model) {
-      auto [x, y] = model->getPosition();
-      // Simple heuristic: if PacMan is back at a "spawn-like" position
-      // and we've finished the animation, reset
-      if (deathFrame >= 10) {
-        // Check if respawn happened by seeing if direction changed to NONE
-        if (model->getDirection() == Direction::NONE) {
-          playingDeathAnimation = false;
-          deathFrame = 0;
-          std::cout << "[VIEW] Detected respawn - resetting animation" << std::endl;
-        }
       }
     }
 
