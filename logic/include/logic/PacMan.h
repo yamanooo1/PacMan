@@ -21,7 +21,7 @@ public:
   PacMan(float x, float y)
       : EntityModel(x, y, 0.8f, 0.8f)
       , speed(3.0f)
-      , desiredDirection(Direction::NONE)
+      , desiredDirection(Direction::LEFT)
       , spawnX(x)
       , spawnY(y) {}
 
@@ -53,8 +53,9 @@ public:
 
   void respawn() {
     setPosition(spawnX, spawnY);
-    setDirection(Direction::NONE);
+    setDirection(Direction::LEFT);
     desiredDirection = Direction::NONE;
+    notify(GameEvent::DIRECTION_CHANGED);
   }
 
   void setSpawnPosition(float x, float y) {

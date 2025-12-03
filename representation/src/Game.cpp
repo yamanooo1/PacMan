@@ -1,5 +1,5 @@
 //
-// Created by yamanooo on 11/22/25.
+// Game.cpp - COMPLETE VERSION with sprite loading
 //
 
 #include "representation/Game.h"
@@ -26,13 +26,7 @@ Game::Game()
 Game::~Game() {
     // CRITICAL: Destruction order matters!
     // Factory must be destroyed BEFORE World to avoid use-after-free
-    // unique_ptr destroys in reverse order of declaration, so we're safe:
-    // 1. lives (last declared, destroyed first)
-    // 2. score
-    // 3. world
-    // 4. factory (destroyed BEFORE world, this is correct!)
-    // 5. camera
-    // 6. window (first declared, destroyed last)
+    // unique_ptr destroys in reverse order of declaration, so we're safe
 }
 
 bool Game::initialize(const std::string& mapFile) {
@@ -50,12 +44,18 @@ bool Game::initialize(const std::string& mapFile) {
     // Create factory (needs window and camera)
     factory = std::make_unique<ConcreteFactory>(window.get(), camera.get());
 
+    // Load sprites
+    if (!factory->loadSprites("../../resources/sprites/spritemap.png")) {
+        std::cerr << "Failed to load sprites!" << std::endl;
+        return false;
+    }
+
     // Create world (needs factory)
     world = std::make_unique<World>(factory.get());
 
     // Create score and lives
     score = std::make_unique<Score>();
-    lives = std::make_unique<Lives>(3);  // Start with 3 lives
+    lives = std::make_unique<Lives>(3);
 
     // Connect score and lives to world
     world->setScore(score.get());
@@ -152,14 +152,11 @@ void Game::update(float deltaTime) {
 
     // Update world (PacMan movement, collisions, etc.)
     world->update(deltaTime);
-
-    // Optional: Display score and lives in console
-    // std::cout << "\rScore: " << score->getScore()
-    //           << " | Lives: " << lives->getLives() << std::flush;
 }
 
 void Game::render() {
-    window->clear(sf::Color::Black);
-    factory->drawAll();
-    window->display();
+  window->clear(sf::Color::Black);
+  factory->updateAll();  // ✅ ADD THIS - Update animations
+  factory->drawAll();
+  window->display();
 }

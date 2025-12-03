@@ -10,6 +10,13 @@
 class World;
 class PacMan;
 
+enum class GhostColor {
+  RED,
+  PINK,
+  CYAN,
+  ORANGE
+};
+
 enum class GhostType {
   RANDOM,      // Locked direction
   AMBUSHER,    // Target ahead of PacMan
@@ -26,6 +33,7 @@ enum class GhostState {
 class Ghost: public EntityModel {
 private:
   GhostType type;
+  GhostColor color;
   GhostState state;
   float waitTimer;          // Current countdown timer
   float originalWaitTime;   // ✅ NEW: Original wait time for reset
@@ -47,11 +55,12 @@ private:
   bool isInSpawnArea(int gridX, int gridY) const;
 
 public:
-  Ghost(float x, float y, GhostType t, float waitTime);
+  Ghost(float x, float y, GhostType t, GhostColor c, float waitTime);
   ~Ghost() override = default;
 
   GhostType getType() const { return type; }
   GhostState getState() const { return state; }
+  GhostColor getColor() const { return color; }
 
   void enterFearMode();
   void exitFearMode();
@@ -64,11 +73,20 @@ public:
     waitTimer = originalWaitTime; // ← NEW: Reset timer to original value
   }
 
+  // ✅ NEW: Quick respawn after being eaten (exits immediately, no waiting)
+  void respawnAfterEaten() {
+    hasLeftSpawn = false;  // Will need to exit spawn area again
+    state = GhostState::EXITING;  // Navigate to exit gate
+    waitTimer = -1.0f;  // ✅ Negative value = already done waiting
+  }
+
   void onEaten() {
     notify(GameEvent::GHOST_EATEN);
   }
 
   void update(float deltaTime, World* world, PacMan* pacman);
+
+
 };
 
 #endif //PACMAN_GHOST_H

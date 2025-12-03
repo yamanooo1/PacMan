@@ -61,8 +61,8 @@ void World::createPacMan(float x, float y) {
   addEntity(std::move(pacmanModel));
 }
 
-void World::createGhost(float x, float y, GhostType type, float waitTime) {
-  auto ghost = factory->createGhost(x, y, type, waitTime);
+void World::createGhost(float x, float y, GhostType type, GhostColor color, float waitTime) {
+  auto ghost = factory->createGhost(x, y, type, color, waitTime);  // ✅ UPDATED
   Ghost* ghostPtr = ghost.get();
 
   float centeredX = x + (1.0f - ghost->getWidth()) / 2.0f;
@@ -153,16 +153,16 @@ bool World::loadFromFile(const std::string &filename) {
         createPacMan(x, y);
         break;
       case 'r':
-        createGhost(x, y, GhostType::CHASER, 0.0f);
+        createGhost(x, y, GhostType::CHASER, GhostColor::RED, 0.0f);  // ✅ UPDATED
         break;
       case 'b':
-        createGhost(x, y, GhostType::AMBUSHER, 0.0f);
+        createGhost(x, y, GhostType::AMBUSHER, GhostColor::CYAN, 0.0f);  // ✅ UPDATED
         break;
       case 'o':
-        createGhost(x, y, GhostType::AMBUSHER, 5.0f);
+        createGhost(x, y, GhostType::CHASER, GhostColor::ORANGE, 5.0f);  // ✅ UPDATED - Orange!
         break;
       case 'p':
-        createGhost(x, y, GhostType::RANDOM, 10.0f);
+        createGhost(x, y, GhostType::RANDOM, GhostColor::PINK, 10.0f);  // ✅ UPDATED - Pink!
         break;
       case 'f':
         createFruit(x, y);
@@ -189,13 +189,13 @@ void World::respawnPacManAndGhosts() {
 
   pacman->respawn();
 
-  // ✅ Respawn all ghosts and reset their spawn flags
+  // ✅ This is CORRECT - full reset when PacMan dies
   for (size_t i = 0; i < ghosts.size(); ++i) {
     if (i < ghostSpawnPositions.size()) {
       auto [spawnX, spawnY] = ghostSpawnPositions[i];
       ghosts[i]->setPosition(spawnX, spawnY);
       ghosts[i]->setDirection(Direction::UP);
-      ghosts[i]->resetSpawnFlag();  // Reset to EXITING state
+      ghosts[i]->resetSpawnFlag();  // ✅ Keep this - resets wait timer
     }
   }
 }
@@ -417,8 +417,10 @@ void World::checkCollisions() {
             auto [spawnX, spawnY] = ghostSpawnPositions[ghostIndex];
             collidedGhost->setPosition(spawnX, spawnY);
             collidedGhost->setDirection(Direction::UP);
-            collidedGhost->exitFearMode();
-            collidedGhost->resetSpawnFlag();
+            collidedGhost->exitFearMode();  // Exit fear mode first
+            collidedGhost->respawnAfterEaten();  // ✅ Then set to exit spawn immediately
+
+            std::cout << "[GHOST] Ghost respawned after being eaten - will exit immediately" << std::endl;
           }
         } else {
           pacmanDied = true;

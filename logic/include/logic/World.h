@@ -52,7 +52,7 @@ public:
   void addEntity(std::unique_ptr<EntityModel> entity);
 
   void createPacMan(float x, float y);
-  void createGhost(float x, float y, GhostType type, float waitTime);
+  void createGhost(float x, float y, GhostType type, GhostColor color, float waitTime);
   void createWall(float x, float y, float w, float h);
   void createCoin(float x, float y);
   void createFruit(float x, float y);

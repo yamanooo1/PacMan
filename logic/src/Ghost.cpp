@@ -10,9 +10,10 @@
 #include <iostream>
 #include <vector>
 
-Ghost::Ghost(float x, float y, GhostType t, float waitTime)
+Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime)
     : EntityModel(x, y, 0.8f, 0.8f)
     , type(t)
+    , color(c)
     , state(GhostState::WAITING)
     , waitTimer(waitTime)
     , originalWaitTime(waitTime)  // ✅ NEW: Store original for reset
@@ -36,7 +37,7 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   // WAITING state
   if (state == GhostState::WAITING) {
     waitTimer -= deltaTime;
-    if (waitTimer <= 0.0f) {
+    if (waitTimer <= 0.0f) {  // ✅ This will be true immediately if waitTimer is negative
       state = GhostState::EXITING;
 
       auto [x, y] = getPosition();
@@ -254,63 +255,80 @@ Direction Ghost::chooseDirectionToExit(int gridX, int gridY, World* world) const
 }
 
 std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* world) const {
-    std::vector<Direction> viable;
-    Direction current = getDirection();
+  std::vector<Direction> viable;
+  Direction current = getDirection();
 
-    Direction opposite = Direction::NONE;
-    if (current == Direction::UP) opposite = Direction::DOWN;
-    else if (current == Direction::DOWN) opposite = Direction::UP;
-    else if (current == Direction::LEFT) opposite = Direction::RIGHT;
-    else if (current == Direction::RIGHT) opposite = Direction::LEFT;
+  Direction opposite = Direction::NONE;
+  if (current == Direction::UP) opposite = Direction::DOWN;
+  else if (current == Direction::DOWN) opposite = Direction::UP;
+  else if (current == Direction::LEFT) opposite = Direction::RIGHT;
+  else if (current == Direction::RIGHT) opposite = Direction::LEFT;
 
-    std::vector<Direction> allDirections = {
-        Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT
-    };
+  std::vector<Direction> allDirections = {
+    Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT
+  };
 
-    for (Direction dir : allDirections) {
-        if (dir == opposite) continue;
+  // First pass: Add all directions except opposite
+  for (Direction dir : allDirections) {
+    if (dir == opposite) continue;
 
-        int nextGridX = gridX;
-        int nextGridY = gridY;
-        switch (dir) {
-            case Direction::UP:    nextGridY--; break;
-            case Direction::DOWN:  nextGridY++; break;
-            case Direction::LEFT:  nextGridX--; break;
-            case Direction::RIGHT: nextGridX++; break;
-            case Direction::NONE: break;
-        }
-
-        if (world->hasWallInGridCell(nextGridX, nextGridY)) {
-            continue;
-        }
-
-        if (hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY)) {
-            continue;
-        }
-
-        viable.push_back(dir);
+    int nextGridX = gridX;
+    int nextGridY = gridY;
+    switch (dir) {
+    case Direction::UP:    nextGridY--; break;
+    case Direction::DOWN:  nextGridY++; break;
+    case Direction::LEFT:  nextGridX--; break;
+    case Direction::RIGHT: nextGridX++; break;
+    case Direction::NONE: break;
     }
 
-    if (viable.empty() && opposite != Direction::NONE) {
-        int nextGridX = gridX;
-        int nextGridY = gridY;
-        switch (opposite) {
-            case Direction::UP:    nextGridY--; break;
-            case Direction::DOWN:  nextGridY++; break;
-            case Direction::LEFT:  nextGridX--; break;
-            case Direction::RIGHT: nextGridX++; break;
-            case Direction::NONE: break;
-        }
+    if (world->hasWallInGridCell(nextGridX, nextGridY)) continue;
+    if (hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY)) continue;
 
-        bool hasWall = world->hasWallInGridCell(nextGridX, nextGridY);
-        bool wouldEnterSpawn = hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY);
+    viable.push_back(dir);
+  }
 
-        if (!hasWall && !wouldEnterSpawn) {
-            viable.push_back(opposite);
-        }
+  // At intersections (2+ directions), also allow reversing
+  if (viable.size() >= 2 && opposite != Direction::NONE) {
+    int nextGridX = gridX;
+    int nextGridY = gridY;
+    switch (opposite) {
+    case Direction::UP:    nextGridY--; break;
+    case Direction::DOWN:  nextGridY++; break;
+    case Direction::LEFT:  nextGridX--; break;
+    case Direction::RIGHT: nextGridX++; break;
+    case Direction::NONE: break;
     }
 
-    return viable;
+    bool hasWall = world->hasWallInGridCell(nextGridX, nextGridY);
+    bool wouldEnterSpawn = hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY);
+
+    if (!hasWall && !wouldEnterSpawn) {
+      viable.push_back(opposite);
+    }
+  }
+
+  // Dead end: must reverse
+  if (viable.empty() && opposite != Direction::NONE) {
+    int nextGridX = gridX;
+    int nextGridY = gridY;
+    switch (opposite) {
+    case Direction::UP:    nextGridY--; break;
+    case Direction::DOWN:  nextGridY++; break;
+    case Direction::LEFT:  nextGridX--; break;
+    case Direction::RIGHT: nextGridX++; break;
+    case Direction::NONE: break;
+    }
+
+    bool hasWall = world->hasWallInGridCell(nextGridX, nextGridY);
+    bool wouldEnterSpawn = hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY);
+
+    if (!hasWall && !wouldEnterSpawn) {
+      viable.push_back(opposite);
+    }
+  }
+
+  return viable;
 }
 
 bool Ghost::isAtIntersection(int gridX, int gridY, World* world) const {
@@ -329,6 +347,9 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
     if (viable.size() == 1) return viable[0];
 
     Random& random = Random::getInstance();
+
+    std::string typeStr = (type == GhostType::RANDOM) ? "RANDOM" :
+                         (type == GhostType::CHASER) ? "CHASER" : "AMBUSHER";
 
     if (type == GhostType::RANDOM) {
         Direction current = getDirection();
@@ -373,23 +394,61 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
     } else if (type == GhostType::CHASER) {
         targetX = pacmanGridX;
         targetY = pacmanGridY;
-    } else {
+
+        std::cout << "[" << typeStr << "] At (" << gridX << "," << gridY
+                  << ") chasing PacMan at (" << targetX << "," << targetY << ")" << std::endl;
+    } else {  // AMBUSHER
+      Direction pacmanDir = pacman->getDirection();
+      int lookAhead = 4;
+
+      if (pacmanDir == Direction::NONE) {
         targetX = pacmanGridX;
         targetY = pacmanGridY;
 
-        Direction pacmanDir = pacman->getDirection();
-        int lookAhead = 4;
+        std::cout << "[" << typeStr << "] PacMan stationary - chasing directly at ("
+                  << targetX << "," << targetY << ")" << std::endl;
+      } else {
+        int lookAheadX = pacmanGridX;
+        int lookAheadY = pacmanGridY;
 
         switch (pacmanDir) {
-            case Direction::UP:    targetY -= lookAhead; break;
-            case Direction::DOWN:  targetY += lookAhead; break;
-            case Direction::LEFT:  targetX -= lookAhead; break;
-            case Direction::RIGHT: targetX += lookAhead; break;
-            case Direction::NONE: break;
+        case Direction::UP:    lookAheadY -= lookAhead; break;
+        case Direction::DOWN:  lookAheadY += lookAhead; break;
+        case Direction::LEFT:  lookAheadX -= lookAhead; break;
+        case Direction::RIGHT: lookAheadX += lookAhead; break;
+        case Direction::NONE: break;
         }
+
+        // ✅ CLAMP to map bounds
+        int mapWidth = 21;
+        int mapHeight = 21;
+        lookAheadX = std::max(0, std::min(mapWidth - 1, lookAheadX));
+        lookAheadY = std::max(0, std::min(mapHeight - 1, lookAheadY));
+
+        int ghostToTarget = manhattanDistance(gridX, gridY, lookAheadX, lookAheadY);
+        int pacmanToTarget = manhattanDistance(pacmanGridX, pacmanGridY, lookAheadX, lookAheadY);
+
+        if (ghostToTarget < pacmanToTarget) {
+          targetX = pacmanGridX;
+          targetY = pacmanGridY;
+
+          std::cout << "[" << typeStr << "] CLOSE MODE - chasing PacMan at ("
+                    << targetX << "," << targetY << ")" << std::endl;
+        } else {
+          targetX = lookAheadX;
+          targetY = lookAheadY;
+
+          std::cout << "[" << typeStr << "] AMBUSH MODE - targeting ("
+                    << targetX << "," << targetY << ") [PacMan at ("
+                    << pacmanGridX << "," << pacmanGridY << ")]" << std::endl;
+        }
+      }
     }
 
     bool shouldMaximize = (state == GhostState::FEAR);
+
+    std::cout << "  Viable directions: " << viable.size()
+              << " | Should maximize: " << (shouldMaximize ? "YES" : "NO") << std::endl;
 
     std::vector<Direction> bestDirections;
     int bestDistance = shouldMaximize ? -1 : 999999;
@@ -407,6 +466,12 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
         }
 
         int distance = manhattanDistance(nextGridX, nextGridY, targetX, targetY);
+
+        std::string dirStr = (dir == Direction::UP) ? "UP" :
+                            (dir == Direction::DOWN) ? "DOWN" :
+                            (dir == Direction::LEFT) ? "LEFT" : "RIGHT";
+        std::cout << "    " << dirStr << " -> (" << nextGridX << "," << nextGridY
+                  << ") distance: " << distance << std::endl;
 
         if (shouldMaximize) {
             if (distance > bestDistance) {
@@ -432,12 +497,16 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
         return viable[index];
     }
 
-    if (bestDirections.size() == 1) {
-        return bestDirections[0];
-    }
+    // ✅ Break ties at random (as per assignment requirements)
+    Direction chosen = bestDirections.size() == 1 ? bestDirections[0] :
+                      bestDirections[random.getInt(0, bestDirections.size() - 1)];
 
-    int index = random.getInt(0, bestDirections.size() - 1);
-    return bestDirections[index];
+    std::string chosenStr = (chosen == Direction::UP) ? "UP" :
+                           (chosen == Direction::DOWN) ? "DOWN" :
+                           (chosen == Direction::LEFT) ? "LEFT" : "RIGHT";
+    std::cout << "  CHOSE: " << chosenStr << " (distance: " << bestDistance << ")" << std::endl << std::endl;
+
+    return chosen;
 }
 
 void Ghost::enterFearMode() {

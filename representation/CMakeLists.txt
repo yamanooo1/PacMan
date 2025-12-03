@@ -16,6 +16,7 @@ add_library(representation STATIC
         src/VictoryState.cpp
         src/Game.cpp
         src/ConcreteFactory.cpp
+        src/SpriteAtlas.cpp
 )
 
 target_include_directories(representation PUBLIC include)
