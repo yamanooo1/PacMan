@@ -111,6 +111,9 @@ void SpriteAtlas::defineAllSpriteRegions() {
     fearSprites[0] = sf::IntRect(1, 554, 35, 35);
     fearSprites[1] = sf::IntRect(1, 604, 35, 35);
 
+    fearSprites[2] = sf::IntRect(51, 554, 35, 35);
+    fearSprites[3] = sf::IntRect(51, 604, 35, 35);
+
     // ===== COLLECTIBLES =====
     coinSprite = sf::IntRect(411, 313, 16, 16);
     fruitSprite = sf::IntRect(601, 200, 33, 42);

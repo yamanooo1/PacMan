@@ -1,8 +1,5 @@
-//
-// Game.cpp - COMPLETE VERSION with sprite loading
-//
-
 #include "representation/Game.h"
+#include "representation/HUD.h"
 #include "logic/World.h"
 #include "logic/PacMan.h"
 #include "logic/Score.h"
@@ -16,6 +13,7 @@ Game::Game()
     : window(nullptr)
     , camera(nullptr)
     , factory(nullptr)
+    , hud(nullptr)
     , world(nullptr)
     , score(nullptr)
     , lives(nullptr)
@@ -24,24 +22,23 @@ Game::Game()
 }
 
 Game::~Game() {
-    // CRITICAL: Destruction order matters!
-    // Factory must be destroyed BEFORE World to avoid use-after-free
-    // unique_ptr destroys in reverse order of declaration, so we're safe
 }
 
 bool Game::initialize(const std::string& mapFile) {
     std::cout << "Initializing game..." << std::endl;
 
-    // Create window
+    // Create window with extra space for HUD
+    int gameHeight = 800;
+    int hudHeight = 60;
     window = std::make_unique<sf::RenderWindow>(
-        sf::VideoMode(800, 600),
+        sf::VideoMode(800, gameHeight + hudHeight),
         "PacMan"
     );
 
-    // Create camera
-    camera = std::make_unique<Camera>(800, 600, 10, 10);
+    // Create camera (game area only, not including HUD)
+    camera = std::make_unique<Camera>(800, gameHeight, 10, 10);
 
-    // Create factory (needs window and camera)
+    // Create factory
     factory = std::make_unique<ConcreteFactory>(window.get(), camera.get());
 
     // Load sprites
@@ -50,7 +47,11 @@ bool Game::initialize(const std::string& mapFile) {
         return false;
     }
 
-    // Create world (needs factory)
+    // Create HUD
+    hud = std::make_unique<HUD>(window.get(), hudHeight);
+    hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
+
+    // Create world
     world = std::make_unique<World>(factory.get());
 
     // Create score and lives
@@ -89,11 +90,9 @@ void Game::run() {
     Stopwatch& stopwatch = Stopwatch::getInstance();
 
     while (window->isOpen() && isRunning) {
-        // Get delta time
         stopwatch.tick();
         float deltaTime = stopwatch.getDeltaTime();
 
-        // Game loop phases
         handleEvents();
         handleInput(deltaTime);
         update(deltaTime);
@@ -110,9 +109,17 @@ void Game::handleEvents() {
         }
 
         if (event.type == sf::Event::Resized) {
-            camera->setWindowSize(event.size.width, event.size.height);
-            sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+            // Update window view to maintain aspect ratio
+            float windowWidth = static_cast<float>(event.size.width);
+            float windowHeight = static_cast<float>(event.size.height);
+
+            // Set view to full window
+            sf::FloatRect visibleArea(0, 0, windowWidth, windowHeight);
             window->setView(sf::View(visibleArea));
+
+            // Update camera size (game area is window height minus HUD)
+            int hudHeight = 60;
+            camera->setWindowSize(windowWidth, windowHeight - hudHeight);
         }
     }
 }
@@ -121,7 +128,6 @@ void Game::handleInput(float deltaTime) {
     PacMan* pacman = world->getPacMan();
     if (!pacman) return;
 
-    // Check keyboard input and set desired direction
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
         pacman->setDesiredDirection(Direction::LEFT);
@@ -139,7 +145,6 @@ void Game::handleInput(float deltaTime) {
         pacman->setDesiredDirection(Direction::DOWN);
     }
 
-    // ESC to quit
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
         window->close();
         isRunning = false;
@@ -147,16 +152,22 @@ void Game::handleInput(float deltaTime) {
 }
 
 void Game::update(float deltaTime) {
-    // Update score decay
+  // Only update score decay if game is active (not dead and not game over)
+  if (lives && !lives->isGameOver() && world && !world->isDeathAnimationActive()) {
     score->updateScoreDecay();
+  }
 
-    // Update world (PacMan movement, collisions, etc.)
-    world->update(deltaTime);
+  world->update(deltaTime);
 }
 
 void Game::render() {
-  window->clear(sf::Color::Black);
-  factory->updateAll();  // ✅ ADD THIS - Update animations
-  factory->drawAll();
-  window->display();
+    window->clear(sf::Color::Black);
+
+    if (world) {
+        factory->updateAll();
+        factory->drawAll();
+        hud->draw(world.get(), score.get(), lives.get());
+    }
+
+    window->display();
 }

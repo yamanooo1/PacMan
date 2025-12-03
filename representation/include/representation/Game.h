@@ -1,7 +1,3 @@
-//
-// Created by yamanooo on 11/22/25.
-//
-
 #ifndef PACMAN_GAME_H
 #define PACMAN_GAME_H
 
@@ -14,6 +10,7 @@ class ConcreteFactory;
 class Camera;
 class Score;
 class Lives;
+class HUD;
 
 class Game {
 private:
@@ -21,6 +18,7 @@ private:
   std::unique_ptr<sf::RenderWindow> window;
   std::unique_ptr<Camera> camera;
   std::unique_ptr<ConcreteFactory> factory;
+  std::unique_ptr<HUD> hud;
 
   // Game logic
   std::unique_ptr<World> world;

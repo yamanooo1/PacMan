@@ -17,6 +17,8 @@ add_library(representation STATIC
         src/Game.cpp
         src/ConcreteFactory.cpp
         src/SpriteAtlas.cpp
+        src/HUD.cpp
+        include/representation/HUD.h
 )
 
 target_include_directories(representation PUBLIC include)
