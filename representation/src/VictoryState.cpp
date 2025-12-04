@@ -13,8 +13,9 @@ VictoryState::VictoryState(int nextLevelNum, int score)
     , finalScore(score)
     , isGameOver(nextLevelNum == 0)
 {
-  std::cout << "[VictoryState] Constructor called - NextLevel: " << nextLevelNum
-            << " Score: " << score << " IsGameOver: " << isGameOver << std::endl;
+  std::cout << "\n🎉 [VICTORYSTATE] CONSTRUCTOR CALLED!" << std::endl;
+  std::cout << "    Next Level: " << nextLevel << std::endl;
+  std::cout << "    Final Score: " << finalScore << std::endl;
 
   // ✅ Save high score when returning to menu from victory
   if (score > 0) {
@@ -58,15 +59,23 @@ void VictoryState::setupTexts() {
     std::cout << "[VictoryState] Title: LEVEL CLEARED! (yellow)" << std::endl;
   }
   titleText.setCharacterSize(40);
-  titleText.setPosition(150.f, 250.f);
+
+  // ✅ CENTER the title
+  sf::FloatRect titleBounds = titleText.getLocalBounds();
+  titleText.setOrigin(titleBounds.width / 2.f, titleBounds.height / 2.f);
+  titleText.setPosition(400.f, 250.f);  // Center of 800px window
 
   // Score display
   scoreText.setFont(font);
   scoreText.setString("Score: " + std::to_string(finalScore));
-  scoreText.setCharacterSize(20);
+  scoreText.setCharacterSize(24);  // ✅ Bigger text
   scoreText.setFillColor(sf::Color::White);
-  scoreText.setPosition(250.f, 350.f);
-  std::cout << "[VictoryState] Score text: Score: " << finalScore << std::endl;
+
+  // ✅ CENTER the score
+  sf::FloatRect scoreBounds = scoreText.getLocalBounds();
+  scoreText.setOrigin(scoreBounds.width / 2.f, scoreBounds.height / 2.f);
+  scoreText.setPosition(400.f, 350.f);
+  std::cout << "[VictoryState] Score text: " << finalScore << std::endl;
 
   // Continue instruction (only if not game over)
   continueText.setFont(font);
@@ -74,22 +83,30 @@ void VictoryState::setupTexts() {
     continueText.setString("");
     std::cout << "[VictoryState] Continue text: (empty - game over)" << std::endl;
   } else {
-    continueText.setString("SPACE - Next Level");
-    continueText.setCharacterSize(18);
+    continueText.setString("Press SPACE for Next Level");
+    continueText.setCharacterSize(16);
     continueText.setFillColor(sf::Color::Green);
-    continueText.setPosition(200.f, 450.f);
-    std::cout << "[VictoryState] Continue text: SPACE - Next Level (green)" << std::endl;
+
+    // ✅ CENTER the continue text
+    sf::FloatRect contBounds = continueText.getLocalBounds();
+    continueText.setOrigin(contBounds.width / 2.f, contBounds.height / 2.f);
+    continueText.setPosition(400.f, 450.f);
+    std::cout << "[VictoryState] Continue text: Press SPACE for Next Level" << std::endl;
   }
 
   // Return to menu
   menuText.setFont(font);
-  menuText.setString("M - Menu");
-  menuText.setCharacterSize(18);
+  menuText.setString("Press M for Menu");
+  menuText.setCharacterSize(16);
   menuText.setFillColor(sf::Color::Cyan);
-  menuText.setPosition(300.f, 520.f);
-  std::cout << "[VictoryState] Menu text: M - Menu (cyan)" << std::endl;
 
-  std::cout << "[VictoryState] setupTexts() complete" << std::endl;
+  // ✅ CENTER the menu text
+  sf::FloatRect menuBounds = menuText.getLocalBounds();
+  menuText.setOrigin(menuBounds.width / 2.f, menuBounds.height / 2.f);
+  menuText.setPosition(400.f, 520.f);
+  std::cout << "[VictoryState] Menu text: Press M for Menu" << std::endl;
+
+  std::cout << "[VictoryState] setupTexts() complete - ALL TEXT CENTERED" << std::endl;
 }
 
 void VictoryState::onEnter() {
@@ -116,10 +133,8 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
     if (stateManager) {
       std::cout << "[VictoryState] Starting level " << nextLevel << "..." << std::endl;
 
-      // Pop VictoryState and LevelState, then push new LevelState
-      stateManager->popState();  // Remove VictoryState
-      stateManager->popState();  // Remove old LevelState
-      stateManager->pushState(std::make_unique<LevelState>(nextLevel));
+      // ✅ SAFE: Clear all states and push new level
+      stateManager->clearAndPushState(std::make_unique<LevelState>(nextLevel));
     }
   }
 
@@ -128,18 +143,7 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
     if (stateManager) {
       std::cout << "[VictoryState] Returning to menu..." << std::endl;
 
-      // ✅ Save score before going to menu (if not already saved)
-      if (!isGameOver && finalScore > 0) {
-        Score tempScore;
-        tempScore.loadHighScores();
-
-        if (tempScore.isHighScore(finalScore)) {
-          std::cout << "[VictoryState] Saving high score: " << finalScore << std::endl;
-          tempScore.addHighScore(finalScore);
-        }
-      }
-
-      // Clear all states and push MenuState
+      // Score already saved in constructor - no need to save again
       stateManager->clearAndPushState(std::make_unique<MenuState>());
     }
   }

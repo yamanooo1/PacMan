@@ -66,10 +66,7 @@ void Game::run() {
     window->display();
 
     // Process deferred state changes
-    std::cout << "[GAME] Processing pending state changes..." << std::endl;
     stateManager->processPendingChanges();
-    std::cout << "[GAME] Pending changes complete. States remaining: "
-              << (stateManager->isEmpty() ? 0 : 1) << std::endl;
 
     // ✅ Check again after processing changes
     if (stateManager->isEmpty()) {

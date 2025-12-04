@@ -59,7 +59,12 @@ bool LevelState::loadLevel() {
 }
 
 void LevelState::handleEvents(sf::RenderWindow& window) {
-  // ✅ IMPROVED: Only trigger pause on key press, not while held
+  // ✅ Disable pause if level is cleared
+  if (world && world->isLevelCleared()) {
+    return;  // No pausing during/after level cleared
+  }
+
+  // Only trigger pause on key press, not while held
   static bool escWasPressed = false;
   bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
 
@@ -88,8 +93,24 @@ void LevelState::update(float deltaTime) {
     return;
   }
 
-  if (world->isLevelCleared()) {
-    return;
+  static int frameCount = 0;
+  frameCount++;
+  if (frameCount % 60 == 0) {
+    std::cout << "[DEBUG LevelState] Frame " << frameCount
+              << " | levelCleared=" << world->isLevelCleared()
+              << " | displayActive=" << world->isLevelClearedDisplayActive()
+              << " | readyActive=" << world->isReadyStateActive()
+              << " | deathActive=" << world->isDeathAnimationActive()
+              << std::endl;
+  }
+
+  // ✅ CRITICAL FIX: Update world FIRST (so timer can count down)
+  world->update(deltaTime);
+
+  // Then check if we should freeze other updates
+  if (world->isLevelClearedDisplayActive()) {
+    std::cout << "[DEBUG] Skipping handleInput - level cleared display active!" << std::endl;
+    return;  // Freeze everything else, but world timer already updated
   }
 
   // Handle input (PacMan movement)
@@ -100,10 +121,7 @@ void LevelState::update(float deltaTime) {
   if (score && lives && !lives->isGameOver() &&
       world && !world->isDeathAnimationActive() && !world->isReadyStateActive()) {
     score->updateScoreDecay();
-      }
-
-  // Update world
-  world->update(deltaTime);
+  }
 
   // Check for game over FIRST
   if (lives && lives->isGameOver()) {
@@ -116,12 +134,15 @@ void LevelState::update(float deltaTime) {
   }
 
   // ✅ Check for level complete (only push VictoryState once)
+  // Debug output every frame to see the condition states
+  if (world->isLevelCleared()) {
+    std::cout << "[DEBUG] Level cleared: true, Display active: "
+              << (world->isLevelClearedDisplayActive() ? "true" : "false") << std::endl;
+  }
+
   if (world->isLevelCleared() && !world->isLevelClearedDisplayActive()) {
-    // Check if VictoryState is already on top
-    if (stateManager && stateManager->getCurrentState() == this) {
-      std::cout << "[LevelState] Level complete! Score: " << score->getScore() << std::endl;
-      stateManager->pushState(std::make_unique<VictoryState>(currentLevel + 1, score->getScore()));
-    }
+    std::cout << "[LevelState] ✅ PUSHING VICTORYSTATE now!" << std::endl;
+    stateManager->pushState(std::make_unique<VictoryState>(currentLevel + 1, score->getScore()));
   }
 }
 

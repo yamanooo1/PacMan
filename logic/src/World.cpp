@@ -184,16 +184,16 @@ bool World::loadFromFile(const std::string &filename) {
         createPacMan(x, y);
         break;
       case 'r':
-        createGhost(x, y, GhostType::CHASER, GhostColor::RED, 0.0f);  // ✅ UPDATED
+        createGhost(x, y, GhostType::CHASER, GhostColor::RED, 0.0f);
         break;
       case 'b':
-        createGhost(x, y, GhostType::AMBUSHER, GhostColor::CYAN, 0.0f);  // ✅ UPDATED
+        createGhost(x, y, GhostType::AMBUSHER, GhostColor::CYAN, 0.0f);
         break;
       case 'o':
-        createGhost(x, y, GhostType::CHASER, GhostColor::ORANGE, 5.0f);  // ✅ UPDATED - Orange!
+        createGhost(x, y, GhostType::CHASER, GhostColor::ORANGE, 5.0f);
         break;
       case 'p':
-        createGhost(x, y, GhostType::RANDOM, GhostColor::PINK, 10.0f);  // ✅ UPDATED - Pink!
+        createGhost(x, y, GhostType::RANDOM, GhostColor::PINK, 10.0f);
         break;
       case 'f':
         createFruit(x, y);
@@ -242,25 +242,26 @@ void World::respawnPacManAndGhosts() {
 void World::update(float deltaTime) {
   if (!pacman) return;
 
-  if (levelClearedDisplayActive) {
-    levelClearedDisplayTimer -= deltaTime;
-    if (levelClearedDisplayTimer <= 0.0f) {
-      levelClearedDisplayActive = false;
-      // TODO: Load next level here
-    }
-    return;  // Freeze all game logic during display
-  }
-
-  // ✅ NEW: Handle ready state - freeze game during "READY!"
+  // ✅ Handle ready state FIRST - freeze game during "READY!"
   if (readyStateActive) {
     updateReadyState(deltaTime);
     return;  // Don't update anything else during ready state
   }
 
-  // ✅ NEW: Handle death animation - freeze game during animation
+  // ✅ Handle death animation - freeze game during animation
   if (deathAnimationActive) {
     updateDeathAnimation(deltaTime);
     return;  // Don't update anything else during death animation
+  }
+
+  // ✅ Handle level cleared display - freeze game and count down timer
+  if (levelClearedDisplayActive) {
+    levelClearedDisplayTimer -= deltaTime;
+    if (levelClearedDisplayTimer <= 0.0f) {
+      levelClearedDisplayActive = false;
+      std::cout << "[WORLD] ✅ 3-second timer EXPIRED! Display inactive now." << std::endl;
+    }
+    return;  // Freeze all game logic during display
   }
 
   if (lives && lives->isGameOver()) {
@@ -272,6 +273,17 @@ void World::update(float deltaTime) {
   Direction currentDir = pacman->getDirection();
   Direction desiredDir = pacman->getDesiredDirection();
 
+  static int pacmanFrameCount = 0;
+  pacmanFrameCount++;
+  if (pacmanFrameCount % 60 == 0) {
+    std::cout << "[DEBUG PacMan] Frame " << pacmanFrameCount
+              << " | Pos(" << x << "," << y << ")"
+              << " | CurrentDir=" << static_cast<int>(currentDir)
+              << " | DesiredDir=" << static_cast<int>(desiredDir)
+              << " | Speed=" << pacman->getSpeed()
+              << std::endl;
+  }
+
   float centerX = x + pacman->getWidth() / 2.0f;
   float centerY = y + pacman->getHeight() / 2.0f;
 
@@ -280,105 +292,156 @@ void World::update(float deltaTime) {
   float gridCenterX = currentGridX + 0.5f;
   float gridCenterY = currentGridY + 0.5f;
 
-  const float centerTolerance = 0.05f;
+  // Store previous position for crossing detection
+  static float prevCenterX = centerX;
+  static float prevCenterY = centerY;
+
+  // Check if we're at or crossed the center
+  float speed = pacman->getSpeed();
+  float maxMovePerFrame = speed * deltaTime;
+  const float centerTolerance = std::max(0.15f, maxMovePerFrame * 1.5f);
+
   bool atCenterX = std::abs(centerX - gridCenterX) < centerTolerance;
   bool atCenterY = std::abs(centerY - gridCenterY) < centerTolerance;
-  bool atCenter = atCenterX && atCenterY;
 
-  bool isPerpendicular = false;
-  if (desiredDir != Direction::NONE && desiredDir != currentDir) {
-    if ((currentDir == Direction::UP || currentDir == Direction::DOWN) &&
-        (desiredDir == Direction::LEFT || desiredDir == Direction::RIGHT)) {
-      isPerpendicular = true;
-    } else if ((currentDir == Direction::LEFT || currentDir == Direction::RIGHT) &&
-               (desiredDir == Direction::UP || desiredDir == Direction::DOWN)) {
-      isPerpendicular = true;
+  // Check if we crossed the center line between frames
+  bool crossedCenterX = false;
+  bool crossedCenterY = false;
+
+  if (currentDir == Direction::LEFT || currentDir == Direction::RIGHT) {
+    // Moving horizontally - check if we crossed the vertical center line
+    if ((prevCenterX < gridCenterX && centerX >= gridCenterX) ||
+        (prevCenterX > gridCenterX && centerX <= gridCenterX)) {
+      crossedCenterX = true;
+      atCenterX = true;  // Consider it centered if we crossed
     }
   }
 
-  if (desiredDir != Direction::NONE && desiredDir != currentDir) {
-    if (!isPerpendicular || atCenter) {
-      int desiredGridX = currentGridX;
-      int desiredGridY = currentGridY;
+  if (currentDir == Direction::UP || currentDir == Direction::DOWN) {
+    // Moving vertically - check if we crossed the horizontal center line
+    if ((prevCenterY < gridCenterY && centerY >= gridCenterY) ||
+        (prevCenterY > gridCenterY && centerY <= gridCenterY)) {
+      crossedCenterY = true;
+      atCenterY = true;  // Consider it centered if we crossed
+    }
+  }
 
-      switch (desiredDir) {
-        case Direction::UP:    desiredGridY--; break;
-        case Direction::DOWN:  desiredGridY++; break;
-        case Direction::LEFT:  desiredGridX--; break;
-        case Direction::RIGHT: desiredGridX++; break;
-        case Direction::NONE: break;
+  bool atCenter = atCenterX && atCenterY;
+
+  // Update previous position for next frame
+  prevCenterX = centerX;
+  prevCenterY = centerY;
+
+  // Check desired direction EVERY frame (not just when centered)
+  if (desiredDir != Direction::NONE && desiredDir != currentDir) {
+    int testX = currentGridX;
+    int testY = currentGridY;
+
+    switch (desiredDir) {
+      case Direction::UP:    testY--; break;
+      case Direction::DOWN:  testY++; break;
+      case Direction::LEFT:  testX--; break;
+      case Direction::RIGHT: testX++; break;
+      case Direction::NONE:  break;
+    }
+
+    // Check if the desired path is clear
+    bool pathIsClear = !hasWallInGridCell(testX, testY);
+
+    if (pathIsClear) {
+      // Determine if this is a perpendicular turn
+      bool isPerpendicular = false;
+      if ((currentDir == Direction::UP || currentDir == Direction::DOWN) &&
+          (desiredDir == Direction::LEFT || desiredDir == Direction::RIGHT)) {
+        isPerpendicular = true;
+      }
+      else if ((currentDir == Direction::LEFT || currentDir == Direction::RIGHT) &&
+               (desiredDir == Direction::UP || desiredDir == Direction::DOWN)) {
+        isPerpendicular = true;
       }
 
-      bool wallInDesiredDirection = hasWallInGridCell(desiredGridX, desiredGridY);
+      // Decide if we can turn now
+      bool canTurn = false;
 
-      if (!wallInDesiredDirection) {
-        if (isPerpendicular && atCenter) {
-          float exactCenterX = currentGridX + 0.5f;
-          float exactCenterY = currentGridY + 0.5f;
-          float exactX = exactCenterX - pacman->getWidth() / 2.0f;
-          float exactY = exactCenterY - pacman->getHeight() / 2.0f;
-          pacman->setPosition(exactX, exactY);
-        }
+      if (currentDir == Direction::NONE) {
+        // Starting from stopped - can always turn
+        canTurn = true;
+      }
+      else if (!isPerpendicular) {
+        // Opposite direction (180° turn) - turn immediately
+        canTurn = true;
+      }
+      else if (atCenter) {
+        // Perpendicular turn - only when centered to avoid corner cutting
+        canTurn = true;
+      }
 
-        pacman->executeTurn();
-        pacman->notifyDirectionChange();
+      if (canTurn) {
+        // Snap to grid center when turning to ensure perfect centering
+        float newX = gridCenterX - pacman->getWidth() / 2.0f;
+        float newY = gridCenterY - pacman->getHeight() / 2.0f;
+        pacman->setPosition(newX, newY);
+
+        pacman->setDirection(desiredDir);
         currentDir = desiredDir;
       }
     }
   }
 
-  int nextGridX = currentGridX;
-  int nextGridY = currentGridY;
+  // Check for walls ahead in current direction
+  int testX = currentGridX;
+  int testY = currentGridY;
 
   switch (currentDir) {
-    case Direction::UP:    nextGridY--; break;
-    case Direction::DOWN:  nextGridY++; break;
-    case Direction::LEFT:  nextGridX--; break;
-    case Direction::RIGHT: nextGridX++; break;
-    case Direction::NONE: break;
+    case Direction::UP:    testY--; break;
+    case Direction::DOWN:  testY++; break;
+    case Direction::LEFT:  testX--; break;
+    case Direction::RIGHT: testX++; break;
+    case Direction::NONE:  break;
   }
 
-  bool wallAhead = hasWallInGridCell(nextGridX, nextGridY);
+  if (hasWallInGridCell(testX, testY)) {
+    // Check if Pac-Man's edge would collide with the wall
+    float halfWidth = pacman->getWidth() / 2.0f;
+    float halfHeight = pacman->getHeight() / 2.0f;
+    bool shouldStop = false;
 
-  if (wallAhead) {
-    float targetCenterX = currentGridX + 0.5f;
-    float targetCenterY = currentGridY + 0.5f;
-
-    bool atTargetCenter = (std::abs(centerX - targetCenterX) < 0.01f &&
-                           std::abs(centerY - targetCenterY) < 0.01f);
-
-    if (!atTargetCenter) {
-      float speed = pacman->getSpeed();
-      float moveDistance = speed * deltaTime;
-      float newCenterX = centerX;
-      float newCenterY = centerY;
-
-      switch (currentDir) {
-        case Direction::UP:
-          newCenterY = std::max(centerY - moveDistance, targetCenterY);
-          break;
-        case Direction::DOWN:
-          newCenterY = std::min(centerY + moveDistance, targetCenterY);
-          break;
-        case Direction::LEFT:
-          newCenterX = std::max(centerX - moveDistance, targetCenterX);
-          break;
-        case Direction::RIGHT:
-          newCenterX = std::min(centerX + moveDistance, targetCenterX);
-          break;
-        case Direction::NONE:
-          break;
-      }
-
-      float newX = newCenterX - pacman->getWidth() / 2.0f;
-      float newY = newCenterY - pacman->getHeight() / 2.0f;
-      pacman->setPosition(newX, newY);
+    switch (currentDir) {
+      case Direction::LEFT:
+        // Wall is to the left, stop if left edge would cross the boundary
+        if (centerX <= (testX + 1.0f) + halfWidth) {
+          shouldStop = true;
+        }
+        break;
+      case Direction::RIGHT:
+        // Wall is to the right, stop if right edge would cross the boundary
+        if (centerX >= testX - halfWidth) {
+          shouldStop = true;
+        }
+        break;
+      case Direction::UP:
+        // Wall is above, stop if top edge would cross the boundary
+        if (centerY <= (testY + 1.0f) + halfHeight) {
+          shouldStop = true;
+        }
+        break;
+      case Direction::DOWN:
+        // Wall is below, stop if bottom edge would cross the boundary
+        if (centerY >= testY - halfHeight) {
+          shouldStop = true;
+        }
+        break;
+      case Direction::NONE:
+        break;
     }
 
-    pacman->update(deltaTime, false);
-  } else {
-    pacman->update(deltaTime, true);
+    if (shouldStop) {
+      pacman->setDirection(Direction::NONE);
+    }
   }
+
+  // Normal movement - no special sliding logic
+  pacman->update(deltaTime, true);
 
   updateGhosts(deltaTime);
   updateFearMode(deltaTime);
@@ -495,7 +558,7 @@ void World::checkCollisions() {
   if (pacmanDied && lives) {
     pacman->die();
 
-    // ✅ ADD THIS - Deactivate fear mode immediately when PacMan dies
+    // ✅ Deactivate fear mode immediately when PacMan dies
     if (fearModeActive) {
       fearModeActive = false;
       fearModeTimer = 0.0f;
@@ -546,11 +609,10 @@ void World::updateFearMode(float deltaTime) {
   fearModeTimer -= deltaTime;
 
   // ✅ Notify ALL ghosts when fear mode is ending (last 2 seconds)
-  // This includes ghosts waiting in spawn
   if (fearModeTimer <= 2.0f && fearModeTimer > 0.0f) {
     for (Ghost* ghost : ghosts) {
       if (ghost) {
-        ghost->setFearModeEnding(true);  // ✅ REMOVED the isInFearMode() check
+        ghost->setFearModeEnding(true);
       }
     }
   }
@@ -566,7 +628,7 @@ void World::updateFearMode(float deltaTime) {
     }
   }
 }
-// ✅ NEW: Start death animation
+
 void World::startDeathAnimation() {
   deathAnimationActive = true;
   deathAnimationTimer = deathAnimationDuration;
@@ -574,7 +636,6 @@ void World::startDeathAnimation() {
   std::cout << "[WORLD] Death animation started (" << deathAnimationDuration << " seconds)" << std::endl;
 }
 
-// ✅ NEW: Update death animation timer
 void World::updateDeathAnimation(float deltaTime) {
   if (!deathAnimationActive) return;
 
@@ -588,7 +649,7 @@ void World::updateDeathAnimation(float deltaTime) {
     // Respawn everything
     respawnPacManAndGhosts();
 
-    // ✅ NEW: Start ready state after respawn
+    // ✅ Start ready state after respawn
     startReadyState();
   }
 }
@@ -635,8 +696,8 @@ void World::checkLevelComplete() {
 
   if (remainingCollectables == 0) {
     levelCleared = true;
-    levelClearedDisplayActive = true;  // ✅ ADD THIS
-    levelClearedDisplayTimer = levelClearedDisplayDuration;  // ✅ ADD THIS
+    levelClearedDisplayActive = true;
+    levelClearedDisplayTimer = levelClearedDisplayDuration;
 
     std::cout << "\n========================================" << std::endl;
     std::cout << "       🎉 LEVEL CLEARED! 🎉" << std::endl;
