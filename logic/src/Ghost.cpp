@@ -10,17 +10,17 @@
 #include <iostream>
 #include <vector>
 
-Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime)
+Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime, float speedMultiplier)
     : EntityModel(x, y, 0.8f, 0.8f)
     , type(t)
     , color(c)
     , state(GhostState::WAITING)
     , waitTimer(waitTime)
     , originalWaitTime(waitTime)
-    , speed(2.5f)
+    , speed(2.5f * speedMultiplier)
     , lastDecisionGridX(-999)
     , lastDecisionGridY(-999)
-    , normalSpeed(2.5f)
+    , normalSpeed(2.5f * speedMultiplier)
     , fearSpeed(1.5f)
     , hasLeftSpawn(false)
     , fearModeEnding(false)

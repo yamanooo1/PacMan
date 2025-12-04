@@ -57,7 +57,7 @@ private:
   bool isInSpawnArea(int gridX, int gridY) const;
 
 public:
-  Ghost(float x, float y, GhostType t, GhostColor c, float waitTime);
+  Ghost(float x, float y, GhostType t, GhostColor c, float waitTime, float speedMultiplier = 1.0f);
   ~Ghost() override = default;
 
   GhostType getType() const { return type; }

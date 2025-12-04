@@ -60,6 +60,44 @@ void MenuState::setupTexts() {
 
 void MenuState::onEnter() {
   std::cout << "[MenuState] Entered menu state" << std::endl;
+
+  // ✅ Load high scores ONCE when entering menu
+  Score tempScore;
+  tempScore.loadHighScores();
+  highScores = tempScore.getHighScores();
+
+  // ✅ Create score texts
+  scoreTexts.clear();
+  float yPosition = 500.f;
+
+  for (size_t i = 0; i < highScores.size(); ++i) {
+    sf::Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setString(std::to_string(i + 1) + ".  " + std::to_string(highScores[i]));
+    scoreText.setCharacterSize(16);
+    scoreText.setFillColor(sf::Color::White);
+
+    sf::FloatRect bounds = scoreText.getLocalBounds();
+    scoreText.setPosition((800.f - bounds.width) / 2.f, yPosition);
+
+    scoreTexts.push_back(scoreText);
+    yPosition += 35.f;
+  }
+
+  // Add empty slots
+  for (size_t i = highScores.size(); i < 5; ++i) {
+    sf::Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setString(std::to_string(i + 1) + ".  ---");
+    scoreText.setCharacterSize(16);
+    scoreText.setFillColor(sf::Color(100, 100, 100));
+
+    sf::FloatRect bounds = scoreText.getLocalBounds();
+    scoreText.setPosition((800.f - bounds.width) / 2.f, yPosition);
+
+    scoreTexts.push_back(scoreText);
+    yPosition += 35.f;
+  }
 }
 
 void MenuState::onExit() {
@@ -106,38 +144,8 @@ void MenuState::render(sf::RenderWindow& window) {
   window.draw(instructionsText);
   window.draw(leaderboardTitle);
 
-  // ✅ NEW: Draw leaderboard scores
-  Score tempScore;  // Temporary score object just to load high scores
-  tempScore.loadHighScores();
-  std::vector<int> scores = tempScore.getHighScores();
-
-  float yPosition = 500.f;
-  for (size_t i = 0; i < scores.size(); ++i) {
-    sf::Text scoreText;
-    scoreText.setFont(font);
-    scoreText.setString(std::to_string(i + 1) + ".  " + std::to_string(scores[i]));
-    scoreText.setCharacterSize(16);
-    scoreText.setFillColor(sf::Color::White);
-
-    sf::FloatRect bounds = scoreText.getLocalBounds();
-    scoreText.setPosition((800.f - bounds.width) / 2.f, yPosition);
-
+  // ✅ Draw pre-loaded score texts (no file I/O every frame!)
+  for (const auto& scoreText : scoreTexts) {
     window.draw(scoreText);
-    yPosition += 35.f;
-  }
-
-  // If less than 5 scores, show empty slots
-  for (size_t i = scores.size(); i < 5; ++i) {
-    sf::Text scoreText;
-    scoreText.setFont(font);
-    scoreText.setString(std::to_string(i + 1) + ".  ---");
-    scoreText.setCharacterSize(16);
-    scoreText.setFillColor(sf::Color(100, 100, 100));  // Gray
-
-    sf::FloatRect bounds = scoreText.getLocalBounds();
-    scoreText.setPosition((800.f - bounds.width) / 2.f, yPosition);
-
-    window.draw(scoreText);
-    yPosition += 35.f;
   }
 }

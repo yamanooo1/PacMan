@@ -11,6 +11,7 @@
 #include "logic/PacMan.h"
 #include <iostream>
 
+
 LevelState::~LevelState() = default;
 
 LevelState::LevelState(int level)
@@ -87,6 +88,10 @@ void LevelState::update(float deltaTime) {
     return;
   }
 
+  if (world->isLevelCleared()) {
+    return;
+  }
+
   // Handle input (PacMan movement)
   handleInput();
 
@@ -110,11 +115,11 @@ void LevelState::update(float deltaTime) {
     return;
   }
 
-  // Check for level complete
+  // ✅ Check for level complete (only push VictoryState once)
   if (world->isLevelCleared() && !world->isLevelClearedDisplayActive()) {
-    std::cout << "[LevelState] Level complete! Score: " << score->getScore() << std::endl;
-
-    if (stateManager) {
+    // Check if VictoryState is already on top
+    if (stateManager && stateManager->getCurrentState() == this) {
+      std::cout << "[LevelState] Level complete! Score: " << score->getScore() << std::endl;
       stateManager->pushState(std::make_unique<VictoryState>(currentLevel + 1, score->getScore()));
     }
   }
@@ -136,7 +141,7 @@ void LevelState::render(sf::RenderWindow& window) {
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
     // Create world
-    world = std::make_unique<World>(factory.get());
+    world = std::make_unique<World>(factory.get(), currentLevel);
     world->setScore(score.get());
     world->setLives(lives.get());
 
@@ -162,7 +167,7 @@ void LevelState::render(sf::RenderWindow& window) {
   // Update animations and draw
   factory->updateAll();
   factory->drawAll();
-  hud->draw(world.get(), score.get(), lives.get());
+  hud->draw(world.get(), score.get(), lives.get(), currentLevel);
   hud->drawReadyText(world.get());
   hud->drawLevelClearedText(world.get());
 }

@@ -15,21 +15,15 @@ class HUD;
 
 class LevelState : public State {
 private:
-  // Rendering
-  std::unique_ptr<Camera> camera;
-  std::unique_ptr<ConcreteFactory> factory;
-  std::unique_ptr<HUD> hud;
+  std::unique_ptr<Lives> lives;            // Destroyed LAST
+  std::unique_ptr<Score> score;            // ↑
+  std::unique_ptr<Camera> camera;          // ↑
+  std::unique_ptr<HUD> hud;                // ↑
+  std::unique_ptr<World> world;            // ↑ Destroyed 2nd
+  std::unique_ptr<ConcreteFactory> factory; // Destroyed FIRST ✅
 
-  // Game logic
-  std::unique_ptr<World> world;
-  std::unique_ptr<Score> score;
-  std::unique_ptr<Lives> lives;
-
-  // Level management
   int currentLevel;
   std::string mapFile;
-  
-  // Paused flag (for internal state, ESC key handling)
   bool pauseRequested;
 
 public:

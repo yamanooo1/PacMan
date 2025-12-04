@@ -16,9 +16,12 @@
 #include <iostream>
 #include <cmath>
 
-World::World(AbstractFactory *f)
+World::World(AbstractFactory *f, int level)
     : mapWidth(0)
     , mapHeight(0)
+    , currentLevel(level)
+    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.05f)  // ✅ 5% faster per level
+    , fearDurationMultiplier(1.0f - (level - 1) * 0.05f)  // ✅ 5% shorter per level
     , factory(f)
     , pacman(nullptr)
     , score(nullptr)
@@ -27,7 +30,7 @@ World::World(AbstractFactory *f)
     , pacmanSpawnY(0.0f)
     , fearModeActive(false)
     , fearModeTimer(0.0f)
-    , fearModeDuration(7.0f)
+    , fearModeDuration(7.0f * fearDurationMultiplier)  // ✅ Apply multiplier
     , deathAnimationActive(false)
     , deathAnimationTimer(0.0f)
     , deathAnimationDuration(2.0f)
@@ -35,10 +38,14 @@ World::World(AbstractFactory *f)
     , readyStateTimer(0.0f)
     , readyStateDuration(2.0f)
     , levelCleared(false)
-    , levelClearedDisplayActive(false)  // ✅ ADD
-    , levelClearedDisplayTimer(0.0f)     // ✅ ADD
-    , levelClearedDisplayDuration(3.0f)  // ✅ ADD - 3 seconds display
-{}
+    , levelClearedDisplayActive(false)
+    , levelClearedDisplayTimer(0.0f)
+    , levelClearedDisplayDuration(3.0f)
+{
+  std::cout << "[WORLD] Level " << currentLevel
+            << " - Ghost speed: x" << ghostSpeedMultiplier
+            << " Fear duration: x" << fearDurationMultiplier << std::endl;
+}
 
 void World::startReadyState() {
   readyStateActive = true;
@@ -86,7 +93,7 @@ void World::createPacMan(float x, float y) {
 }
 
 void World::createGhost(float x, float y, GhostType type, GhostColor color, float waitTime) {
-  auto ghost = factory->createGhost(x, y, type, color, waitTime);  // ✅ UPDATED
+  auto ghost = factory->createGhost(x, y, type, color, waitTime, ghostSpeedMultiplier);  // ✅ Pass multiplier
   Ghost* ghostPtr = ghost.get();
 
   float centeredX = x + (1.0f - ghost->getWidth()) / 2.0f;
@@ -524,8 +531,8 @@ void World::activateFearMode() {
   fearModeActive = true;
   fearModeTimer = fearModeDuration;
 
-  std::cout << "[WORLD] Fear mode activated for " << fearModeDuration << " seconds!" << std::endl;
-
+  std::cout << "[WORLD] Fear mode activated for " << fearModeDuration
+              << " seconds (level " << currentLevel << ")!" << std::endl;
   for (Ghost* ghost : ghosts) {
     if (ghost) {
       ghost->enterFearMode();

@@ -12,7 +12,10 @@ private:
   sf::Text playText;
   sf::Text instructionsText;
   sf::Text leaderboardTitle;
-  // TODO: Add leaderboard scores display later
+
+  // ✅ NEW: Store high scores and score texts
+  std::vector<int> highScores;
+  std::vector<sf::Text> scoreTexts;
 
   bool fontLoaded;
 

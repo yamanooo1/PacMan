@@ -23,6 +23,11 @@ private:
   int mapWidth;
   int mapHeight;
 
+  // ✅ NEW: Level difficulty scaling
+  int currentLevel;
+  float ghostSpeedMultiplier;
+  float fearDurationMultiplier;
+
   AbstractFactory* factory;
   PacMan* pacman;
   Score* score;
@@ -53,7 +58,7 @@ private:
   float levelClearedDisplayDuration;
 
 public:
-  explicit World(AbstractFactory* f);
+  explicit World(AbstractFactory* f, int level = 1);
 
   void setMapDimensions(int w, int h);
   void setScore(Score* s) { score = s; }
@@ -92,6 +97,8 @@ public:
 
   // Fear mode methods
   void activateFearMode();
+  float getGhostSpeedMultiplier() const { return ghostSpeedMultiplier; }  // ✅ NEW
+
   void updateFearMode(float deltaTime);
   bool isFearModeEnding() const { return fearModeActive && fearModeTimer <= 2.0f; }
 

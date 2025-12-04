@@ -21,7 +21,7 @@ void HUD::loadFont(const std::string& fontPath) {
     }
 }
 
-void HUD::draw(World* world, Score* score, Lives* lives) {
+void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
     if (!window || !score || !lives) return;
 
     // Calculate HUD position dynamically based on current window size
@@ -63,6 +63,19 @@ void HUD::draw(World* world, Score* score, Lives* lives) {
     sf::FloatRect textBounds = livesText.getLocalBounds();
     livesText.setPosition(window->getSize().x - textBounds.width - 20.f, hudYPosition + 20.f);
     window->draw(livesText);
+
+  // Draw level indicator (centered)
+  sf::Text levelText;
+  levelText.setFont(font);
+  levelText.setString("LEVEL " + std::to_string(currentLevel));
+  levelText.setCharacterSize(20);
+  levelText.setFillColor(sf::Color::Yellow);
+
+  // Center the level text
+  sf::FloatRect levelBounds = levelText.getLocalBounds();
+  float centerX = (window->getSize().x - levelBounds.width) / 2.f;
+  levelText.setPosition(centerX, hudYPosition + 20.f);
+  window->draw(levelText);
 }
 
 void HUD::drawReadyText(World* world) {

@@ -14,7 +14,7 @@ public:
   HUD(sf::RenderWindow* window, int hudHeight);
 
   void loadFont(const std::string& fontPath);
-  void draw(World* world, Score* score, Lives* lives);
+  void draw(World* world, Score* score, Lives* lives, int currentLevel);
   void drawReadyText(World* world);  // ✅ ADD THIS
   void drawLevelClearedText(World* world);
 
