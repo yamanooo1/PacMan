@@ -19,11 +19,15 @@ private:
 
 public:
   PacMan(float x, float y)
-      : EntityModel(x, y, 0.8f, 0.8f)
-      , speed(10.0f)
-      , desiredDirection(Direction::LEFT)
-      , spawnX(x)
-      , spawnY(y) {}
+    : EntityModel(x, y, 0.8f, 0.8f)
+    , speed(4.0f)
+    , desiredDirection(Direction::LEFT)  // ✅ Changed from LEFT to NONE
+    , spawnX(x)
+    , spawnY(y)
+  {
+    // ✅ Set initial direction to LEFT (not NONE)
+    setDirection(Direction::LEFT);
+  }
 
   ~PacMan() override = default;
 

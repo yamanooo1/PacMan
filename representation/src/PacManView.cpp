@@ -52,6 +52,7 @@ void PacManView::update(GameEvent event) {
 }
 
 // ✅ Update animation every frame (separate from events)
+// ✅ Update animation every frame (separate from events)
 void PacManView::updateAnimation(float deltaTime) {
   // Update death animation
   if (playingDeathAnimation) {
@@ -71,14 +72,31 @@ void PacManView::updateAnimation(float deltaTime) {
     return;  // Don't update mouth animation during death
   }
 
-  // Update mouth animation (only when moving)
-  if (model && model->getDirection() != Direction::NONE) {
-    animationTimer += deltaTime;
+  // ✅ FIX: Only animate if position actually changed (detect movement)
+  if (model) {
+    static float prevX = 0.0f;
+    static float prevY = 0.0f;
 
-    if (animationTimer >= frameDuration) {
-      animationTimer = 0.0f;
-      currentMouthFrame = (currentMouthFrame + 1) % 3;
+    auto [currentX, currentY] = model->getPosition();
+    bool actuallyMoving = (std::abs(currentX - prevX) > 0.001f ||
+                           std::abs(currentY - prevY) > 0.001f);
+
+    if (actuallyMoving && model->getDirection() != Direction::NONE) {
+      // PacMan is moving - animate mouth
+      animationTimer += deltaTime;
+
+      if (animationTimer >= frameDuration) {
+        animationTimer = 0.0f;
+        currentMouthFrame = (currentMouthFrame + 1) % 3;
+      }
+    } else {
+      // PacMan is stationary (ready state, stopped, etc.) - show closed mouth
+      currentMouthFrame = 0;
     }
+
+    // Update previous position for next frame
+    prevX = currentX;
+    prevY = currentY;
   } else {
     currentMouthFrame = 0;
   }

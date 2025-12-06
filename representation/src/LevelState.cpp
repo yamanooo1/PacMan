@@ -121,6 +121,7 @@ void LevelState::update(float deltaTime) {
     return;  // Freeze everything else, but world timer already updated
   }
 
+
   // Handle input (PacMan movement)
   handleInput();
 
