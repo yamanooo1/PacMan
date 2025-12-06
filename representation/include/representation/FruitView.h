@@ -1,5 +1,5 @@
 //
-// FruitView.h - UPDATED constructor
+// FruitView.h - UPDATED with window reference
 //
 
 #ifndef PACMAN_FRUITVIEW_H
@@ -11,12 +11,12 @@
 
 class FruitView: public EntityView {
 private:
-  sf::RenderWindow* window;
+  // ✅ REMOVED: sf::RenderWindow* window;
   sf::CircleShape shape;
 
 public:
-  FruitView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
-            std::shared_ptr<SpriteAtlas> atlas);  // ✅ UPDATED
+  FruitView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
+            std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent) override;
   void draw() override;

@@ -1,5 +1,5 @@
 //
-// CoinView.cpp - SAFER VERSION with error checking
+// CoinView.cpp - UPDATED with window reference
 //
 
 #include "representation/CoinView.h"
@@ -7,10 +7,9 @@
 #include "representation/SpriteAtlas.h"
 #include <iostream>
 
-CoinView::CoinView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
+CoinView::CoinView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
                    std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, cam, atlas)
-    , window(win)
+    : EntityView(model, win, cam, atlas)  // ✅ Pass to base
 {
   shape.setRadius(5.f);
   shape.setFillColor(sf::Color::White);
@@ -19,14 +18,13 @@ CoinView::CoinView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Ca
 void CoinView::update(GameEvent event) {}
 
 void CoinView::draw() {
-  if (!model || !window || !camera) return;
+  if (!model || !camera) return;
   if (model->isDead()) return;
 
   auto [x, y] = model->getPosition();
   float screenX = camera->gridToScreenX(x);
   float screenY = camera->gridToScreenY(y);
 
-  // ✅ Try to use sprite with better error checking
   if (spriteAtlas) {
     std::shared_ptr<sf::Texture> texture = spriteAtlas->getTexture();
 
@@ -38,12 +36,10 @@ void CoinView::draw() {
         sf::IntRect rect = spriteAtlas->getCoinSprite();
         sprite.setTextureRect(rect);
 
-        // Get sprite size
         float spriteWidth = static_cast<float>(rect.width);
         float spriteHeight = static_cast<float>(rect.height);
 
         if (spriteWidth > 0 && spriteHeight > 0) {
-          // Calculate scale
           float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
           float desiredSize = gridCellSize * 0.4f;
 
@@ -54,8 +50,8 @@ void CoinView::draw() {
           sprite.setOrigin(spriteWidth / 2.f, spriteHeight / 2.f);
           sprite.setPosition(screenX, screenY);
 
-          window->draw(sprite);
-          return;  // Successfully drew sprite, exit
+          window.draw(sprite);  // ✅ CHANGED
+          return;
         }
       } catch (const std::exception& e) {
         std::cerr << "[COIN] Error drawing sprite: " << e.what() << std::endl;
@@ -63,7 +59,7 @@ void CoinView::draw() {
     }
   }
 
-  // Fallback: use circle shape
+  // Fallback
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.3f;
   float radius = desiredSize / 2.f;
@@ -72,5 +68,5 @@ void CoinView::draw() {
   shape.setOrigin(radius, radius);
   shape.setPosition(screenX, screenY);
 
-  window->draw(shape);
+  window.draw(shape);  // ✅ CHANGED
 }

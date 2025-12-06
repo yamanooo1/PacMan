@@ -1,5 +1,5 @@
 //
-// ConcreteFactory.h - UPDATED with shared_ptr<Camera>
+// ConcreteFactory.h - UPDATED with window reference
 //
 
 #ifndef PACMAN_CONCRETEFACTORY_H
@@ -16,18 +16,17 @@ class SpriteAtlas;
 
 class ConcreteFactory: public AbstractFactory {
 private:
-  sf::RenderWindow* window;  // ✅ Will fix in Phase 2
-  std::shared_ptr<Camera> camera;  // ✅ CHANGED from Camera*
+  sf::RenderWindow& window;  // ✅ CHANGED to reference
+  std::shared_ptr<Camera> camera;
   std::shared_ptr<SpriteAtlas> spriteAtlas;
   std::vector<std::unique_ptr<EntityView>> views;
 
 public:
-  explicit ConcreteFactory(sf::RenderWindow* win, std::shared_ptr<Camera> cam);  // ✅ CHANGED parameter
+  explicit ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam);  // ✅ Reference
   ~ConcreteFactory() override;
 
   bool loadSprites(const std::string& filepath);
 
-  // Factory methods (from AbstractFactory)
   std::unique_ptr<PacMan> createPacMan(float x, float y) override;
   std::unique_ptr<Ghost> createGhost(float x, float y, GhostType type, GhostColor color, float waitTime, float speedMultiplier = 1.0f) override;
   std::unique_ptr<Wall> createWall(float x, float y, float w, float h) override;

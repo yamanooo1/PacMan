@@ -40,18 +40,14 @@ void LevelState::onExit() {
 bool LevelState::loadLevel() {
   std::cout << "[LevelState] Loading level " << currentLevel << "..." << std::endl;
 
-  // Create camera (game area: 800x800, HUD: 60px)
   int gameHeight = 800;
   int hudHeight = 60;
-  camera = std::make_unique<Camera>(800, gameHeight, 10, 10);
+  camera = std::make_shared<Camera>(800, gameHeight, 10, 10);
   std::cout << "[LevelState] ✅ Camera created" << std::endl;
 
-  // Create HUD
-  hud = std::make_unique<HUD>(nullptr, hudHeight);
-  hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
-  std::cout << "[LevelState] ✅ HUD created" << std::endl;
+  // ✅ DON'T create HUD here - we don't have window reference yet
+  // It will be created in render()
 
-  // Create score and lives
   std::cout << "[LevelState] Creating Score with initialScore: " << initialScore << std::endl;
   score = std::make_unique<Score>();
   std::cout << "[LevelState] ✅ Score created" << std::endl;
@@ -160,7 +156,7 @@ void LevelState::update(float deltaTime) {
 void LevelState::render(sf::RenderWindow& window) {
   // Lazy initialization of factory and world (need window reference)
   if (!factory) {
-    factory = std::make_unique<ConcreteFactory>(&window, camera);
+    factory = std::make_unique<ConcreteFactory>(window, camera);
 
     // Load sprites
     if (!factory->loadSprites("../../resources/sprites/spritemap.png")) {
@@ -169,7 +165,7 @@ void LevelState::render(sf::RenderWindow& window) {
     }
 
     // Update HUD window reference
-    hud = std::make_unique<HUD>(&window, 60);
+    hud = std::make_unique<HUD>(window, 60);
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
     // Create world

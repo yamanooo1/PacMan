@@ -6,27 +6,23 @@
 #include "logic/Stopwatch.h"
 #include <iostream>
 
-GhostView::GhostView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
+GhostView::GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
                      std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, cam, atlas)
-    , window(win)
+    : EntityView(model, win, cam, atlas)  // ✅ Pass to base
     , spriteType(SpriteGhostType::RED)
     , animationTimer(0.0f)
     , currentFrame(0)
     , frameDuration(0.15f)
-    , flashTimer(0.0f)      // ✅ NEW
-    , showWhite(false)      // ✅ NEW
+    , flashTimer(0.0f)
+    , showWhite(false)
 {
   shape.setRadius(20.f);
   shape.setFillColor(sf::Color::Red);
 }
 
-void GhostView::update(GameEvent event) {
-  // Empty - we use updateAnimation instead
-}
+void GhostView::update(GameEvent event) {}
 
 void GhostView::updateAnimation(float deltaTime) {
-  // Update walking animation timer
   animationTimer += deltaTime;
 
   if (animationTimer >= frameDuration) {
@@ -34,7 +30,6 @@ void GhostView::updateAnimation(float deltaTime) {
     currentFrame = (currentFrame + 1) % 2;
   }
 
-  // ✅ Flash when fear mode is ending OR when waiting to enter fear mode
   Ghost* ghost = static_cast<Ghost*>(model);
   if (ghost && ghost->shouldShowFearMode() && ghost->isFearModeEnding()) {
     flashTimer += deltaTime;
@@ -50,7 +45,7 @@ void GhostView::updateAnimation(float deltaTime) {
 }
 
 void GhostView::draw() {
-  if (!model || !window || !camera) return;
+  if (!model || !camera) return;  // ✅ window always valid
 
   auto [x, y] = model->getPosition();
   float centerX = x + model->getWidth() / 2.0f;
@@ -59,7 +54,7 @@ void GhostView::draw() {
   float screenY = camera->gridToScreenY(centerY);
 
   Ghost* ghost = static_cast<Ghost*>(model);
-  bool shouldShowFear = (ghost && ghost->shouldShowFearMode());  // ✅ CHANGED
+  bool shouldShowFear = (ghost && ghost->shouldShowFearMode());
 
   if (spriteAtlas) {
     std::shared_ptr<sf::Texture> texture = spriteAtlas->getTexture();
@@ -100,7 +95,7 @@ void GhostView::draw() {
           sprite.setOrigin(spriteWidth / 2.f, spriteHeight / 2.f);
           sprite.setPosition(screenX, screenY);
 
-          window->draw(sprite);
+          window.draw(sprite);  // ✅ CHANGED
           return;
         }
       } catch (const std::exception& e) {
@@ -109,7 +104,7 @@ void GhostView::draw() {
     }
   }
 
-  // Fallback: use circle shape
+  // Fallback
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.8f;
   float radius = desiredSize / 2.f;
@@ -123,6 +118,6 @@ void GhostView::draw() {
     shape.setFillColor(sf::Color::Blue);
   }
 
-  window->draw(shape);
+  window.draw(shape);  // ✅ CHANGED
   shape.setFillColor(originalColor);
 }

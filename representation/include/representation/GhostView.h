@@ -1,5 +1,5 @@
 //
-// GhostView.h - WITH ANIMATION SUPPORT
+// GhostView.h - UPDATED with window reference
 //
 
 #ifndef PACMAN_GHOSTVIEW_H
@@ -12,21 +12,19 @@
 
 class GhostView: public EntityView {
 private:
-  sf::RenderWindow* window;
+  // ✅ REMOVED: sf::RenderWindow* window;
   sf::CircleShape shape;
   SpriteGhostType spriteType;
 
-  // Animation state
   float animationTimer;
-  int currentFrame;  // 0 or 1 (for FRAME_1 or FRAME_2)
+  int currentFrame;
   float frameDuration;
 
-  // ✅ ADD THESE
   float flashTimer;
   bool showWhite;
 
 public:
-  GhostView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
+  GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
             std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent) override;

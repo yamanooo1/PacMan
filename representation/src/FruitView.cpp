@@ -1,5 +1,5 @@
 //
-// FruitView.cpp - SAFER VERSION with error checking
+// FruitView.cpp - UPDATED with window reference
 //
 
 #include "representation/FruitView.h"
@@ -7,10 +7,9 @@
 #include "representation/SpriteAtlas.h"
 #include <iostream>
 
-FruitView::FruitView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
+FruitView::FruitView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
                      std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, cam, atlas)
-    , window(win)
+    : EntityView(model, win, cam, atlas)  // ✅ Pass to base
 {
   shape.setRadius(8.f);
   shape.setFillColor(sf::Color::Green);
@@ -19,14 +18,13 @@ FruitView::FruitView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<
 void FruitView::update(GameEvent event) {}
 
 void FruitView::draw() {
-  if (!model || !window || !camera) return;
+  if (!model || !camera) return;
   if (model->isDead()) return;
 
   auto [x, y] = model->getPosition();
   float screenX = camera->gridToScreenX(x);
   float screenY = camera->gridToScreenY(y);
 
-  // ✅ Try to use sprite with better error checking
   if (spriteAtlas) {
     std::shared_ptr<sf::Texture> texture = spriteAtlas->getTexture();
 
@@ -52,8 +50,8 @@ void FruitView::draw() {
           sprite.setOrigin(spriteWidth / 2.f, spriteHeight / 2.f);
           sprite.setPosition(screenX, screenY);
 
-          window->draw(sprite);
-          return;  // Successfully drew sprite
+          window.draw(sprite);  // ✅ CHANGED
+          return;
         }
       } catch (const std::exception& e) {
         std::cerr << "[FRUIT] Error drawing sprite: " << e.what() << std::endl;
@@ -61,7 +59,7 @@ void FruitView::draw() {
     }
   }
 
-  // Fallback: use circle shape
+  // Fallback
   float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
   float desiredSize = gridCellSize * 0.5f;
   float radius = desiredSize / 2.f;
@@ -70,5 +68,5 @@ void FruitView::draw() {
   shape.setOrigin(radius, radius);
   shape.setPosition(screenX, screenY);
 
-  window->draw(shape);
+  window.draw(shape);  // ✅ CHANGED
 }

@@ -1,5 +1,5 @@
 //
-// EntityView.h - FIXED with shared_ptr<Camera>
+// EntityView.h - UPDATED with window reference
 //
 
 #ifndef PACMAN_ENTITYVIEW_H
@@ -7,6 +7,7 @@
 
 #include "logic/EntityModel.h"
 #include "logic/Observer.h"
+#include <SFML/Graphics.hpp>
 #include <memory>
 
 class Camera;
@@ -14,8 +15,8 @@ class SpriteAtlas;
 
 class EntityView: public Observer {
 public:
-  explicit EntityView(EntityModel* m, std::shared_ptr<Camera> cam, std::shared_ptr<SpriteAtlas> atlas)
-      : model(m), camera(cam), spriteAtlas(atlas) {
+  explicit EntityView(EntityModel* m, sf::RenderWindow& win, std::shared_ptr<Camera> cam, std::shared_ptr<SpriteAtlas> atlas)
+      : model(m), window(win), camera(cam), spriteAtlas(atlas) {  // ✅ ADDED window
     if (model) model->attach(this);
   }
 
@@ -23,24 +24,20 @@ public:
     if (model) model->detach(this);
   }
 
-  // Observer pattern - receives events when they happen
   void update(GameEvent event) override {}
-
-  // Animation update - called every frame (default does nothing)
   virtual void updateAnimation(float deltaTime) {}
-
   virtual void draw() = 0;
 
-  // Prevent copying
   EntityView(const EntityView&) = delete;
   EntityView& operator=(const EntityView&) = delete;
 
   EntityModel* getModel() const { return model; }
 
 protected:
-  EntityModel* model;  // ✅ Raw pointer OK - non-owning, points to entity in World
-  std::shared_ptr<Camera> camera;  // ✅ Shared ownership - multiple Views share one Camera
-  std::shared_ptr<SpriteAtlas> spriteAtlas;  // ✅ Already correct
+  EntityModel* model;  // ✅ Non-owning pointer
+  sf::RenderWindow& window;  // ✅ NEW - Reference to window
+  std::shared_ptr<Camera> camera;  // ✅ Shared ownership
+  std::shared_ptr<SpriteAtlas> spriteAtlas;  // ✅ Shared ownership
 };
 
 #endif //PACMAN_ENTITYVIEW_H

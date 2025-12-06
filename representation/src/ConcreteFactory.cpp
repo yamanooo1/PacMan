@@ -20,9 +20,9 @@
 #include "representation/FruitView.h"
 #include "logic/Stopwatch.h"
 
-ConcreteFactory::ConcreteFactory(sf::RenderWindow* win, std::shared_ptr<Camera> cam)  // ✅ CHANGED
-    : window(win)
-    , camera(cam)  // ✅ Now stores shared_ptr
+ConcreteFactory::ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam)  // ✅ Reference
+    : window(win)  // ✅ Initialize reference
+    , camera(cam)
     , spriteAtlas(std::make_shared<SpriteAtlas>())
 {
 }

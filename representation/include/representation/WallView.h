@@ -1,5 +1,5 @@
 //
-// WallView.h - UPDATED constructor
+// WallView.h - UPDATED with window reference
 //
 
 #ifndef PACMAN_WALLVIEW_H
@@ -11,12 +11,12 @@
 
 class WallView: public EntityView {
 private:
-  sf::RenderWindow* window;
+  // ✅ REMOVED: sf::RenderWindow* window;
   sf::RectangleShape shape;
 
 public:
-  WallView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
-           std::shared_ptr<SpriteAtlas> atlas);  // ✅ UPDATED
+  WallView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
+           std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent) override;
   void draw() override;

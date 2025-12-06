@@ -1,5 +1,5 @@
 //
-// PacManView.cpp - FIXED with separate event and animation handling
+// PacManView.cpp - UPDATED with window reference
 //
 
 #include "representation/PacManView.h"
@@ -7,10 +7,9 @@
 #include "representation/SpriteAtlas.h"
 #include <iostream>
 
-PacManView::PacManView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
+PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
                        std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, cam, atlas)
-    , window(win)
+    : EntityView(model, win, cam, atlas)  // ✅ Pass to base class
     , animationTimer(0.0f)
     , currentMouthFrame(0)
     , frameDuration(0.1f)
@@ -22,7 +21,6 @@ PacManView::PacManView(EntityModel* model, sf::RenderWindow* win, std::shared_pt
   shape.setFillColor(sf::Color::Yellow);
 }
 
-// ✅ Handle events ONLY (not called every frame)
 void PacManView::update(GameEvent event) {
   switch (event) {
   case GameEvent::PACMAN_DIED:
@@ -35,7 +33,6 @@ void PacManView::update(GameEvent event) {
     break;
 
   case GameEvent::DIRECTION_CHANGED:
-    // ✅ If death animation finished and PacMan moves, respawn happened
     if (playingDeathAnimation && deathFrame >= 10) {
       std::cout << "[VIEW] Detected respawn - resetting death animation" << std::endl;
       playingDeathAnimation = false;
@@ -51,10 +48,7 @@ void PacManView::update(GameEvent event) {
   }
 }
 
-// ✅ Update animation every frame (separate from events)
-// ✅ Update animation every frame (separate from events)
 void PacManView::updateAnimation(float deltaTime) {
-  // Update death animation
   if (playingDeathAnimation) {
     deathAnimationTimer += deltaTime;
 
@@ -62,17 +56,14 @@ void PacManView::updateAnimation(float deltaTime) {
       deathAnimationTimer = 0.0f;
       deathFrame++;
 
-      // Death animation has 11 frames (0-10)
       if (deathFrame > 10) {
-        // Stay on last frame until respawn detected via DIRECTION_CHANGED event
         deathFrame = 10;
       }
     }
 
-    return;  // Don't update mouth animation during death
+    return;
   }
 
-  // ✅ FIX: Only animate if position actually changed (detect movement)
   if (model) {
     static float prevX = 0.0f;
     static float prevY = 0.0f;
@@ -82,7 +73,6 @@ void PacManView::updateAnimation(float deltaTime) {
                            std::abs(currentY - prevY) > 0.001f);
 
     if (actuallyMoving && model->getDirection() != Direction::NONE) {
-      // PacMan is moving - animate mouth
       animationTimer += deltaTime;
 
       if (animationTimer >= frameDuration) {
@@ -90,11 +80,9 @@ void PacManView::updateAnimation(float deltaTime) {
         currentMouthFrame = (currentMouthFrame + 1) % 3;
       }
     } else {
-      // PacMan is stationary (ready state, stopped, etc.) - show closed mouth
       currentMouthFrame = 0;
     }
 
-    // Update previous position for next frame
     prevX = currentX;
     prevY = currentY;
   } else {
@@ -103,7 +91,7 @@ void PacManView::updateAnimation(float deltaTime) {
 }
 
 void PacManView::draw() {
-  if (!model || !window || !camera) return;
+  if (!model || !camera) return;  // ✅ window is always valid (reference)
 
   auto [x, y] = model->getPosition();
   float screenX = camera->gridToScreenX(x);
@@ -158,7 +146,7 @@ void PacManView::draw() {
 
           sprite.setPosition(centerScreenX, centerScreenY);
 
-          window->draw(sprite);
+          window.draw(sprite);  // ✅ CHANGED from window->draw()
           return;
         }
       } catch (const std::exception& e) {
@@ -173,5 +161,5 @@ void PacManView::draw() {
   shape.setSize(sf::Vector2f(screenWidth, screenHeight));
   shape.setPosition(screenX, screenY);
 
-  window->draw(shape);
+  window.draw(shape);  // ✅ CHANGED from window->draw()
 }
