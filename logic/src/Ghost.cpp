@@ -62,7 +62,6 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   }
 
   // EXITING state
-  // EXITING state
   if (state == GhostState::EXITING) {
     auto [x, y] = getPosition();
     float centerX = x + getWidth() / 2.0f;
@@ -526,25 +525,18 @@ void Ghost::enterFearMode() {
   // ✅ ALWAYS reset fearModeEnding when new fear mode starts
   fearModeEnding = false;
 
-  // If still waiting, mark to enter fear later
-  if (state == GhostState::WAITING) {
+  // If ghost hasn't left spawn yet, just mark it to enter fear mode later
+  if (state == GhostState::WAITING || state == GhostState::EXITING) {
     shouldEnterFearWhenLeaving = true;
+    // ❌ DON'T reverse direction when in spawn - let them exit normally
     return;
   }
 
-  // If exiting, check if already on/past exit tile
-  if (state == GhostState::EXITING) {
-    shouldEnterFearWhenLeaving = true;
-    // The update() method will detect exit position and switch to FEAR
-    // No need to do anything else here
-    return;
-  }
-
-  // Ghost is already out (CHASING or already in FEAR) - enter/stay in fear mode
+  // Ghost is already chasing, enter fear mode immediately
   state = GhostState::FEAR;
   speed = fearSpeed;
 
-  // Reverse direction only if we were chasing
+  // Reverse direction when entering fear mode (only if already out and chasing)
   Direction current = getDirection();
   Direction opposite = Direction::NONE;
 
