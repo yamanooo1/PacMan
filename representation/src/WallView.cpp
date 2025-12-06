@@ -6,7 +6,7 @@
 #include "representation/Camera.h"
 #include "representation/SpriteAtlas.h"  // ✅ ADD THIS
 
-WallView::WallView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+WallView::WallView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
                    std::shared_ptr<SpriteAtlas> atlas)  // ✅ UPDATED
     : EntityView(model, cam, atlas)  // ✅ UPDATED
     , window(win)

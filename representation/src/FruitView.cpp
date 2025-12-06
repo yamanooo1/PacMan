@@ -7,7 +7,7 @@
 #include "representation/SpriteAtlas.h"
 #include <iostream>
 
-FruitView::FruitView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+FruitView::FruitView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
                      std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, cam, atlas)
     , window(win)

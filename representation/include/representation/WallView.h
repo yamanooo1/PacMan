@@ -15,7 +15,7 @@ private:
   sf::RectangleShape shape;
 
 public:
-  WallView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+  WallView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
            std::shared_ptr<SpriteAtlas> atlas);  // ✅ UPDATED
 
   void update(GameEvent) override;

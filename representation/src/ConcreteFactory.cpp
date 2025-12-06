@@ -1,9 +1,9 @@
 //
-// ConcreteFactory.cpp - UPDATED to pass SpriteAtlas to Views
+// ConcreteFactory.cpp - UPDATED with shared_ptr<Camera>
 //
 
 #include "representation/ConcreteFactory.h"
-#include "representation/SpriteAtlas.h"  // ✅ ADD THIS
+#include "representation/SpriteAtlas.h"
 
 // Include complete types
 #include <iostream>
@@ -20,17 +20,15 @@
 #include "representation/FruitView.h"
 #include "logic/Stopwatch.h"
 
-ConcreteFactory::ConcreteFactory(sf::RenderWindow* win, Camera* cam)
+ConcreteFactory::ConcreteFactory(sf::RenderWindow* win, std::shared_ptr<Camera> cam)  // ✅ CHANGED
     : window(win)
-    , camera(cam)
-    , spriteAtlas(std::make_shared<SpriteAtlas>())  // ✅ ADD THIS - create SpriteAtlas
+    , camera(cam)  // ✅ Now stores shared_ptr
+    , spriteAtlas(std::make_shared<SpriteAtlas>())
 {
 }
 
-// CRITICAL: Define destructor where EntityView is complete
 ConcreteFactory::~ConcreteFactory() = default;
 
-// ✅ ADD THIS METHOD
 bool ConcreteFactory::loadSprites(const std::string& filepath) {
     if (!spriteAtlas) {
         std::cerr << "[FACTORY] SpriteAtlas not initialized!" << std::endl;
@@ -51,7 +49,6 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
   auto model = std::make_unique<PacMan>(x, y);
   PacMan* modelPtr = model.get();
 
-  // ✅ PASS spriteAtlas to view
   auto view = std::make_unique<PacManView>(modelPtr, window, camera, spriteAtlas);
 
   views.push_back(std::move(view));
@@ -63,7 +60,6 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
   Ghost* modelPtr = model.get();
   auto view = std::make_unique<GhostView>(modelPtr, window, camera, spriteAtlas);
 
-  // ✅ Set sprite type based on COLOR (not type!)
   switch (color) {
   case GhostColor::RED:
     view->setColor(sf::Color::Red);
@@ -78,7 +74,7 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
     view->setSpriteType(SpriteGhostType::CYAN);
     break;
   case GhostColor::ORANGE:
-    view->setColor(sf::Color(255, 165, 0));  // Orange color
+    view->setColor(sf::Color(255, 165, 0));
     view->setSpriteType(SpriteGhostType::ORANGE);
     break;
   }
@@ -91,7 +87,6 @@ std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, flo
   auto model = std::make_unique<Wall>(x, y, w, h);
   Wall* modelPtr = model.get();
 
-  // ✅ PASS spriteAtlas to view (walls don't use sprites, but keep consistent interface)
   auto view = std::make_unique<WallView>(modelPtr, window, camera, spriteAtlas);
 
   views.push_back(std::move(view));
@@ -102,7 +97,6 @@ std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
   auto model = std::make_unique<Coin>(x, y);
   Coin* modelPtr = model.get();
 
-  // ✅ PASS spriteAtlas to view
   auto view = std::make_unique<CoinView>(modelPtr, window, camera, spriteAtlas);
 
   views.push_back(std::move(view));
@@ -115,7 +109,7 @@ std::unique_ptr<Fruit> ConcreteFactory::createFruit(float x, float y) {
 
   auto view = std::make_unique<FruitView>(modelPtr, window, camera, spriteAtlas);
 
-  views.push_back(std::move(view));  // ✅ FIX: was "Fruit* fruitPtr = fruit.get();"
+  views.push_back(std::move(view));
   return model;
 }
 
@@ -136,7 +130,6 @@ void ConcreteFactory::removeDeadViews() {
 }
 
 void ConcreteFactory::updateAll() {
-  // ✅ FIXED: Call animation update with deltaTime, not event-based update
   Stopwatch& stopwatch = Stopwatch::getInstance();
   float deltaTime = stopwatch.getDeltaTime();
 

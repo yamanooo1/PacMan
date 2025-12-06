@@ -26,7 +26,7 @@ private:
   bool showWhite;
 
 public:
-  GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+  GhostView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
             std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent) override;

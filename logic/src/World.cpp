@@ -187,7 +187,7 @@ bool World::loadFromFile(const std::string &filename) {
         createGhost(x, y, GhostType::CHASER, GhostColor::RED, 0.0f);
         break;
       case 'b':
-        createGhost(x, y, GhostType::AMBUSHER, GhostColor::CYAN, 0.0f);
+        createGhost(x, y, GhostType::AMBUSHER, GhostColor::CYAN, 0.6f);
         break;
       case 'o':
         createGhost(x, y, GhostType::CHASER, GhostColor::ORANGE, 5.0f);

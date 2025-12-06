@@ -21,7 +21,7 @@ public:
   PacMan(float x, float y)
     : EntityModel(x, y, 0.8f, 0.8f)
     , speed(4.0f)
-    , desiredDirection(Direction::LEFT)  // ✅ Changed from LEFT to NONE
+    , desiredDirection(Direction::LEFT)
     , spawnX(x)
     , spawnY(y)
   {

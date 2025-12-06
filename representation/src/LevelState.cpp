@@ -160,7 +160,7 @@ void LevelState::update(float deltaTime) {
 void LevelState::render(sf::RenderWindow& window) {
   // Lazy initialization of factory and world (need window reference)
   if (!factory) {
-    factory = std::make_unique<ConcreteFactory>(&window, camera.get());
+    factory = std::make_unique<ConcreteFactory>(&window, camera);
 
     // Load sprites
     if (!factory->loadSprites("../../resources/sprites/spritemap.png")) {

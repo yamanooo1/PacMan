@@ -25,7 +25,7 @@ private:
   float deathFrameDuration;
 
 public:
-  PacManView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+  PacManView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
              std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent event) override;  // ✅ Events only

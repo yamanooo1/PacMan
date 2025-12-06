@@ -14,25 +14,25 @@ class ConcreteFactory;
 
 class LevelState : public State {
 public:
-    explicit LevelState(int level, int startingScore = 0);  // ✅ Added startingScore parameter with default value
-    ~LevelState() override;
+  explicit LevelState(int level, int startingScore = 0);
+  ~LevelState() override;
 
-    void onEnter() override;
-    void onExit() override;
-    void handleEvents(sf::RenderWindow& window) override;
-    void update(float deltaTime) override;
-    void render(sf::RenderWindow& window) override;
+  void onEnter() override;
+  void onExit() override;
+  void handleEvents(sf::RenderWindow& window) override;
+  void update(float deltaTime) override;
+  void render(sf::RenderWindow& window) override;
 
 private:
-    bool loadLevel();
-    void handleInput();
+  bool loadLevel();
+  void handleInput();
 
-  std::unique_ptr<Lives> lives;            // Destroyed LAST (6th)
-  std::unique_ptr<Score> score;            // Destroyed 5th
-  std::unique_ptr<Camera> camera;          // Destroyed 4th
-  std::unique_ptr<HUD> hud;                // Destroyed 3rd
-  std::unique_ptr<World> world;            // Destroyed 2nd (models destroyed here)
-  std::unique_ptr<ConcreteFactory> factory; // Destroyed FIRST ✅ (Views detach from models)
+  std::unique_ptr<Lives> lives;
+  std::unique_ptr<Score> score;
+  std::shared_ptr<Camera> camera;  // ✅ CHANGED from unique_ptr
+  std::unique_ptr<HUD> hud;
+  std::unique_ptr<World> world;
+  std::unique_ptr<ConcreteFactory> factory;
 
   int currentLevel;
   int initialScore;

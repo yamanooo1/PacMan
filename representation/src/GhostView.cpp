@@ -6,7 +6,7 @@
 #include "logic/Stopwatch.h"
 #include <iostream>
 
-GhostView::GhostView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+GhostView::GhostView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
                      std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, cam, atlas)
     , window(win)

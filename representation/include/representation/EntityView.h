@@ -1,5 +1,5 @@
 //
-// EntityView.h - COMPLETE FIXED VERSION
+// EntityView.h - FIXED with shared_ptr<Camera>
 //
 
 #ifndef PACMAN_ENTITYVIEW_H
@@ -14,7 +14,7 @@ class SpriteAtlas;
 
 class EntityView: public Observer {
 public:
-  explicit EntityView(EntityModel* m, Camera* cam, std::shared_ptr<SpriteAtlas> atlas)
+  explicit EntityView(EntityModel* m, std::shared_ptr<Camera> cam, std::shared_ptr<SpriteAtlas> atlas)
       : model(m), camera(cam), spriteAtlas(atlas) {
     if (model) model->attach(this);
   }
@@ -38,9 +38,9 @@ public:
   EntityModel* getModel() const { return model; }
 
 protected:
-  EntityModel* model;
-  Camera* camera;
-  std::shared_ptr<SpriteAtlas> spriteAtlas;
+  EntityModel* model;  // ✅ Raw pointer OK - non-owning, points to entity in World
+  std::shared_ptr<Camera> camera;  // ✅ Shared ownership - multiple Views share one Camera
+  std::shared_ptr<SpriteAtlas> spriteAtlas;  // ✅ Already correct
 };
 
 #endif //PACMAN_ENTITYVIEW_H

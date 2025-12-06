@@ -15,7 +15,7 @@ private:
   sf::CircleShape shape;
 
 public:
-  CoinView(EntityModel* model, sf::RenderWindow* win, Camera* cam,
+  CoinView(EntityModel* model, sf::RenderWindow* win, std::shared_ptr<Camera> cam,
            std::shared_ptr<SpriteAtlas> atlas);  // ✅ UPDATED
 
   void update(GameEvent) override;
