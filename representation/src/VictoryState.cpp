@@ -9,6 +9,8 @@ VictoryState::VictoryState(int nextLevelNum, int score)
     : fontLoaded(false)
     , continueRequested(false)
     , menuRequested(false)
+    , spaceWasPressed(false)
+    , mWasPressed(false)
     , nextLevel(nextLevelNum)
     , finalScore(score)
     , isGameOver(nextLevelNum == 0)
@@ -122,8 +124,6 @@ void VictoryState::onExit() {
 }
 
 void VictoryState::handleEvents(sf::RenderWindow& window) {
-  static bool spaceWasPressed = false;
-  static bool mWasPressed = false;
 
   bool spaceIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
   bool mIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::M);
@@ -131,10 +131,9 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
   // Continue to next level with SPACE (only if not game over)
   if (!isGameOver && spaceIsPressed && !spaceWasPressed) {
     if (stateManager) {
-      std::cout << "[VictoryState] Starting level " << nextLevel << "..." << std::endl;
-
-      // ✅ SAFE: Clear all states and push new level
-      stateManager->clearAndPushState(std::make_unique<LevelState>(nextLevel));
+      std::cout << "[VictoryState] ✅ Starting level " << nextLevel
+                << " with score " << finalScore << "..." << std::endl;
+      stateManager->clearAndPushState(std::make_unique<LevelState>(nextLevel, finalScore));  // ✅ PASS SCORE
     }
   }
 

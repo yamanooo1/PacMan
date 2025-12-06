@@ -14,11 +14,14 @@
 
 LevelState::~LevelState() = default;
 
-LevelState::LevelState(int level)
+LevelState::LevelState(int level, int startingScore)
     : currentLevel(level)
+    , initialScore(startingScore)  // ✅ ADD THIS
     , mapFile("../../resources/map/map1.txt")
     , pauseRequested(false)
 {
+  std::cout << "[LevelState] Constructor - Level: " << level
+            << ", Starting Score: " << startingScore << std::endl;
 }
 
 void LevelState::onEnter() {
@@ -41,18 +44,23 @@ bool LevelState::loadLevel() {
   int gameHeight = 800;
   int hudHeight = 60;
   camera = std::make_unique<Camera>(800, gameHeight, 10, 10);
-
-  // Create factory (we'll get the window from render())
-  // For now, we can't create factory here because we don't have window yet
-  // We'll do this in render() on first frame
+  std::cout << "[LevelState] ✅ Camera created" << std::endl;
 
   // Create HUD
-  hud = std::make_unique<HUD>(nullptr, hudHeight);  // Set window later
+  hud = std::make_unique<HUD>(nullptr, hudHeight);
   hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
+  std::cout << "[LevelState] ✅ HUD created" << std::endl;
 
   // Create score and lives
+  std::cout << "[LevelState] Creating Score with initialScore: " << initialScore << std::endl;
   score = std::make_unique<Score>();
+  std::cout << "[LevelState] ✅ Score created" << std::endl;
+
+  score->setScore(initialScore);
+  std::cout << "[LevelState] ✅ Score set to: " << initialScore << std::endl;
+
   lives = std::make_unique<Lives>(3);
+  std::cout << "[LevelState] ✅ Lives created" << std::endl;
 
   std::cout << "[LevelState] Level " << currentLevel << " loaded successfully!" << std::endl;
   return true;
@@ -119,9 +127,11 @@ void LevelState::update(float deltaTime) {
   // ✅ IMPROVED: Only update score when game is actually playable
   // Not during: death animation, ready state, or game over
   if (score && lives && !lives->isGameOver() &&
-      world && !world->isDeathAnimationActive() && !world->isReadyStateActive()) {
+      world && !world->isDeathAnimationActive() &&
+      !world->isReadyStateActive() &&
+      !world->isLevelClearedDisplayActive()) {  // ✅ ADD THIS CHECK
     score->updateScoreDecay();
-  }
+      }
 
   // Check for game over FIRST
   if (lives && lives->isGameOver()) {

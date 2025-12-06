@@ -117,7 +117,7 @@ void MenuState::handleEvents(sf::RenderWindow& window) {
 
     // Transition to LevelState
     if (stateManager) {
-      stateManager->pushState(std::make_unique<LevelState>());
+      stateManager->pushState(std::make_unique<LevelState>(1));
     }
   }
 

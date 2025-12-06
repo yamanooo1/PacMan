@@ -16,6 +16,10 @@ private:
   bool continueRequested;
   bool menuRequested;
 
+
+  bool spaceWasPressed;
+  bool mWasPressed;
+
   int nextLevel;     // 0 = game over (no next level)
   int finalScore;
   bool isGameOver;   // true if game over, false if level cleared

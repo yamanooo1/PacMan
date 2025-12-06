@@ -33,6 +33,7 @@ public:
   bool isHighScore(int score) const;
   void addHighScore(int score);
   std::vector<int> getHighScores() const { return highScores; }
+  void setScore(int newScore) { currentScore = newScore; }
 };
 
 #endif // PACMAN_SCORE_H
