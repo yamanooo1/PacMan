@@ -9,7 +9,6 @@ add_library(logic STATIC
         src/World.cpp
         src/Stopwatch.cpp
         src/Random.cpp
-        src/Subject.cpp
         src/Score.cpp
         src/AbstractFactory.cpp
         src/Observer.cpp
