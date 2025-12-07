@@ -1,7 +1,6 @@
 find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
 
 add_library(representation STATIC
-        src/EntityView.cpp
         src/PacManView.cpp
         src/GhostView.cpp
         src/CoinView.cpp

@@ -1,5 +1,5 @@
 //
-// ConcreteFactory.h - UPDATED with window reference
+// ConcreteFactory.h - UPDATED to use shared_ptr for views
 //
 
 #ifndef PACMAN_CONCRETEFACTORY_H
@@ -16,13 +16,13 @@ class SpriteAtlas;
 
 class ConcreteFactory: public AbstractFactory {
 private:
-  sf::RenderWindow& window;  // ✅ CHANGED to reference
+  sf::RenderWindow& window;
   std::shared_ptr<Camera> camera;
   std::shared_ptr<SpriteAtlas> spriteAtlas;
-  std::vector<std::unique_ptr<EntityView>> views;
+  std::vector<std::shared_ptr<EntityView>> views;  // ✅ CHANGED to shared_ptr
 
 public:
-  explicit ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam);  // ✅ Reference
+  explicit ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam);
   ~ConcreteFactory() override;
 
   bool loadSprites(const std::string& filepath);

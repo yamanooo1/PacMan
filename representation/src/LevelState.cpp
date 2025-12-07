@@ -45,17 +45,14 @@ bool LevelState::loadLevel() {
   camera = std::make_shared<Camera>(800, gameHeight, 10, 10);
   std::cout << "[LevelState] ✅ Camera created" << std::endl;
 
-  // ✅ DON'T create HUD here - we don't have window reference yet
-  // It will be created in render()
-
   std::cout << "[LevelState] Creating Score with initialScore: " << initialScore << std::endl;
-  score = std::make_unique<Score>();
+  score = std::make_shared<Score>();  // ✅ CHANGED to make_shared
   std::cout << "[LevelState] ✅ Score created" << std::endl;
 
   score->setScore(initialScore);
   std::cout << "[LevelState] ✅ Score set to: " << initialScore << std::endl;
 
-  lives = std::make_unique<Lives>(3);
+  lives = std::make_shared<Lives>(3);  // ✅ CHANGED to make_shared
   std::cout << "[LevelState] ✅ Lives created" << std::endl;
 
   std::cout << "[LevelState] Level " << currentLevel << " loaded successfully!" << std::endl;
@@ -164,14 +161,15 @@ void LevelState::render(sf::RenderWindow& window) {
       return;
     }
 
-    // Update HUD window reference
     hud = std::make_unique<HUD>(window, 60);
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
     // Create world
     world = std::make_unique<World>(factory.get(), currentLevel);
-    world->setScore(score.get());
-    world->setLives(lives.get());
+
+    // ✅ Pass shared_ptr (not raw pointer)
+    world->setScore(score);
+    world->setLives(lives);
 
     // Load map
     if (!world->loadFromFile(mapFile)) {
@@ -179,20 +177,17 @@ void LevelState::render(sf::RenderWindow& window) {
       return;
     }
 
-    // Update camera with map dimensions
     camera->setMapSize(world->getMapWidth(), world->getMapHeight());
 
     std::cout << "[LevelState] Map loaded: " << world->getMapWidth() << "x"
               << world->getMapHeight() << std::endl;
     std::cout << "[LevelState] Entities: " << world->getEntityCount() << std::endl;
 
-    // Start with ready state
     world->startReadyState();
   }
 
   if (!world) return;
 
-  // Update animations and draw
   factory->updateAll();
   factory->drawAll();
   hud->draw(world.get(), score.get(), lives.get(), currentLevel);

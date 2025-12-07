@@ -1,5 +1,6 @@
 #ifndef PACMAN_WORLD_H
 #define PACMAN_WORLD_H
+
 #include "EntityModel.h"
 #include "AbstractFactory.h"
 #include <memory>
@@ -14,58 +15,56 @@ class Fruit;
 class Score;
 class Lives;
 
-
 class World {
 private:
   std::vector<std::unique_ptr<EntityModel>> entities;
-  std::vector<Ghost*> ghosts;
+  std::vector<Ghost*> ghosts;  // ⚠️ Non-owning - point to entities owned above
 
   int mapWidth;
   int mapHeight;
 
-  // ✅ NEW: Level difficulty scaling
   int currentLevel;
   float ghostSpeedMultiplier;
   float fearDurationMultiplier;
 
-  AbstractFactory* factory;
-  PacMan* pacman;
-  Score* score;
-  Lives* lives;
+  AbstractFactory* factory;  // ⚠️ Non-owning - owned by LevelState
+  PacMan* pacman;  // ⚠️ Non-owning - points to entity in 'entities' vector
 
-  // Spawn positions for reset
+  // ✅ CHANGED to shared_ptr (for Observer pattern)
+  std::shared_ptr<Score> score;
+  std::shared_ptr<Lives> lives;
+
   float pacmanSpawnX, pacmanSpawnY;
   std::vector<std::pair<float, float>> ghostSpawnPositions;
 
-  // Fear mode management
   bool fearModeActive;
   float fearModeTimer;
   float fearModeDuration;
 
-  // ✅ NEW: Death animation management
   bool deathAnimationActive;
   float deathAnimationTimer;
   float deathAnimationDuration;
 
-  // ✅ ADD THESE - Ready state management
   bool readyStateActive;
   float readyStateTimer;
   float readyStateDuration;
 
-  bool levelCleared;  // ✅ Already added
-  bool levelClearedDisplayActive;  // ✅ ADD THIS
-  float levelClearedDisplayTimer;   // ✅ ADD THIS
+  bool levelCleared;
+  bool levelClearedDisplayActive;
+  float levelClearedDisplayTimer;
   float levelClearedDisplayDuration;
 
 public:
   explicit World(AbstractFactory* f, int level = 1);
 
   void setMapDimensions(int w, int h);
-  void setScore(Score* s) { score = s; }
-  void setLives(Lives* l) { lives = l; }
 
-  bool isLevelCleared() const { return levelCleared; }  // ✅ ADD THIS
-  bool isLevelClearedDisplayActive() const { return levelClearedDisplayActive; }  // ✅ ADD THIS
+  // ✅ CHANGED to take shared_ptr
+  void setScore(std::shared_ptr<Score> s) { score = s; }
+  void setLives(std::shared_ptr<Lives> l) { lives = l; }
+
+  bool isLevelCleared() const { return levelCleared; }
+  bool isLevelClearedDisplayActive() const { return levelClearedDisplayActive; }
 
   void addEntity(std::unique_ptr<EntityModel> entity);
 
@@ -85,24 +84,18 @@ public:
   void update(float deltaTime);
   PacMan* getPacMan() const { return pacman; }
 
-  // Respawn methods
   void respawnPacManAndGhosts();
 
-  // Collision helpers
   bool isWall(float x, float y, float width, float height) const;
   bool canMoveInDirection(float x, float y, float w, float h, Direction dir, float distance) const;
-
-  // Helper to check if a specific grid cell contains a wall
   bool hasWallInGridCell(int gridX, int gridY) const;
 
-  // Fear mode methods
   void activateFearMode();
-  float getGhostSpeedMultiplier() const { return ghostSpeedMultiplier; }  // ✅ NEW
+  float getGhostSpeedMultiplier() const { return ghostSpeedMultiplier; }
 
   void updateFearMode(float deltaTime);
   bool isFearModeEnding() const { return fearModeActive && fearModeTimer <= 2.0f; }
 
-  // ✅ NEW: Death animation methods
   void startDeathAnimation();
   void updateDeathAnimation(float deltaTime);
   bool isDeathAnimationActive() const { return deathAnimationActive; }

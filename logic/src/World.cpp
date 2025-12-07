@@ -85,6 +85,7 @@ void World::createPacMan(float x, float y) {
   pacmanSpawnY = centeredY;
   pacman->setSpawnPosition(centeredX, centeredY);
 
+  // ✅ Attach lives as observer (now uses shared_ptr)
   if (lives) {
     pacman->attach(lives);
   }
@@ -93,7 +94,7 @@ void World::createPacMan(float x, float y) {
 }
 
 void World::createGhost(float x, float y, GhostType type, GhostColor color, float waitTime) {
-  auto ghost = factory->createGhost(x, y, type, color, waitTime, ghostSpeedMultiplier);  // ✅ Pass multiplier
+  auto ghost = factory->createGhost(x, y, type, color, waitTime, ghostSpeedMultiplier);
   Ghost* ghostPtr = ghost.get();
 
   float centeredX = x + (1.0f - ghost->getWidth()) / 2.0f;
@@ -107,6 +108,7 @@ void World::createGhost(float x, float y, GhostType type, GhostColor color, floa
             << " position (" << centeredX << "," << centeredY << ")"
             << " center (" << centerX << "," << centerY << ")" << std::endl;
 
+  // ✅ Attach score as observer (now uses shared_ptr)
   if (score) {
     ghost->attach(score);
   }
@@ -128,6 +130,7 @@ void World::createCoin(float x, float y) {
   float centeredY = y + (1.0f - coin->getHeight()) / 2.0f;
   coin->setPosition(centeredX, centeredY);
 
+  // ✅ Attach score as observer (now uses shared_ptr)
   if (score) {
     coin->attach(score);
   }
@@ -142,11 +145,11 @@ void World::createFruit(float x, float y) {
   float centeredY = y + (1.0f - fruit->getHeight()) / 2.0f;
   fruit->setPosition(centeredX, centeredY);
 
+  // ✅ Attach score as observer (now uses shared_ptr)
   if (score) {
     fruit->attach(score);
   }
 
-  Fruit* fruitPtr = fruit.get();
   addEntity(std::move(fruit));
 }
 

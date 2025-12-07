@@ -1,5 +1,5 @@
 //
-// EntityView.h - UPDATED with window reference
+// EntityView.h - UPDATED: No auto-attach, factory handles it
 //
 
 #ifndef PACMAN_ENTITYVIEW_H
@@ -16,12 +16,12 @@ class SpriteAtlas;
 class EntityView: public Observer {
 public:
   explicit EntityView(EntityModel* m, sf::RenderWindow& win, std::shared_ptr<Camera> cam, std::shared_ptr<SpriteAtlas> atlas)
-      : model(m), window(win), camera(cam), spriteAtlas(atlas) {  // ✅ ADDED window
-    if (model) model->attach(this);
+      : model(m), window(win), camera(cam), spriteAtlas(atlas) {
+    // ❌ REMOVED: Auto-attach (factory will handle this)
   }
 
   ~EntityView() override {
-    if (model) model->detach(this);
+    // ❌ REMOVED: Auto-detach (weak_ptr handles cleanup automatically)
   }
 
   void update(GameEvent event) override {}
@@ -34,10 +34,10 @@ public:
   EntityModel* getModel() const { return model; }
 
 protected:
-  EntityModel* model;  // ✅ Non-owning pointer
-  sf::RenderWindow& window;  // ✅ NEW - Reference to window
-  std::shared_ptr<Camera> camera;  // ✅ Shared ownership
-  std::shared_ptr<SpriteAtlas> spriteAtlas;  // ✅ Shared ownership
+  EntityModel* model;  // ⚠️ Non-owning pointer to model owned by World
+  sf::RenderWindow& window;
+  std::shared_ptr<Camera> camera;
+  std::shared_ptr<SpriteAtlas> spriteAtlas;
 };
 
 #endif //PACMAN_ENTITYVIEW_H

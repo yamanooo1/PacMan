@@ -27,9 +27,9 @@ private:
   bool loadLevel();
   void handleInput();
 
-  std::unique_ptr<Lives> lives;
-  std::unique_ptr<Score> score;
-  std::shared_ptr<Camera> camera;  // ✅ CHANGED from unique_ptr
+  std::shared_ptr<Lives> lives;  // ✅ CHANGED to shared_ptr
+  std::shared_ptr<Score> score;  // ✅ CHANGED to shared_ptr
+  std::shared_ptr<Camera> camera;
   std::unique_ptr<HUD> hud;
   std::unique_ptr<World> world;
   std::unique_ptr<ConcreteFactory> factory;

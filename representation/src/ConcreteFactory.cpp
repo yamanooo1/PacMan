@@ -1,11 +1,9 @@
 //
-// ConcreteFactory.cpp - UPDATED with shared_ptr<Camera>
+// ConcreteFactory.cpp - UPDATED with explicit observer attachment
 //
 
 #include "representation/ConcreteFactory.h"
 #include "representation/SpriteAtlas.h"
-
-// Include complete types
 #include <iostream>
 #include "representation/EntityView.h"
 #include "logic/PacMan.h"
@@ -20,8 +18,8 @@
 #include "representation/FruitView.h"
 #include "logic/Stopwatch.h"
 
-ConcreteFactory::ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam)  // ✅ Reference
-    : window(win)  // ✅ Initialize reference
+ConcreteFactory::ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam)
+    : window(win)
     , camera(cam)
     , spriteAtlas(std::make_shared<SpriteAtlas>())
 {
@@ -49,16 +47,22 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
   auto model = std::make_unique<PacMan>(x, y);
   PacMan* modelPtr = model.get();
 
-  auto view = std::make_unique<PacManView>(modelPtr, window, camera, spriteAtlas);
+  // ✅ Create view with shared_ptr
+  auto view = std::make_shared<PacManView>(modelPtr, window, camera, spriteAtlas);
 
-  views.push_back(std::move(view));
+  // ✅ Explicitly attach view as observer
+  modelPtr->attach(view);
+
+  views.push_back(view);
   return model;
 }
 
 std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType type, GhostColor color, float waitTime, float speedMultiplier) {
   auto model = std::make_unique<Ghost>(x, y, type, color, waitTime, speedMultiplier);
   Ghost* modelPtr = model.get();
-  auto view = std::make_unique<GhostView>(modelPtr, window, camera, spriteAtlas);
+
+  // ✅ Create view with shared_ptr
+  auto view = std::make_shared<GhostView>(modelPtr, window, camera, spriteAtlas);
 
   switch (color) {
   case GhostColor::RED:
@@ -79,7 +83,10 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
     break;
   }
 
-  views.push_back(std::move(view));
+  // ✅ Explicitly attach view as observer
+  modelPtr->attach(view);
+
+  views.push_back(view);
   return model;
 }
 
@@ -87,9 +94,13 @@ std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, flo
   auto model = std::make_unique<Wall>(x, y, w, h);
   Wall* modelPtr = model.get();
 
-  auto view = std::make_unique<WallView>(modelPtr, window, camera, spriteAtlas);
+  // ✅ Create view with shared_ptr
+  auto view = std::make_shared<WallView>(modelPtr, window, camera, spriteAtlas);
 
-  views.push_back(std::move(view));
+  // ✅ Explicitly attach view as observer
+  modelPtr->attach(view);
+
+  views.push_back(view);
   return model;
 }
 
@@ -97,9 +108,13 @@ std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
   auto model = std::make_unique<Coin>(x, y);
   Coin* modelPtr = model.get();
 
-  auto view = std::make_unique<CoinView>(modelPtr, window, camera, spriteAtlas);
+  // ✅ Create view with shared_ptr
+  auto view = std::make_shared<CoinView>(modelPtr, window, camera, spriteAtlas);
 
-  views.push_back(std::move(view));
+  // ✅ Explicitly attach view as observer
+  modelPtr->attach(view);
+
+  views.push_back(view);
   return model;
 }
 
@@ -107,9 +122,13 @@ std::unique_ptr<Fruit> ConcreteFactory::createFruit(float x, float y) {
   auto model = std::make_unique<Fruit>(x, y);
   Fruit* modelPtr = model.get();
 
-  auto view = std::make_unique<FruitView>(modelPtr, window, camera, spriteAtlas);
+  // ✅ Create view with shared_ptr
+  auto view = std::make_shared<FruitView>(modelPtr, window, camera, spriteAtlas);
 
-  views.push_back(std::move(view));
+  // ✅ Explicitly attach view as observer
+  modelPtr->attach(view);
+
+  views.push_back(view);
   return model;
 }
 
@@ -122,7 +141,7 @@ void ConcreteFactory::drawAll() {
 void ConcreteFactory::removeDeadViews() {
   views.erase(
     std::remove_if(views.begin(), views.end(),
-      [](const std::unique_ptr<EntityView>& view) {
+      [](const std::shared_ptr<EntityView>& view) {  // ✅ shared_ptr
         return view->getModel()->isDead();
       }),
     views.end()
