@@ -50,8 +50,8 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
   // ✅ Create view with shared_ptr
   auto view = std::make_shared<PacManView>(modelPtr, window, camera, spriteAtlas);
 
-  // ✅ Explicitly attach view as observer
-  modelPtr->attach(view);
+  // ✅ CORRECTED: Explicitly attach view as observer using shared_ptr
+  modelPtr->attach(view);  // view is already shared_ptr, so this works
 
   views.push_back(view);
   return model;
@@ -83,7 +83,7 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
     break;
   }
 
-  // ✅ Explicitly attach view as observer
+  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
 
   views.push_back(view);
@@ -97,7 +97,7 @@ std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, flo
   // ✅ Create view with shared_ptr
   auto view = std::make_shared<WallView>(modelPtr, window, camera, spriteAtlas);
 
-  // ✅ Explicitly attach view as observer
+  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
 
   views.push_back(view);
@@ -111,7 +111,7 @@ std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
   // ✅ Create view with shared_ptr
   auto view = std::make_shared<CoinView>(modelPtr, window, camera, spriteAtlas);
 
-  // ✅ Explicitly attach view as observer
+  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
 
   views.push_back(view);
@@ -125,7 +125,7 @@ std::unique_ptr<Fruit> ConcreteFactory::createFruit(float x, float y) {
   // ✅ Create view with shared_ptr
   auto view = std::make_shared<FruitView>(modelPtr, window, camera, spriteAtlas);
 
-  // ✅ Explicitly attach view as observer
+  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
 
   views.push_back(view);
