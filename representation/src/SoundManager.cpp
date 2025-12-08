@@ -1,5 +1,6 @@
 //
 // SoundManager.cpp - Implementation of audio system
+// FIXED: Added movement sound, removed coin sound
 //
 
 #include "representation/SoundManager.h"
@@ -9,6 +10,7 @@ SoundManager::SoundManager()
     : soundVolume(50.0f)
     , musicVolume(30.0f)
     , soundsLoaded(false)
+    , movementSoundPlaying(false)  // ✅ NEW
 {
   std::cout << "[SOUND] SoundManager initialized" << std::endl;
 }
@@ -21,9 +23,9 @@ SoundManager& SoundManager::getInstance() {
 bool SoundManager::loadSounds(const std::string& soundDirectory) {
   std::cout << "[SOUND] Loading sounds from: " << soundDirectory << std::endl;
 
+  // ✅ REMOVED: COIN_COLLECTED (you deleted that file)
   // Map sound effects to their file names
   std::map<SoundEffect, std::string> soundFiles = {
-    {SoundEffect::COIN_COLLECTED, soundDirectory + "/03. PAC-MAN - Eating The Pac-dots.mp3"},
     {SoundEffect::FRUIT_COLLECTED, soundDirectory + "/11. PAC-MAN - Eating The Fruit.mp3"},
     {SoundEffect::GHOST_EATEN, soundDirectory + "/13. PAC-MAN - Eating The Ghost.mp3"},
     {SoundEffect::PACMAN_DIED, soundDirectory + "/15. Fail.mp3"},
@@ -69,6 +71,15 @@ bool SoundManager::loadSounds(const std::string& soundDirectory) {
     std::cerr << "[SOUND] ✗ Failed to load menu music" << std::endl;
   }
 
+  // ✅ NEW: Load continuous movement sound
+  if (movementSound.openFromFile(soundDirectory + "/03. PAC-MAN - Eating The Pac-dots.mp3")) {
+    movementSound.setVolume(soundVolume);
+    movementSound.setLoop(true);  // Loop continuously
+    std::cout << "[SOUND] ✓ Loaded movement sound (will loop)" << std::endl;
+  } else {
+    std::cerr << "[SOUND] ✗ Failed to load movement sound" << std::endl;
+  }
+
   soundsLoaded = (loadedCount > 0);
   std::cout << "[SOUND] Loaded " << loadedCount << "/" << soundFiles.size()
             << " sound effects" << std::endl;
@@ -103,7 +114,6 @@ void SoundManager::playSound(SoundEffect effect) {
     // Debug output
     const char* effectName = "UNKNOWN";
     switch (effect) {
-      case SoundEffect::COIN_COLLECTED: effectName = "COIN"; break;
       case SoundEffect::FRUIT_COLLECTED: effectName = "FRUIT"; break;
       case SoundEffect::GHOST_EATEN: effectName = "GHOST_EATEN"; break;
       case SoundEffect::PACMAN_DIED: effectName = "DEATH"; break;
@@ -115,7 +125,34 @@ void SoundManager::playSound(SoundEffect effect) {
   }
 }
 
+// ✅ NEW: Start continuous movement sound
+void SoundManager::startMovementSound() {
+  if (!soundsLoaded) return;
+
+  // Only start if not already playing
+  if (movementSound.getStatus() != sf::Music::Playing) {
+    movementSound.play();
+    movementSoundPlaying = true;
+    std::cout << "[SOUND] Started movement sound (looping)" << std::endl;
+  }
+}
+
+// ✅ NEW: Stop continuous movement sound
+void SoundManager::stopMovementSound() {
+  if (movementSound.getStatus() == sf::Music::Playing) {
+    movementSound.stop();
+    movementSoundPlaying = false;
+    std::cout << "[SOUND] Stopped movement sound" << std::endl;
+  }
+}
+
 void SoundManager::playBackgroundMusic(bool loop) {
+  // ✅ Don't try to play if not loaded yet
+  if (!soundsLoaded) {
+    std::cout << "[SOUND] Cannot play background music - sounds not loaded yet" << std::endl;
+    return;
+  }
+
   if (backgroundMusic.getStatus() == sf::Music::Playing) {
     return;  // Already playing
   }
@@ -138,12 +175,14 @@ void SoundManager::playMenuMusic(bool loop) {
 void SoundManager::stopMusic() {
   backgroundMusic.stop();
   menuMusic.stop();
+  stopMovementSound();  // ✅ Also stop movement sound
   std::cout << "[SOUND] Stopped all music" << std::endl;
 }
 
 void SoundManager::pauseMusic() {
   backgroundMusic.pause();
   menuMusic.pause();
+  movementSound.pause();  // ✅ Also pause movement sound
 }
 
 void SoundManager::resumeMusic() {
@@ -152,6 +191,9 @@ void SoundManager::resumeMusic() {
   }
   if (menuMusic.getStatus() == sf::Music::Paused) {
     menuMusic.play();
+  }
+  if (movementSoundPlaying && movementSound.getStatus() == sf::Music::Paused) {
+    movementSound.play();
   }
 }
 
@@ -164,6 +206,9 @@ void SoundManager::setSoundVolume(float volume) {
       sound.setVolume(soundVolume);
     }
   }
+
+  // ✅ Also update movement sound volume
+  movementSound.setVolume(soundVolume);
 
   std::cout << "[SOUND] Sound volume set to: " << soundVolume << std::endl;
 }

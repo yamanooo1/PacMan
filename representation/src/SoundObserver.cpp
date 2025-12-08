@@ -1,5 +1,6 @@
 //
 // SoundObserver.cpp - Plays sounds in response to game events
+// FIXED: Removed coin collection sound (file deleted)
 //
 
 #include "representation/SoundObserver.h"
@@ -14,12 +15,13 @@ void SoundObserver::update(GameEvent event) {
 
   switch (event) {
   case GameEvent::COIN_COLLECTED:
-    soundManager.playSound(SoundEffect::COIN_COLLECTED);
+    // ✅ REMOVED: No sound for coin collection
+    // (You deleted the coin eating sound file)
     break;
 
   case GameEvent::FRUIT_COLLECTED:
     soundManager.playSound(SoundEffect::FRUIT_COLLECTED);
-    soundManager.playSound(SoundEffect::FEAR_MODE_START);  // ✅ Play both!
+    soundManager.playSound(SoundEffect::FEAR_MODE_START);
     break;
 
   case GameEvent::GHOST_EATEN:

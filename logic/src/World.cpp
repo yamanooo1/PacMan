@@ -20,8 +20,8 @@ World::World(AbstractFactory *f, int level)
     : mapWidth(0)
     , mapHeight(0)
     , currentLevel(level)
-    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.05f)  // ✅ 5% faster per level
-    , fearDurationMultiplier(1.0f - (level - 1) * 0.05f)  // ✅ 5% shorter per level
+    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.09f)  // ✅ 5% faster per level
+    , fearDurationMultiplier(1.0f - (level - 1) * 0.09f)  // ✅ 5% shorter per level
     , factory(f)
     , pacman(nullptr)
     , score(nullptr)
@@ -36,7 +36,7 @@ World::World(AbstractFactory *f, int level)
     , deathAnimationDuration(2.0f)
     , readyStateActive(false)
     , readyStateTimer(0.0f)
-    , readyStateDuration(2.0f)
+    , readyStateDuration(4.7f)
     , levelCleared(false)
     , levelClearedDisplayActive(false)
     , levelClearedDisplayTimer(0.0f)

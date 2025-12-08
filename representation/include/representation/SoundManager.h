@@ -1,5 +1,6 @@
 //
 // SoundManager.h - Singleton manager for game audio
+// FIXED: Added continuous movement sound support
 //
 
 #ifndef PACMAN_SOUNDMANAGER_H
@@ -11,7 +12,6 @@
 #include <memory>
 
 enum class SoundEffect {
-  COIN_COLLECTED,
   FRUIT_COLLECTED,
   GHOST_EATEN,
   PACMAN_DIED,
@@ -33,6 +33,10 @@ private:
   // Background music
   sf::Music backgroundMusic;
   sf::Music menuMusic;
+
+  // ✅ NEW: Continuous movement sound (plays while PacMan moves)
+  sf::Music movementSound;
+  bool movementSoundPlaying;
 
   // Volume settings (0-100)
   float soundVolume;
@@ -56,6 +60,11 @@ public:
 
   // Play sound effects
   void playSound(SoundEffect effect);
+
+  // ✅ NEW: Movement sound controls
+  void startMovementSound();
+  void stopMovementSound();
+  bool isMovementSoundPlaying() const { return movementSoundPlaying; }
 
   // Music controls
   void playBackgroundMusic(bool loop = true);

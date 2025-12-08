@@ -29,10 +29,15 @@ LevelState::LevelState(int level, int startingScore)
 void LevelState::onEnter() {
   std::cout << "[LevelState] Entering level " << currentLevel << std::endl;
 
-  // ✅ Play background music
+  // ✅ Load sounds FIRST
   SoundManager& soundManager = SoundManager::getInstance();
+  if (!soundManager.isLoaded()) {
+    soundManager.loadSounds("../../resources/sound effects");
+  }
+
+  // ✅ Play intro music ONCE (don't loop)
   soundManager.stopMusic();
-  soundManager.playBackgroundMusic(true);
+  soundManager.playBackgroundMusic(false);  // false = play once
 
   if (!loadLevel()) {
     std::cerr << "[LevelState] Failed to load level!" << std::endl;
@@ -42,7 +47,7 @@ void LevelState::onEnter() {
 void LevelState::onExit() {
   std::cout << "[LevelState] Exiting level " << currentLevel << std::endl;
 
-  // ✅ Stop background music
+  // ✅ Stop all sounds
   SoundManager& soundManager = SoundManager::getInstance();
   soundManager.stopMusic();
 }
@@ -63,33 +68,23 @@ bool LevelState::loadLevel() {
   lives = std::make_shared<Lives>(3);
   std::cout << "[LevelState] ✅ Lives created" << std::endl;
 
-  // ✅ Load sounds (but DON'T attach observer here - that happens in factory!)
-  SoundManager& soundManager = SoundManager::getInstance();
-  if (!soundManager.isLoaded()) {
-    soundManager.loadSounds("../../resources/sound effects");
-  }
   std::cout << "[LevelState] ✅ Sound system ready" << std::endl;
-
   std::cout << "[LevelState] Level " << currentLevel << " loaded successfully!" << std::endl;
   return true;
 }
 
 void LevelState::handleEvents(sf::RenderWindow& window) {
-  // ✅ Disable pause if level is cleared
   if (world && world->isLevelCleared()) {
-    return;  // No pausing during/after level cleared
+    return;
   }
 
-  // Only trigger pause on key press, not while held
   static bool escWasPressed = false;
   bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
 
-  // Detect ESC key press (not held)
   if (escIsPressed && !escWasPressed) {
     std::cout << "[LevelState] Pause requested" << std::endl;
     pauseRequested = true;
 
-    // Push PausedState onto stack
     if (stateManager) {
       stateManager->pushState(std::make_unique<PausedState>());
     }
@@ -99,7 +94,6 @@ void LevelState::handleEvents(sf::RenderWindow& window) {
 }
 
 void LevelState::update(float deltaTime) {
-  // Don't update if pause was just requested
   if (pauseRequested) {
     pauseRequested = false;
     return;
@@ -120,21 +114,58 @@ void LevelState::update(float deltaTime) {
               << std::endl;
   }
 
-  // ✅ CRITICAL FIX: Update world FIRST (so timer can count down)
+  // Update world
   world->update(deltaTime);
 
-  // Then check if we should freeze other updates
+  // Freeze during special states
   if (world->isLevelClearedDisplayActive()) {
     std::cout << "[DEBUG] Skipping handleInput - level cleared display active!" << std::endl;
-    return;  // Freeze everything else, but world timer already updated
+    return;
   }
 
-
-  // Handle input (PacMan movement)
+  // Handle input
   handleInput();
 
-  // ✅ IMPROVED: Only update score when game is actually playable
-  // Not during: death animation, ready state, or game over
+  // ✅ PERFECT SOLUTION: Check BOTH direction AND actual movement
+  SoundManager& soundManager = SoundManager::getInstance();
+  PacMan* pacman = world->getPacMan();
+
+  // Only play movement sound during normal gameplay
+  bool isNormalGameplay = (pacman && lives && !lives->isGameOver() &&
+                           world && !world->isDeathAnimationActive() &&
+                           !world->isReadyStateActive() &&
+                           !world->isLevelClearedDisplayActive());
+
+  if (isNormalGameplay) {
+    // ✅ Track position to detect ACTUAL movement
+    static float prevX = 0.0f;
+    static float prevY = 0.0f;
+    auto [currentX, currentY] = pacman->getPosition();
+
+    bool actuallyMoving = (std::abs(currentX - prevX) > 0.001f ||
+                           std::abs(currentY - prevY) > 0.001f);
+
+    // ✅ Also check direction isn't NONE (not stopped by user)
+    Direction currentDirection = pacman->getDirection();
+    bool wantsToMove = (currentDirection != Direction::NONE);
+
+    // ✅ Play sound only if BOTH:
+    // 1. PacMan wants to move (direction set)
+    // 2. PacMan is ACTUALLY moving (position changing)
+    if (actuallyMoving && wantsToMove) {
+      soundManager.startMovementSound();
+    } else {
+      soundManager.stopMovementSound();
+    }
+
+    prevX = currentX;
+    prevY = currentY;
+  } else {
+    // ✅ Not normal gameplay - stop sound
+    soundManager.stopMovementSound();
+  }
+
+  // Update score decay
   if (score && lives && !lives->isGameOver() &&
       world && !world->isDeathAnimationActive() &&
       !world->isReadyStateActive() &&
@@ -142,7 +173,7 @@ void LevelState::update(float deltaTime) {
     score->updateScoreDecay();
   }
 
-  // Check for game over FIRST
+  // Check for game over
   if (lives && lives->isGameOver()) {
     std::cout << "[LevelState] Game Over! Final score: " << score->getScore() << std::endl;
 
@@ -152,8 +183,7 @@ void LevelState::update(float deltaTime) {
     return;
   }
 
-  // ✅ Check for level complete (only push VictoryState once)
-  // Debug output every frame to see the condition states
+  // Check for level complete
   if (world->isLevelCleared()) {
     std::cout << "[DEBUG] Level cleared: true, Display active: "
               << (world->isLevelClearedDisplayActive() ? "true" : "false") << std::endl;
@@ -166,17 +196,14 @@ void LevelState::update(float deltaTime) {
 }
 
 void LevelState::render(sf::RenderWindow& window) {
-  // Lazy initialization of factory and world (need window reference)
   if (!factory) {
     factory = std::make_unique<ConcreteFactory>(window, camera);
 
-    // Load sprites
     if (!factory->loadSprites("../../resources/sprites/spritemap.png")) {
       std::cerr << "[LevelState] Failed to load sprites!" << std::endl;
       return;
     }
 
-    // ✅ NEW: Create and set sound observer BEFORE creating world/entities
     auto soundObserver = std::make_shared<SoundObserver>();
     factory->setSoundObserver(soundObserver);
     std::cout << "[LevelState] ✅ SoundObserver attached to factory" << std::endl;
@@ -184,14 +211,10 @@ void LevelState::render(sf::RenderWindow& window) {
     hud = std::make_unique<HUD>(window, 60);
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
-    // Create world
     world = std::make_unique<World>(factory.get(), currentLevel);
-
-    // ✅ Pass shared_ptr (not raw pointer)
     world->setScore(score);
     world->setLives(lives);
 
-    // Load map (this is where entities are created, observer gets attached!)
     if (!world->loadFromFile(mapFile)) {
       std::cerr << "[LevelState] Failed to load map: " << mapFile << std::endl;
       return;
