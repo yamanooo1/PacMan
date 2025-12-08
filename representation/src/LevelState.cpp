@@ -29,15 +29,13 @@ LevelState::LevelState(int level, int startingScore)
 void LevelState::onEnter() {
   std::cout << "[LevelState] Entering level " << currentLevel << std::endl;
 
-  // ✅ Load sounds FIRST
   SoundManager& soundManager = SoundManager::getInstance();
   if (!soundManager.isLoaded()) {
     soundManager.loadSounds("../../resources/sound effects");
   }
 
-  // ✅ Play intro music ONCE (don't loop)
   soundManager.stopMusic();
-  soundManager.playBackgroundMusic(false);  // false = play once
+  soundManager.playBackgroundMusic(false);
 
   if (!loadLevel()) {
     std::cerr << "[LevelState] Failed to load level!" << std::endl;
@@ -47,7 +45,6 @@ void LevelState::onEnter() {
 void LevelState::onExit() {
   std::cout << "[LevelState] Exiting level " << currentLevel << std::endl;
 
-  // ✅ Stop all sounds
   SoundManager& soundManager = SoundManager::getInstance();
   soundManager.stopMusic();
 }
@@ -103,31 +100,69 @@ void LevelState::update(float deltaTime) {
     return;
   }
 
-  static int frameCount = 0;
-  frameCount++;
-  if (frameCount % 60 == 0) {
-    std::cout << "[DEBUG LevelState] Frame " << frameCount
-              << " | levelCleared=" << world->isLevelCleared()
-              << " | displayActive=" << world->isLevelClearedDisplayActive()
-              << " | readyActive=" << world->isReadyStateActive()
-              << " | deathActive=" << world->isDeathAnimationActive()
-              << std::endl;
+  SoundManager& soundManager = SoundManager::getInstance();
+
+  // ✅ Track game state changes to reset coin timer
+  static bool wasInSpecialState = false;
+  bool isInSpecialState = (world->isDeathAnimationActive() ||
+                           world->isReadyStateActive() ||
+                           world->isLevelClearedDisplayActive());
+
+  // ✅ NEW: Monitor fear mode state and stop music when it ends naturally
+  static bool wasFearModeActive = false;
+  bool isFearModeActive = world->isFearModeActive();
+
+  // Detect fear mode ending
+  if (wasFearModeActive && !isFearModeActive) {
+    soundManager.stopFearModeSound();
+    std::cout << "[LevelState] Fear mode ended naturally - stopped music" << std::endl;
+  }
+
+  wasFearModeActive = isFearModeActive;
+
+  // ✅ Count coins BEFORE update
+  static int previousCoinCount = -1;
+  int coinsBeforeUpdate = 0;
+
+  if (world) {
+    for (const auto& entity : world->getEntities()) {
+      if (entity->isDead()) continue;
+      float w = entity->getWidth();
+      float h = entity->getHeight();
+      bool isCoin = (w > 0.015f && w < 0.025f && h > 0.015f && h < 0.025f);
+      if (isCoin) coinsBeforeUpdate++;
+    }
+  }
+
+  if (previousCoinCount == -1) {
+    previousCoinCount = coinsBeforeUpdate;
   }
 
   // Update world
   world->update(deltaTime);
 
+  // ✅ Count coins AFTER update
+  int coinsAfterUpdate = 0;
+  for (const auto& entity : world->getEntities()) {
+    if (entity->isDead()) continue;
+    float w = entity->getWidth();
+    float h = entity->getHeight();
+    bool isCoin = (w > 0.015f && w < 0.025f && h > 0.015f && h < 0.025f);
+    if (isCoin) coinsAfterUpdate++;
+  }
+
+  // Detect coin collection THIS frame
+  bool coinWasCollectedThisFrame = (coinsAfterUpdate < previousCoinCount);
+  previousCoinCount = coinsAfterUpdate;
+
   // Freeze during special states
   if (world->isLevelClearedDisplayActive()) {
-    std::cout << "[DEBUG] Skipping handleInput - level cleared display active!" << std::endl;
     return;
   }
 
   // Handle input
   handleInput();
 
-  // ✅ PERFECT SOLUTION: Check BOTH direction AND actual movement
-  SoundManager& soundManager = SoundManager::getInstance();
   PacMan* pacman = world->getPacMan();
 
   // Only play movement sound during normal gameplay
@@ -137,7 +172,10 @@ void LevelState::update(float deltaTime) {
                            !world->isLevelClearedDisplayActive());
 
   if (isNormalGameplay) {
-    // ✅ Track position to detect ACTUAL movement
+    // ✅ Detect state transition (just exited special state)
+    bool justExitedSpecialState = (wasInSpecialState && !isInSpecialState);
+
+    // Track position for movement detection
     static float prevX = 0.0f;
     static float prevY = 0.0f;
     auto [currentX, currentY] = pacman->getPosition();
@@ -145,25 +183,47 @@ void LevelState::update(float deltaTime) {
     bool actuallyMoving = (std::abs(currentX - prevX) > 0.001f ||
                            std::abs(currentY - prevY) > 0.001f);
 
-    // ✅ Also check direction isn't NONE (not stopped by user)
     Direction currentDirection = pacman->getDirection();
     bool wantsToMove = (currentDirection != Direction::NONE);
 
-    // ✅ Play sound only if BOTH:
-    // 1. PacMan wants to move (direction set)
-    // 2. PacMan is ACTUALLY moving (position changing)
-    if (actuallyMoving && wantsToMove) {
+    // ✅ COIN EATING SOUND: Track recent coin collection with timer
+    static float timeSinceLastCoin = 999.0f;
+
+    // ✅ CRITICAL FIX: Reset timer when exiting special states (respawn, ready, etc.)
+    if (justExitedSpecialState) {
+      timeSinceLastCoin = 999.0f;
+      std::cout << "[SOUND] Reset coin timer on state transition" << std::endl;
+    } else if (coinWasCollectedThisFrame) {
+      timeSinceLastCoin = 0.0f;  // Reset on coin collection
+    } else {
+      timeSinceLastCoin += deltaTime;  // Count up
+    }
+
+    // ✅ Play sound ONLY if:
+    // 1. Actually moving
+    // 2. Wants to move
+    // 3. Collected a coin in the last 0.3 seconds
+    // 4. Coins still remain in level
+    if (actuallyMoving && wantsToMove && timeSinceLastCoin < 0.3f && coinsAfterUpdate > 0) {
       soundManager.startMovementSound();
     } else {
       soundManager.stopMovementSound();
     }
 
+    // Reset timer when stopped
+    if (!actuallyMoving) {
+      timeSinceLastCoin = 999.0f;
+    }
+
     prevX = currentX;
     prevY = currentY;
   } else {
-    // ✅ Not normal gameplay - stop sound
+    // ✅ Stop sound during special states
     soundManager.stopMovementSound();
   }
+
+  // ✅ Update state tracking for next frame
+  wasInSpecialState = isInSpecialState;
 
   // Update score decay
   if (score && lives && !lives->isGameOver() &&
@@ -184,11 +244,6 @@ void LevelState::update(float deltaTime) {
   }
 
   // Check for level complete
-  if (world->isLevelCleared()) {
-    std::cout << "[DEBUG] Level cleared: true, Display active: "
-              << (world->isLevelClearedDisplayActive() ? "true" : "false") << std::endl;
-  }
-
   if (world->isLevelCleared() && !world->isLevelClearedDisplayActive()) {
     std::cout << "[LevelState] ✅ PUSHING VICTORYSTATE now!" << std::endl;
     stateManager->pushState(std::make_unique<VictoryState>(currentLevel + 1, score->getScore()));

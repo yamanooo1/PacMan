@@ -1,6 +1,6 @@
 //
 // SoundManager.h - Singleton manager for game audio
-// FIXED: Added continuous movement sound support
+// FIXED: Added looping fear mode music
 //
 
 #ifndef PACMAN_SOUNDMANAGER_H
@@ -15,7 +15,6 @@ enum class SoundEffect {
   FRUIT_COLLECTED,
   GHOST_EATEN,
   PACMAN_DIED,
-  FEAR_MODE_START,
   LEVEL_START
 };
 
@@ -34,9 +33,13 @@ private:
   sf::Music backgroundMusic;
   sf::Music menuMusic;
 
-  // ✅ NEW: Continuous movement sound (plays while PacMan moves)
+  // ✅ Continuous movement sound (plays while PacMan moves)
   sf::Music movementSound;
   bool movementSoundPlaying;
+
+  // ✅ NEW: Continuous fear mode sound (loops while fear mode active)
+  sf::Music fearModeSound;
+  bool fearModeSoundPlaying;
 
   // Volume settings (0-100)
   float soundVolume;
@@ -61,10 +64,15 @@ public:
   // Play sound effects
   void playSound(SoundEffect effect);
 
-  // ✅ NEW: Movement sound controls
+  // ✅ Movement sound controls
   void startMovementSound();
   void stopMovementSound();
   bool isMovementSoundPlaying() const { return movementSoundPlaying; }
+
+  // ✅ NEW: Fear mode sound controls
+  void startFearModeSound();
+  void stopFearModeSound();
+  bool isFearModeSoundPlaying() const { return fearModeSoundPlaying; }
 
   // Music controls
   void playBackgroundMusic(bool loop = true);

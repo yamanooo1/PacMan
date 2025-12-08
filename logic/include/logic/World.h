@@ -75,6 +75,7 @@ public:
   void createFruit(float x, float y);
 
   bool loadFromFile(const std::string& filename);
+  bool isFearModeActive() const { return fearModeActive; }
 
   int getMapWidth() const { return mapWidth; }
   int getMapHeight() const { return mapHeight; }

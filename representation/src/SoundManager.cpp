@@ -1,6 +1,6 @@
 //
 // SoundManager.cpp - Implementation of audio system
-// FIXED: Added movement sound, removed coin sound
+// FIXED: Added looping fear mode music (no latency)
 //
 
 #include "representation/SoundManager.h"
@@ -10,7 +10,8 @@ SoundManager::SoundManager()
     : soundVolume(50.0f)
     , musicVolume(30.0f)
     , soundsLoaded(false)
-    , movementSoundPlaying(false)  // ✅ NEW
+    , movementSoundPlaying(false)
+    , fearModeSoundPlaying(false)  // ✅ NEW
 {
   std::cout << "[SOUND] SoundManager initialized" << std::endl;
 }
@@ -23,14 +24,12 @@ SoundManager& SoundManager::getInstance() {
 bool SoundManager::loadSounds(const std::string& soundDirectory) {
   std::cout << "[SOUND] Loading sounds from: " << soundDirectory << std::endl;
 
-  // ✅ REMOVED: COIN_COLLECTED (you deleted that file)
-  // Map sound effects to their file names
+  // ✅ REMOVED FEAR_MODE_START from sound effects (now using looping music)
   std::map<SoundEffect, std::string> soundFiles = {
-    {SoundEffect::FRUIT_COLLECTED, soundDirectory + "/11. PAC-MAN - Eating The Fruit.mp3"},
-    {SoundEffect::GHOST_EATEN, soundDirectory + "/13. PAC-MAN - Eating The Ghost.mp3"},
-    {SoundEffect::PACMAN_DIED, soundDirectory + "/15. Fail.mp3"},
-    {SoundEffect::FEAR_MODE_START, soundDirectory + "/12. Ghost - Turn to Blue.mp3"},
-    {SoundEffect::LEVEL_START, soundDirectory + "/02. Start Music.mp3"}
+    {SoundEffect::FRUIT_COLLECTED, soundDirectory + "/11. PAC-MAN - Eating The Fruit.wav"},
+    {SoundEffect::GHOST_EATEN, soundDirectory + "/13. PAC-MAN - Eating The Ghost.wav"},
+    {SoundEffect::PACMAN_DIED, soundDirectory + "/15. Fail.wav"},
+    {SoundEffect::LEVEL_START, soundDirectory + "/02. Start Music.wav"}
   };
 
   // Load each sound buffer
@@ -56,7 +55,7 @@ bool SoundManager::loadSounds(const std::string& soundDirectory) {
   }
 
   // Load background music
-  if (backgroundMusic.openFromFile(soundDirectory + "/02. Start Music.mp3")) {
+  if (backgroundMusic.openFromFile(soundDirectory + "/02. Start Music.wav")) {
     backgroundMusic.setVolume(musicVolume);
     std::cout << "[SOUND] ✓ Loaded background music" << std::endl;
   } else {
@@ -64,20 +63,29 @@ bool SoundManager::loadSounds(const std::string& soundDirectory) {
   }
 
   // Load menu music
-  if (menuMusic.openFromFile(soundDirectory + "/16. Coffee Break Music.mp3")) {
+  if (menuMusic.openFromFile(soundDirectory + "/16. Coffee Break Music.wav")) {
     menuMusic.setVolume(musicVolume);
     std::cout << "[SOUND] ✓ Loaded menu music" << std::endl;
   } else {
     std::cerr << "[SOUND] ✗ Failed to load menu music" << std::endl;
   }
 
-  // ✅ NEW: Load continuous movement sound
-  if (movementSound.openFromFile(soundDirectory + "/03. PAC-MAN - Eating The Pac-dots.mp3")) {
+  // ✅ Load continuous movement sound
+  if (movementSound.openFromFile(soundDirectory + "/03. PAC-MAN - Eating The Pac-dots.wav")) {
     movementSound.setVolume(soundVolume);
     movementSound.setLoop(true);  // Loop continuously
     std::cout << "[SOUND] ✓ Loaded movement sound (will loop)" << std::endl;
   } else {
     std::cerr << "[SOUND] ✗ Failed to load movement sound" << std::endl;
+  }
+
+  // ✅ NEW: Load continuous fear mode sound
+  if (fearModeSound.openFromFile(soundDirectory + "/12. Ghost - Turn to Blue.wav")) {
+    fearModeSound.setVolume(musicVolume);  // Use music volume
+    fearModeSound.setLoop(true);  // Loop continuously while fear mode active
+    std::cout << "[SOUND] ✓ Loaded fear mode sound (will loop)" << std::endl;
+  } else {
+    std::cerr << "[SOUND] ✗ Failed to load fear mode sound" << std::endl;
   }
 
   soundsLoaded = (loadedCount > 0);
@@ -117,7 +125,6 @@ void SoundManager::playSound(SoundEffect effect) {
       case SoundEffect::FRUIT_COLLECTED: effectName = "FRUIT"; break;
       case SoundEffect::GHOST_EATEN: effectName = "GHOST_EATEN"; break;
       case SoundEffect::PACMAN_DIED: effectName = "DEATH"; break;
-      case SoundEffect::FEAR_MODE_START: effectName = "FEAR_MODE"; break;
       case SoundEffect::LEVEL_START: effectName = "LEVEL_START"; break;
     }
 
@@ -125,7 +132,7 @@ void SoundManager::playSound(SoundEffect effect) {
   }
 }
 
-// ✅ NEW: Start continuous movement sound
+// ✅ Start continuous movement sound
 void SoundManager::startMovementSound() {
   if (!soundsLoaded) return;
 
@@ -137,7 +144,7 @@ void SoundManager::startMovementSound() {
   }
 }
 
-// ✅ NEW: Stop continuous movement sound
+// ✅ Stop continuous movement sound
 void SoundManager::stopMovementSound() {
   if (movementSound.getStatus() == sf::Music::Playing) {
     movementSound.stop();
@@ -146,8 +153,28 @@ void SoundManager::stopMovementSound() {
   }
 }
 
+// ✅ NEW: Start continuous fear mode sound
+void SoundManager::startFearModeSound() {
+  if (!soundsLoaded) return;
+
+  // Only start if not already playing
+  if (fearModeSound.getStatus() != sf::Music::Playing) {
+    fearModeSound.play();
+    fearModeSoundPlaying = true;
+    std::cout << "[SOUND] Started fear mode sound (looping)" << std::endl;
+  }
+}
+
+// ✅ NEW: Stop continuous fear mode sound
+void SoundManager::stopFearModeSound() {
+  if (fearModeSound.getStatus() == sf::Music::Playing) {
+    fearModeSound.stop();
+    fearModeSoundPlaying = false;
+    std::cout << "[SOUND] Stopped fear mode sound" << std::endl;
+  }
+}
+
 void SoundManager::playBackgroundMusic(bool loop) {
-  // ✅ Don't try to play if not loaded yet
   if (!soundsLoaded) {
     std::cout << "[SOUND] Cannot play background music - sounds not loaded yet" << std::endl;
     return;
@@ -175,14 +202,16 @@ void SoundManager::playMenuMusic(bool loop) {
 void SoundManager::stopMusic() {
   backgroundMusic.stop();
   menuMusic.stop();
-  stopMovementSound();  // ✅ Also stop movement sound
+  stopMovementSound();      // ✅ Also stop movement sound
+  stopFearModeSound();       // ✅ Also stop fear mode sound
   std::cout << "[SOUND] Stopped all music" << std::endl;
 }
 
 void SoundManager::pauseMusic() {
   backgroundMusic.pause();
   menuMusic.pause();
-  movementSound.pause();  // ✅ Also pause movement sound
+  movementSound.pause();     // ✅ Also pause movement sound
+  fearModeSound.pause();     // ✅ Also pause fear mode sound
 }
 
 void SoundManager::resumeMusic() {
@@ -194,6 +223,9 @@ void SoundManager::resumeMusic() {
   }
   if (movementSoundPlaying && movementSound.getStatus() == sf::Music::Paused) {
     movementSound.play();
+  }
+  if (fearModeSoundPlaying && fearModeSound.getStatus() == sf::Music::Paused) {
+    fearModeSound.play();
   }
 }
 
@@ -217,6 +249,7 @@ void SoundManager::setMusicVolume(float volume) {
   musicVolume = std::max(0.0f, std::min(100.0f, volume));
   backgroundMusic.setVolume(musicVolume);
   menuMusic.setVolume(musicVolume);
+  fearModeSound.setVolume(musicVolume);  // ✅ Fear mode uses music volume
 
   std::cout << "[SOUND] Music volume set to: " << musicVolume << std::endl;
 }

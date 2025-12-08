@@ -1,6 +1,6 @@
 //
 // SoundObserver.cpp - Plays sounds in response to game events
-// FIXED: Removed coin collection sound (file deleted)
+// FIXED: Fear mode now loops continuously instead of one-shot
 //
 
 #include "representation/SoundObserver.h"
@@ -15,13 +15,16 @@ void SoundObserver::update(GameEvent event) {
 
   switch (event) {
   case GameEvent::COIN_COLLECTED:
-    // ✅ REMOVED: No sound for coin collection
-    // (You deleted the coin eating sound file)
+    // No sound for coin collection (handled by movement sound)
     break;
 
   case GameEvent::FRUIT_COLLECTED:
+    // ✅ Play fruit sound (one-shot)
     soundManager.playSound(SoundEffect::FRUIT_COLLECTED);
-    soundManager.playSound(SoundEffect::FEAR_MODE_START);
+
+    // ✅ Start looping fear mode music (won't be interrupted by fruit sound)
+    soundManager.startFearModeSound();
+    std::cout << "[SoundObserver] Fruit collected - started looping fear mode music" << std::endl;
     break;
 
   case GameEvent::GHOST_EATEN:
@@ -30,6 +33,10 @@ void SoundObserver::update(GameEvent event) {
 
   case GameEvent::PACMAN_DIED:
     soundManager.playSound(SoundEffect::PACMAN_DIED);
+
+    // ✅ Stop fear mode music when PacMan dies
+    soundManager.stopFearModeSound();
+    std::cout << "[SoundObserver] PacMan died - stopped fear mode music" << std::endl;
     break;
 
   case GameEvent::LEVEL_CLEARED:
