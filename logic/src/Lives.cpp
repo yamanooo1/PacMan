@@ -1,5 +1,5 @@
 //
-// Created by yamanooo on 11/27/25.
+// Lives.cpp - WITHOUT sound dependencies (sounds handled by SoundObserver)
 //
 
 #include "logic/Lives.h"
@@ -16,6 +16,8 @@ void Lives::update(GameEvent event) {
     remainingLives--;
 
     std::cout << "[LIVES] PacMan died! Remaining lives: " << remainingLives << std::endl;
+
+    // ✅ NO SoundManager here! Sound is handled by SoundObserver in representation layer
 
     if (remainingLives <= 0) {
       std::cout << "[LIVES] GAME OVER!" << std::endl;

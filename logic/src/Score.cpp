@@ -21,6 +21,7 @@ Score::Score()
 
 void Score::update(GameEvent event) {
     Stopwatch& stopwatch = Stopwatch::getInstance();
+    // ✅ NO SoundManager here! Sound is handled by SoundObserver in representation layer
 
     switch (event) {
         case GameEvent::COIN_COLLECTED: {
