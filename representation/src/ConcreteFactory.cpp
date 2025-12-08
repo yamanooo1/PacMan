@@ -1,5 +1,5 @@
 //
-// ConcreteFactory.cpp - UPDATED with explicit observer attachment
+// ConcreteFactory.cpp - UPDATED with SoundObserver attachment
 //
 
 #include "representation/ConcreteFactory.h"
@@ -11,6 +11,7 @@
 #include "logic/Wall.h"
 #include "logic/Coin.h"
 #include "logic/Fruit.h"
+#include "logic/Observer.h"  // ✅ Include Observer
 #include "representation/PacManView.h"
 #include "representation/GhostView.h"
 #include "representation/WallView.h"
@@ -22,6 +23,7 @@ ConcreteFactory::ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> 
     : window(win)
     , camera(cam)
     , spriteAtlas(std::make_shared<SpriteAtlas>())
+    , soundObserver(nullptr)  // ✅ Initialize to nullptr
 {
 }
 
@@ -47,11 +49,13 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
   auto model = std::make_unique<PacMan>(x, y);
   PacMan* modelPtr = model.get();
 
-  // ✅ Create view with shared_ptr
   auto view = std::make_shared<PacManView>(modelPtr, window, camera, spriteAtlas);
+  modelPtr->attach(view);
 
-  // ✅ CORRECTED: Explicitly attach view as observer using shared_ptr
-  modelPtr->attach(view);  // view is already shared_ptr, so this works
+  // ✅ NEW: Attach sound observer if present
+  if (soundObserver) {
+    modelPtr->attach(soundObserver);
+  }
 
   views.push_back(view);
   return model;
@@ -61,7 +65,6 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
   auto model = std::make_unique<Ghost>(x, y, type, color, waitTime, speedMultiplier);
   Ghost* modelPtr = model.get();
 
-  // ✅ Create view with shared_ptr
   auto view = std::make_shared<GhostView>(modelPtr, window, camera, spriteAtlas);
 
   switch (color) {
@@ -83,8 +86,12 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
     break;
   }
 
-  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
+
+  // ✅ NEW: Attach sound observer if present
+  if (soundObserver) {
+    modelPtr->attach(soundObserver);
+  }
 
   views.push_back(view);
   return model;
@@ -94,11 +101,10 @@ std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, flo
   auto model = std::make_unique<Wall>(x, y, w, h);
   Wall* modelPtr = model.get();
 
-  // ✅ Create view with shared_ptr
   auto view = std::make_shared<WallView>(modelPtr, window, camera, spriteAtlas);
-
-  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
+
+  // Walls don't fire events, so no sound observer needed
 
   views.push_back(view);
   return model;
@@ -108,11 +114,13 @@ std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
   auto model = std::make_unique<Coin>(x, y);
   Coin* modelPtr = model.get();
 
-  // ✅ Create view with shared_ptr
   auto view = std::make_shared<CoinView>(modelPtr, window, camera, spriteAtlas);
-
-  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
+
+  // ✅ NEW: Attach sound observer if present
+  if (soundObserver) {
+    modelPtr->attach(soundObserver);
+  }
 
   views.push_back(view);
   return model;
@@ -122,11 +130,13 @@ std::unique_ptr<Fruit> ConcreteFactory::createFruit(float x, float y) {
   auto model = std::make_unique<Fruit>(x, y);
   Fruit* modelPtr = model.get();
 
-  // ✅ Create view with shared_ptr
   auto view = std::make_shared<FruitView>(modelPtr, window, camera, spriteAtlas);
-
-  // ✅ CORRECTED: Explicitly attach view as observer
   modelPtr->attach(view);
+
+  // ✅ NEW: Attach sound observer if present
+  if (soundObserver) {
+    modelPtr->attach(soundObserver);
+  }
 
   views.push_back(view);
   return model;
@@ -141,7 +151,7 @@ void ConcreteFactory::drawAll() {
 void ConcreteFactory::removeDeadViews() {
   views.erase(
     std::remove_if(views.begin(), views.end(),
-      [](const std::shared_ptr<EntityView>& view) {  // ✅ shared_ptr
+      [](const std::shared_ptr<EntityView>& view) {
         return view->getModel()->isDead();
       }),
     views.end()

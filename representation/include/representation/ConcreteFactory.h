@@ -1,5 +1,5 @@
 //
-// ConcreteFactory.h - UPDATED to use shared_ptr for views
+// ConcreteFactory.h - UPDATED with SoundObserver support
 //
 
 #ifndef PACMAN_CONCRETEFACTORY_H
@@ -13,19 +13,28 @@
 class EntityView;
 class Camera;
 class SpriteAtlas;
+class Observer;  // ✅ Forward declaration
 
 class ConcreteFactory: public AbstractFactory {
 private:
   sf::RenderWindow& window;
   std::shared_ptr<Camera> camera;
   std::shared_ptr<SpriteAtlas> spriteAtlas;
-  std::vector<std::shared_ptr<EntityView>> views;  // ✅ CHANGED to shared_ptr
+  std::vector<std::shared_ptr<EntityView>> views;
+
+  // ✅ NEW: Sound observer to attach to entities
+  std::shared_ptr<Observer> soundObserver;
 
 public:
   explicit ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam);
   ~ConcreteFactory() override;
 
   bool loadSprites(const std::string& filepath);
+
+  // ✅ NEW: Set sound observer that will be attached to all entities
+  void setSoundObserver(std::shared_ptr<Observer> observer) {
+    soundObserver = observer;
+  }
 
   std::unique_ptr<PacMan> createPacMan(float x, float y) override;
   std::unique_ptr<Ghost> createGhost(float x, float y, GhostType type, GhostColor color, float waitTime, float speedMultiplier = 1.0f) override;

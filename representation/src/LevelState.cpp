@@ -3,6 +3,8 @@
 #include "representation/PausedState.h"
 #include "representation/VictoryState.h"
 #include "representation/ConcreteFactory.h"
+#include "representation/SoundManager.h"
+#include "representation/SoundObserver.h"
 #include "representation/Camera.h"
 #include "representation/HUD.h"
 #include "logic/World.h"
@@ -16,7 +18,7 @@ LevelState::~LevelState() = default;
 
 LevelState::LevelState(int level, int startingScore)
     : currentLevel(level)
-    , initialScore(startingScore)  // ✅ ADD THIS
+    , initialScore(startingScore)
     , mapFile("../../resources/map/map1.txt")
     , pauseRequested(false)
 {
@@ -27,14 +29,22 @@ LevelState::LevelState(int level, int startingScore)
 void LevelState::onEnter() {
   std::cout << "[LevelState] Entering level " << currentLevel << std::endl;
 
+  // ✅ Play background music
+  SoundManager& soundManager = SoundManager::getInstance();
+  soundManager.stopMusic();
+  soundManager.playBackgroundMusic(true);
+
   if (!loadLevel()) {
     std::cerr << "[LevelState] Failed to load level!" << std::endl;
-    // TODO: Handle error - maybe go back to menu?
   }
 }
 
 void LevelState::onExit() {
   std::cout << "[LevelState] Exiting level " << currentLevel << std::endl;
+
+  // ✅ Stop background music
+  SoundManager& soundManager = SoundManager::getInstance();
+  soundManager.stopMusic();
 }
 
 bool LevelState::loadLevel() {
@@ -46,14 +56,19 @@ bool LevelState::loadLevel() {
   std::cout << "[LevelState] ✅ Camera created" << std::endl;
 
   std::cout << "[LevelState] Creating Score with initialScore: " << initialScore << std::endl;
-  score = std::make_shared<Score>();  // ✅ CHANGED to make_shared
-  std::cout << "[LevelState] ✅ Score created" << std::endl;
-
+  score = std::make_shared<Score>();
   score->setScore(initialScore);
   std::cout << "[LevelState] ✅ Score set to: " << initialScore << std::endl;
 
-  lives = std::make_shared<Lives>(3);  // ✅ CHANGED to make_shared
+  lives = std::make_shared<Lives>(3);
   std::cout << "[LevelState] ✅ Lives created" << std::endl;
+
+  // ✅ Load sounds (but DON'T attach observer here - that happens in factory!)
+  SoundManager& soundManager = SoundManager::getInstance();
+  if (!soundManager.isLoaded()) {
+    soundManager.loadSounds("../../resources/sound effects");
+  }
+  std::cout << "[LevelState] ✅ Sound system ready" << std::endl;
 
   std::cout << "[LevelState] Level " << currentLevel << " loaded successfully!" << std::endl;
   return true;
@@ -123,9 +138,9 @@ void LevelState::update(float deltaTime) {
   if (score && lives && !lives->isGameOver() &&
       world && !world->isDeathAnimationActive() &&
       !world->isReadyStateActive() &&
-      !world->isLevelClearedDisplayActive()) {  // ✅ ADD THIS CHECK
+      !world->isLevelClearedDisplayActive()) {
     score->updateScoreDecay();
-      }
+  }
 
   // Check for game over FIRST
   if (lives && lives->isGameOver()) {
@@ -161,6 +176,11 @@ void LevelState::render(sf::RenderWindow& window) {
       return;
     }
 
+    // ✅ NEW: Create and set sound observer BEFORE creating world/entities
+    auto soundObserver = std::make_shared<SoundObserver>();
+    factory->setSoundObserver(soundObserver);
+    std::cout << "[LevelState] ✅ SoundObserver attached to factory" << std::endl;
+
     hud = std::make_unique<HUD>(window, 60);
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
@@ -171,7 +191,7 @@ void LevelState::render(sf::RenderWindow& window) {
     world->setScore(score);
     world->setLives(lives);
 
-    // Load map
+    // Load map (this is where entities are created, observer gets attached!)
     if (!world->loadFromFile(mapFile)) {
       std::cerr << "[LevelState] Failed to load map: " << mapFile << std::endl;
       return;

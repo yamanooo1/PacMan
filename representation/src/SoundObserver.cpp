@@ -19,7 +19,7 @@ void SoundObserver::update(GameEvent event) {
 
   case GameEvent::FRUIT_COLLECTED:
     soundManager.playSound(SoundEffect::FRUIT_COLLECTED);
-    soundManager.playSound(SoundEffect::FEAR_MODE_START);  // ✅ Fear mode activates!
+    soundManager.playSound(SoundEffect::FEAR_MODE_START);  // ✅ Play both!
     break;
 
   case GameEvent::GHOST_EATEN:
