@@ -9,13 +9,21 @@ class MenuState : public State {
 private:
   sf::Font font;
   sf::Text titleText;
-  sf::Text playText;
-  sf::Text instructionsText;
-  sf::Text leaderboardTitle;
 
-  // ✅ NEW: Store high scores and score texts
-  std::vector<int> highScores;
-  std::vector<sf::Text> scoreTexts;
+  // ✅ NEW: Play button instead of text
+  sf::RectangleShape playButton;
+  sf::Text playButtonText;
+  bool isPlayButtonHovered;
+
+  // ✅ NEW: How to play section
+  sf::Text howToPlayTitle;
+  sf::Text howToPlayControls;
+
+  // ✅ NEW: Leaderboard with yellow box
+  sf::RectangleShape leaderboardBox;
+  sf::Text leaderboardTitle;
+  std::vector<sf::Text> scoreNameTexts;  // Player names
+  std::vector<sf::Text> scoreValueTexts; // Scores
 
   bool fontLoaded;
 
@@ -32,6 +40,10 @@ public:
 
 private:
   void setupTexts();
+  void setupPlayButton();
+  void setupHowToPlay();
+  void setupLeaderboard();
+  bool isMouseOverButton(const sf::RectangleShape& button, sf::RenderWindow& window);
 };
 
 #endif // PACMAN_MENUSTATE_H

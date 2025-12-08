@@ -6,6 +6,7 @@
 
 MenuState::MenuState()
     : fontLoaded(false)
+    , isPlayButtonHovered(false)
 {
   if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
     fontLoaded = true;
@@ -15,88 +16,158 @@ MenuState::MenuState()
   }
 
   setupTexts();
+  setupPlayButton();
+  setupHowToPlay();
 }
 
 void MenuState::setupTexts() {
   if (!fontLoaded) return;
 
-  // Title
+  // Title - larger and more prominent
   titleText.setFont(font);
   titleText.setString("PAC-MAN");
-  titleText.setCharacterSize(50);
+  titleText.setCharacterSize(60);
   titleText.setFillColor(sf::Color::Yellow);
 
-  // Center title horizontally
   sf::FloatRect titleBounds = titleText.getLocalBounds();
-  titleText.setPosition((800.f - titleBounds.width) / 2.f, 80.f);
+  titleText.setPosition((800.f - titleBounds.width) / 2.f, 50.f);
+}
 
-  // Play button/instruction
-  playText.setFont(font);
-  playText.setString("Press SPACE to Play");
-  playText.setCharacterSize(18);
-  playText.setFillColor(sf::Color::White);
+// ✅ NEW: Setup clickable play button
+void MenuState::setupPlayButton() {
+  if (!fontLoaded) return;
 
-  sf::FloatRect playBounds = playText.getLocalBounds();
-  playText.setPosition((800.f - playBounds.width) / 2.f, 250.f);
+  // Button shape (grey, will lighten on hover)
+  playButton.setSize(sf::Vector2f(300.f, 60.f));
+  playButton.setFillColor(sf::Color(80, 80, 80));  // Dark grey
+  playButton.setOutlineColor(sf::Color::White);
+  playButton.setOutlineThickness(3.f);
 
-  // Instructions
-  instructionsText.setFont(font);
-  instructionsText.setString("Arrow Keys / WASD to move\nESC to pause");
-  instructionsText.setCharacterSize(12);
-  instructionsText.setFillColor(sf::Color::Cyan);
+  // Center button horizontally, near bottom
+  playButton.setPosition((800.f - 300.f) / 2.f, 680.f);
 
-  sf::FloatRect instrBounds = instructionsText.getLocalBounds();
-  instructionsText.setPosition((800.f - instrBounds.width) / 2.f, 320.f);
+  // Button text
+  playButtonText.setFont(font);
+  playButtonText.setString("PLAY");
+  playButtonText.setCharacterSize(28);
+  playButtonText.setFillColor(sf::Color::White);
 
-  // Leaderboard title
-  leaderboardTitle.setFont(font);
-  leaderboardTitle.setString("TOP SCORES");
-  leaderboardTitle.setCharacterSize(20);
-  leaderboardTitle.setFillColor(sf::Color::Yellow);
+  // Center text in button
+  sf::FloatRect textBounds = playButtonText.getLocalBounds();
+  playButtonText.setPosition(
+    playButton.getPosition().x + (300.f - textBounds.width) / 2.f - textBounds.left,
+    playButton.getPosition().y + (60.f - textBounds.height) / 2.f - textBounds.top - 5.f
+  );
+}
 
-  sf::FloatRect leaderBounds = leaderboardTitle.getLocalBounds();
-  leaderboardTitle.setPosition((800.f - leaderBounds.width) / 2.f, 450.f);
+// ✅ NEW: Setup how to play section
+void MenuState::setupHowToPlay() {
+  if (!fontLoaded) return;
+
+  // Title
+  howToPlayTitle.setFont(font);
+  howToPlayTitle.setString("HOW TO PLAY");
+  howToPlayTitle.setCharacterSize(20);
+  howToPlayTitle.setFillColor(sf::Color::Cyan);
+
+  sf::FloatRect titleBounds = howToPlayTitle.getLocalBounds();
+  howToPlayTitle.setPosition((800.f - titleBounds.width) / 2.f, 150.f);
+
+  // Controls text
+  howToPlayControls.setFont(font);
+  howToPlayControls.setString(
+    "ARROW KEYS or WASD - Move Pac-Man\n"
+    "      ESC - Pause Game\n"
+    "      M - Return to Menu\n\n"
+    " Eat all dots to clear level!\n"
+    "Eat fruit for fear mode power!"
+  );
+  howToPlayControls.setCharacterSize(12);
+  howToPlayControls.setFillColor(sf::Color::White);
+  howToPlayControls.setLineSpacing(1.5f);
+
+  sf::FloatRect controlsBounds = howToPlayControls.getLocalBounds();
+  howToPlayControls.setPosition((800.f - controlsBounds.width) / 2.f, 190.f);
 }
 
 void MenuState::onEnter() {
   std::cout << "[MenuState] Entered menu state" << std::endl;
 
-  // ✅ Load high scores ONCE when entering menu
+  // Load and setup leaderboard
+  setupLeaderboard();
+}
+
+// ✅ NEW: Setup leaderboard with yellow box
+void MenuState::setupLeaderboard() {
+  if (!fontLoaded) return;
+
+  // Load high scores
   Score tempScore;
   tempScore.loadHighScores();
-  highScores = tempScore.getHighScores();
+  auto highScores = tempScore.getHighScores();
 
-  // ✅ Create score texts
-  scoreTexts.clear();
-  float yPosition = 500.f;
+  // Yellow box for leaderboard
+  leaderboardBox.setSize(sf::Vector2f(600.f, 280.f));
+  leaderboardBox.setFillColor(sf::Color(255, 255, 0, 40));  // Semi-transparent yellow
+  leaderboardBox.setOutlineColor(sf::Color::Yellow);
+  leaderboardBox.setOutlineThickness(4.f);
+  leaderboardBox.setPosition((800.f - 600.f) / 2.f, 360.f);
 
-  for (size_t i = 0; i < highScores.size(); ++i) {
+  // Title
+  leaderboardTitle.setFont(font);
+  leaderboardTitle.setString("TOP 5 SCORES");
+  leaderboardTitle.setCharacterSize(24);
+  leaderboardTitle.setFillColor(sf::Color::Yellow);
+
+  sf::FloatRect titleBounds = leaderboardTitle.getLocalBounds();
+  leaderboardTitle.setPosition((800.f - titleBounds.width) / 2.f, 380.f);
+
+  // Create score entries
+  scoreNameTexts.clear();
+  scoreValueTexts.clear();
+
+  float yPosition = 430.f;
+  float leftX = 150.f;    // Position for player names (left side)
+  float rightX = 650.f;   // Position for scores (right side)
+
+  for (size_t i = 0; i < 5; ++i) {
+    // Player name (left side)
+    sf::Text nameText;
+    nameText.setFont(font);
+    nameText.setCharacterSize(16);
+
+    if (i < highScores.size()) {
+      // Format: "1. PLAYERNAME"
+      nameText.setString(std::to_string(i + 1) + ". " + highScores[i].playerName);
+      nameText.setFillColor(sf::Color::White);
+    } else {
+      // Empty slot
+      nameText.setString(std::to_string(i + 1) + ". ------");
+      nameText.setFillColor(sf::Color(100, 100, 100));
+    }
+
+    nameText.setPosition(leftX, yPosition);
+    scoreNameTexts.push_back(nameText);
+
+    // Score (right side)
     sf::Text scoreText;
     scoreText.setFont(font);
-    scoreText.setString(std::to_string(i + 1) + ".  " + std::to_string(highScores[i]));
     scoreText.setCharacterSize(16);
-    scoreText.setFillColor(sf::Color::White);
 
-    sf::FloatRect bounds = scoreText.getLocalBounds();
-    scoreText.setPosition((800.f - bounds.width) / 2.f, yPosition);
+    if (i < highScores.size()) {
+      scoreText.setString(std::to_string(highScores[i].score));
+      scoreText.setFillColor(sf::Color::White);
+    } else {
+      scoreText.setString("---");
+      scoreText.setFillColor(sf::Color(100, 100, 100));
+    }
 
-    scoreTexts.push_back(scoreText);
-    yPosition += 35.f;
-  }
+    // Right-align the score
+    sf::FloatRect scoreBounds = scoreText.getLocalBounds();
+    scoreText.setPosition(rightX - scoreBounds.width, yPosition);
+    scoreValueTexts.push_back(scoreText);
 
-  // Add empty slots
-  for (size_t i = highScores.size(); i < 5; ++i) {
-    sf::Text scoreText;
-    scoreText.setFont(font);
-    scoreText.setString(std::to_string(i + 1) + ".  ---");
-    scoreText.setCharacterSize(16);
-    scoreText.setFillColor(sf::Color(100, 100, 100));
-
-    sf::FloatRect bounds = scoreText.getLocalBounds();
-    scoreText.setPosition((800.f - bounds.width) / 2.f, yPosition);
-
-    scoreTexts.push_back(scoreText);
-    yPosition += 35.f;
+    yPosition += 45.f;
   }
 }
 
@@ -105,47 +176,78 @@ void MenuState::onExit() {
 }
 
 void MenuState::handleEvents(sf::RenderWindow& window) {
-  static bool spaceWasPressed = false;
-  static bool escWasPressed = false;
+  static bool mouseWasPressed = false;
+  bool mouseIsPressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
-  bool spaceIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
-  bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
+  // ✅ NEW: Check for play button click
+  if (mouseIsPressed && !mouseWasPressed) {
+    if (isMouseOverButton(playButton, window)) {
+      std::cout << "[MenuState] Play button clicked - starting game..." << std::endl;
 
-  // Check for Space key to start game (detect press)
-  if (spaceIsPressed && !spaceWasPressed) {
-    std::cout << "[MenuState] Starting game..." << std::endl;
-
-    // Transition to LevelState
-    if (stateManager) {
-      stateManager->pushState(std::make_unique<LevelState>(1));
+      if (stateManager) {
+        stateManager->pushState(std::make_unique<LevelState>(1));
+      }
     }
   }
 
-  // ESC to quit from menu (detect press)
+  mouseWasPressed = mouseIsPressed;
+
+  // Keep ESC to quit as backup
+  static bool escWasPressed = false;
+  bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
+
   if (escIsPressed && !escWasPressed) {
     std::cout << "[MenuState] Quitting game..." << std::endl;
     window.close();
   }
 
-  spaceWasPressed = spaceIsPressed;
   escWasPressed = escIsPressed;
 }
 
 void MenuState::update(float deltaTime) {
-  // Menu doesn't need to update anything for now
+  // Nothing to update - hover state is checked in render()
+}
+
+bool MenuState::isMouseOverButton(const sf::RectangleShape& button, sf::RenderWindow& window) {
+  sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+  sf::Vector2f mousePosFloat(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+
+  return button.getGlobalBounds().contains(mousePosFloat);
 }
 
 void MenuState::render(sf::RenderWindow& window) {
   if (!fontLoaded) return;
 
-  // Draw all text elements
+  // Update hover state (needs window)
+  bool wasHovered = isPlayButtonHovered;
+  isPlayButtonHovered = isMouseOverButton(playButton, window);
+
+  if (isPlayButtonHovered) {
+    playButton.setFillColor(sf::Color(140, 140, 140));
+  } else {
+    playButton.setFillColor(sf::Color(80, 80, 80));
+  }
+
+  // Draw title
   window.draw(titleText);
-  window.draw(playText);
-  window.draw(instructionsText);
+
+  // Draw how to play section
+  window.draw(howToPlayTitle);
+  window.draw(howToPlayControls);
+
+  // ✅ Draw leaderboard yellow box
+  window.draw(leaderboardBox);
   window.draw(leaderboardTitle);
 
-  // ✅ Draw pre-loaded score texts (no file I/O every frame!)
-  for (const auto& scoreText : scoreTexts) {
+  // Draw score entries (names on left, scores on right)
+  for (const auto& nameText : scoreNameTexts) {
+    window.draw(nameText);
+  }
+  for (const auto& scoreText : scoreValueTexts) {
     window.draw(scoreText);
   }
+
+  // ✅ Draw play button (at bottom)
+  window.draw(playButton);
+  window.draw(playButtonText);
 }

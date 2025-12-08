@@ -3,6 +3,7 @@
 
 #include "State.h"
 #include <SFML/Graphics.hpp>
+#include <string>
 
 class VictoryState : public State {
 private:
@@ -12,17 +13,25 @@ private:
   sf::Text continueText;
   sf::Text menuText;
 
+  // ✅ NEW: Name input for high scores
+  sf::Text namePromptText;
+  sf::Text nameInputText;
+  sf::RectangleShape nameInputBox;
+  std::string playerNameInput;
+  bool isEnteringName;
+  bool nameSubmitted;
+
   bool fontLoaded;
   bool continueRequested;
   bool menuRequested;
 
-
   bool spaceWasPressed;
   bool mWasPressed;
 
-  int nextLevel;     // 0 = game over (no next level)
+  int nextLevel;
   int finalScore;
-  bool isGameOver;   // true if game over, false if level cleared
+  bool isGameOver;
+  bool qualifiesForHighScore;  // ✅ NEW
 
 public:
   VictoryState(int nextLevelNum, int score);
@@ -39,6 +48,9 @@ public:
 
 private:
   void setupTexts();
+  void setupNameInput();
+  void handleTextInput(sf::Uint32 unicode);
+  void submitHighScore();
 };
 
 #endif // PACMAN_VICTORYSTATE_H

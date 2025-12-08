@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 
 Score::Score()
@@ -15,7 +16,6 @@ Score::Score()
     lastCoinTime = stopwatch.getElapsedTime();
     lastUpdateTime = stopwatch.getElapsedTime();
 
-    // Load existing high scores
     loadHighScores();
 }
 
@@ -31,11 +31,7 @@ void Score::update(GameEvent event) {
             int points = static_cast<int>(30 * decayFactor);
             currentScore += points;
 
-            std::cout << "[SCORE] Coin! Time since last: " << timeSinceLastCoin
-                      << "s, Decay: " << decayFactor
-                      << ", Points: " << points
-                      << ", Total: " << currentScore << std::endl;
-
+            std::cout << "[SCORE] Coin! +[" << points << " points. Total: " << currentScore << std::endl;
             lastCoinTime = currentTime;
             break;
         }
@@ -89,27 +85,34 @@ void Score::reset() {
     lastUpdateTime = stopwatch.getElapsedTime();
 }
 
-// ✅ NEW: Load high scores from file
+// ✅ UPDATED: Load scores with player names
 void Score::loadHighScores(const std::string& filepath) {
     scoresFilePath = filepath;
     highScores.clear();
 
     std::ifstream file(scoresFilePath);
     if (!file.is_open()) {
-        std::cout << "[SCORE] No existing high scores file found. Starting fresh." << std::endl;
+        std::cout << "[SCORE] No existing high scores file. Starting fresh." << std::endl;
         return;
     }
 
-    int score;
-    while (file >> score && highScores.size() < MAX_HIGH_SCORES) {
-        highScores.push_back(score);
+    std::string line;
+    while (std::getline(file, line) && highScores.size() < MAX_HIGH_SCORES) {
+        std::istringstream iss(line);
+        std::string name;
+        int score;
+
+        // Expected format: "NAME SCORE"
+        if (iss >> name >> score) {
+            highScores.push_back(ScoreEntry(name, score));
+        }
     }
 
     file.close();
     std::cout << "[SCORE] Loaded " << highScores.size() << " high scores." << std::endl;
 }
 
-// ✅ NEW: Save high scores to file
+// ✅ UPDATED: Save scores with player names
 void Score::saveHighScores() {
     std::ofstream file(scoresFilePath);
     if (!file.is_open()) {
@@ -117,38 +120,36 @@ void Score::saveHighScores() {
         return;
     }
 
-    for (int score : highScores) {
-        file << score << "\n";
+    for (const auto& entry : highScores) {
+        file << entry.playerName << " " << entry.score << "\n";
     }
 
     file.close();
     std::cout << "[SCORE] Saved " << highScores.size() << " high scores." << std::endl;
 }
 
-// ✅ NEW: Check if score qualifies as high score
 bool Score::isHighScore(int score) const {
     if (highScores.size() < MAX_HIGH_SCORES) {
-        return true;  // Less than 5 scores, always qualifies
+        return true;
     }
-
-    // Check if score is higher than the lowest high score
-    return score > highScores.back();
+    return score > highScores.back().score;  // ✅ Compare with .score
 }
 
-// ✅ NEW: Add a high score to the list
-void Score::addHighScore(int score) {
-    highScores.push_back(score);
+// ✅ UPDATED: Add high score with player name
+void Score::addHighScore(const std::string& playerName, int score) {
+    highScores.push_back(ScoreEntry(playerName, score));
 
-    // Sort in descending order
-    std::sort(highScores.begin(), highScores.end(), std::greater<int>());
+    // Sort in descending order by score
+    std::sort(highScores.begin(), highScores.end(),
+        [](const ScoreEntry& a, const ScoreEntry& b) {
+            return a.score > b.score;
+        });
 
     // Keep only top 5
     if (highScores.size() > MAX_HIGH_SCORES) {
         highScores.resize(MAX_HIGH_SCORES);
     }
 
-    // Save to file
     saveHighScores();
-
-    std::cout << "[SCORE] Added new high score: " << score << std::endl;
+    std::cout << "[SCORE] Added new high score: " << playerName << " - " << score << std::endl;
 }
