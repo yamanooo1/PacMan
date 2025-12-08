@@ -49,6 +49,18 @@ void LevelState::onExit() {
   soundManager.stopMusic();
 }
 
+// ✅ NEW: Handle window resize by updating camera
+void LevelState::onWindowResize(float width, float height) {
+  if (camera) {
+    // Calculate game area height (total height - HUD height)
+    float hudHeight = 60.0f;
+    float gameHeight = height - hudHeight;
+
+    camera->setWindowSize(width, gameHeight);
+    std::cout << "[LevelState] Camera updated for resize: " << width << "x" << gameHeight << std::endl;
+  }
+}
+
 bool LevelState::loadLevel() {
   std::cout << "[LevelState] Loading level " << currentLevel << "..." << std::endl;
 
@@ -102,17 +114,16 @@ void LevelState::update(float deltaTime) {
 
   SoundManager& soundManager = SoundManager::getInstance();
 
-  // ✅ Track game state changes to reset coin timer
+  // Track game state changes to reset coin timer
   static bool wasInSpecialState = false;
   bool isInSpecialState = (world->isDeathAnimationActive() ||
                            world->isReadyStateActive() ||
                            world->isLevelClearedDisplayActive());
 
-  // ✅ NEW: Monitor fear mode state and stop music when it ends naturally
+  // Monitor fear mode state and stop music when it ends naturally
   static bool wasFearModeActive = false;
   bool isFearModeActive = world->isFearModeActive();
 
-  // Detect fear mode ending
   if (wasFearModeActive && !isFearModeActive) {
     soundManager.stopFearModeSound();
     std::cout << "[LevelState] Fear mode ended naturally - stopped music" << std::endl;
@@ -120,7 +131,7 @@ void LevelState::update(float deltaTime) {
 
   wasFearModeActive = isFearModeActive;
 
-  // ✅ Count coins BEFORE update
+  // Count coins BEFORE update
   static int previousCoinCount = -1;
   int coinsBeforeUpdate = 0;
 
@@ -141,7 +152,7 @@ void LevelState::update(float deltaTime) {
   // Update world
   world->update(deltaTime);
 
-  // ✅ Count coins AFTER update
+  // Count coins AFTER update
   int coinsAfterUpdate = 0;
   for (const auto& entity : world->getEntities()) {
     if (entity->isDead()) continue;
@@ -172,7 +183,7 @@ void LevelState::update(float deltaTime) {
                            !world->isLevelClearedDisplayActive());
 
   if (isNormalGameplay) {
-    // ✅ Detect state transition (just exited special state)
+    // Detect state transition
     bool justExitedSpecialState = (wasInSpecialState && !isInSpecialState);
 
     // Track position for movement detection
@@ -186,24 +197,20 @@ void LevelState::update(float deltaTime) {
     Direction currentDirection = pacman->getDirection();
     bool wantsToMove = (currentDirection != Direction::NONE);
 
-    // ✅ COIN EATING SOUND: Track recent coin collection with timer
+    // Coin eating sound: Track recent coin collection with timer
     static float timeSinceLastCoin = 999.0f;
 
-    // ✅ CRITICAL FIX: Reset timer when exiting special states (respawn, ready, etc.)
+    // Reset timer when exiting special states
     if (justExitedSpecialState) {
       timeSinceLastCoin = 999.0f;
       std::cout << "[SOUND] Reset coin timer on state transition" << std::endl;
     } else if (coinWasCollectedThisFrame) {
-      timeSinceLastCoin = 0.0f;  // Reset on coin collection
+      timeSinceLastCoin = 0.0f;
     } else {
-      timeSinceLastCoin += deltaTime;  // Count up
+      timeSinceLastCoin += deltaTime;
     }
 
-    // ✅ Play sound ONLY if:
-    // 1. Actually moving
-    // 2. Wants to move
-    // 3. Collected a coin in the last 0.3 seconds
-    // 4. Coins still remain in level
+    // Play sound only if moving through coins recently
     if (actuallyMoving && wantsToMove && timeSinceLastCoin < 0.3f && coinsAfterUpdate > 0) {
       soundManager.startMovementSound();
     } else {
@@ -218,11 +225,9 @@ void LevelState::update(float deltaTime) {
     prevX = currentX;
     prevY = currentY;
   } else {
-    // ✅ Stop sound during special states
     soundManager.stopMovementSound();
   }
 
-  // ✅ Update state tracking for next frame
   wasInSpecialState = isInSpecialState;
 
   // Update score decay

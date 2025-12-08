@@ -17,6 +17,9 @@ public:
   // Called when state becomes inactive (but stays on stack)
   virtual void onExit() {}
 
+  // ✅ NEW: Called when window is resized
+  virtual void onWindowResize(float width, float height) {}
+
   // Handle SFML events (key presses, mouse clicks, etc.)
   virtual void handleEvents(sf::RenderWindow& window) = 0;
 
@@ -26,7 +29,7 @@ public:
   // Render to screen (called every frame)
   virtual void render(sf::RenderWindow& window) = 0;
 
-  // ✅ NEW: Should states below this one be visible?
+  // Should states below this one be visible?
   virtual bool isTransparent() const { return false; }
 
 protected:

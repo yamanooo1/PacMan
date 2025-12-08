@@ -69,7 +69,6 @@ void StateManager::clearStates() {
   std::cout << "[StateManager] All states cleared." << std::endl;
 }
 
-// ✅ NEW: Deferred clear and push
 void StateManager::clearAndPushState(std::unique_ptr<State> state) {
   if (!state) {
     std::cerr << "[StateManager] Attempted to clear and push null state!" << std::endl;
@@ -118,7 +117,15 @@ void StateManager::render(sf::RenderWindow& window) {
   }
 }
 
-// ✅ NEW: Process deferred state changes
+// ✅ NEW: Propagate window resize to current state
+void StateManager::onWindowResize(float width, float height) {
+  if (!states.empty()) {
+    states.back()->onWindowResize(width, height);
+    std::cout << "[StateManager] Propagated resize (" << width << "x" << height
+              << ") to current state" << std::endl;
+  }
+}
+
 void StateManager::processPendingChanges() {
   if (pendingAction == PendingAction::None) {
     return;

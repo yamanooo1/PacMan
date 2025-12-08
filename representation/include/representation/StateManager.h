@@ -24,7 +24,7 @@ public:
   // Clear all states
   void clearStates();
 
-  // ✅ NEW: Clear all and push a new state (deferred)
+  // Clear all and push a new state (deferred)
   void clearAndPushState(std::unique_ptr<State> state);
 
   // Check if we have any states
@@ -38,14 +38,17 @@ public:
   void update(float deltaTime);
   void render(sf::RenderWindow& window);
 
-  // ✅ NEW: Process pending changes (call at end of frame)
+  // ✅ NEW: Propagate window resize to current state
+  void onWindowResize(float width, float height);
+
+  // Process pending changes (call at end of frame)
   void processPendingChanges();
 
 private:
   // State stack
   std::vector<std::unique_ptr<State>> states;
 
-  // ✅ NEW: Pending operations
+  // Pending operations
   enum class PendingAction { None, Push, Pop, Change, Clear, ClearAndPush };
   PendingAction pendingAction = PendingAction::None;
   std::unique_ptr<State> pendingState = nullptr;

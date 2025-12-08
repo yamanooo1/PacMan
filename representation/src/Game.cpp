@@ -68,7 +68,7 @@ void Game::run() {
     // Process deferred state changes
     stateManager->processPendingChanges();
 
-    // ✅ Check again after processing changes
+    // Check again after processing changes
     if (stateManager->isEmpty()) {
       std::cout << "[GAME] No states after processing changes - exiting..." << std::endl;
       isRunning = false;
@@ -93,6 +93,13 @@ void Game::handleEvents() {
 
       sf::FloatRect visibleArea(0, 0, windowWidth, windowHeight);
       window->setView(sf::View(visibleArea));
+
+      // ✅ NEW: Notify state manager of resize so it can update cameras
+      if (stateManager) {
+        stateManager->onWindowResize(windowWidth, windowHeight);
+      }
+
+      std::cout << "[GAME] Window resized to " << windowWidth << "x" << windowHeight << std::endl;
     }
 
     // Pass event to current state
