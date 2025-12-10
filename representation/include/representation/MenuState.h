@@ -15,9 +15,15 @@ private:
   sf::Text playButtonText;
   bool isPlayButtonHovered;
 
+  // ✅ NEW: Exit button
+  sf::RectangleShape exitButton;
+  sf::Text exitButtonText;
+  bool isExitButtonHovered;
+
   // How to play section
   sf::Text howToPlayTitle;
   sf::Text howToPlayControls;
+  sf::Text howToPlayPoints;  // ✅ NEW: Points information
 
   // Leaderboard with yellow box
   sf::RectangleShape leaderboardBox;
@@ -27,7 +33,7 @@ private:
 
   bool fontLoaded;
 
-  // ✅ NEW: Window size tracking for proportional positioning
+  // Window size tracking for proportional positioning
   float windowWidth;
   float windowHeight;
 
@@ -36,7 +42,7 @@ public:
   ~MenuState() override = default;
 
   void onEnter() override;
-  void onWindowResize(float width, float height) override;  // ✅ NEW
+  void onWindowResize(float width, float height) override;
 
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;
@@ -45,6 +51,7 @@ public:
 private:
   void setupTexts();
   void setupPlayButton();
+  void setupExitButton();  // ✅ NEW
   void setupHowToPlay();
   void setupLeaderboard();
   bool isMouseOverButton(const sf::RectangleShape& button, sf::RenderWindow& window);

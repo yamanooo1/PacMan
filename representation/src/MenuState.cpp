@@ -1,13 +1,15 @@
 #include "representation/MenuState.h"
 #include "representation/StateManager.h"
 #include "representation/LevelState.h"
+#include "representation/SoundManager.h"
 #include "logic/Score.h"
 #include <iostream>
 
 MenuState::MenuState()
     : fontLoaded(false)
     , isPlayButtonHovered(false)
-    , windowWidth(800.0f)   // ✅ Initialize with default window size
+    , isExitButtonHovered(false)  // ✅ NEW
+    , windowWidth(800.0f)
     , windowHeight(860.0f)
 {
   if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
@@ -19,10 +21,10 @@ MenuState::MenuState()
 
   setupTexts();
   setupPlayButton();
+  setupExitButton();  // ✅ NEW
   setupHowToPlay();
 }
 
-// ✅ NEW: Recalculate all positions when window resizes
 void MenuState::onWindowResize(float width, float height) {
   windowWidth = width;
   windowHeight = height;
@@ -30,11 +32,11 @@ void MenuState::onWindowResize(float width, float height) {
   std::cout << "[MenuState] Window resized to " << width << "x" << height
             << " - recalculating positions" << std::endl;
 
-  // Recalculate all UI element positions
   setupTexts();
   setupPlayButton();
+  setupExitButton();  // ✅ NEW
   setupHowToPlay();
-  setupLeaderboard();  // Also refresh leaderboard
+  setupLeaderboard();
 }
 
 void MenuState::setupTexts() {
@@ -47,24 +49,22 @@ void MenuState::setupTexts() {
   titleText.setFillColor(sf::Color::Yellow);
 
   sf::FloatRect titleBounds = titleText.getLocalBounds();
-  // ✅ Proportional: centered horizontally, 6% from top
   titleText.setPosition((windowWidth - titleBounds.width) / 2.f, windowHeight * 0.06f);
 }
 
 void MenuState::setupPlayButton() {
   if (!fontLoaded) return;
 
-  // Button shape (grey, will lighten on hover)
-  // ✅ Proportional size: 37.5% of window width, 7% of window height
+  // Play button (green-tinted grey)
   float buttonWidth = windowWidth * 0.375f;
   float buttonHeight = windowHeight * 0.07f;
 
   playButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
-  playButton.setFillColor(sf::Color(80, 80, 80));  // Dark grey
+  playButton.setFillColor(sf::Color(60, 100, 60));  // Dark green-grey
   playButton.setOutlineColor(sf::Color::White);
   playButton.setOutlineThickness(3.f);
 
-  // ✅ Proportional: centered horizontally, 79% from top
+  // Position: 79% from top (same as before)
   playButton.setPosition((windowWidth - buttonWidth) / 2.f, windowHeight * 0.79f);
 
   // Button text
@@ -81,6 +81,36 @@ void MenuState::setupPlayButton() {
   );
 }
 
+// ✅ NEW: Setup exit button
+void MenuState::setupExitButton() {
+  if (!fontLoaded) return;
+
+  // Exit button (light red)
+  float buttonWidth = windowWidth * 0.375f;
+  float buttonHeight = windowHeight * 0.07f;
+
+  exitButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
+  exitButton.setFillColor(sf::Color(140, 60, 60));  // Light red
+  exitButton.setOutlineColor(sf::Color::White);
+  exitButton.setOutlineThickness(3.f);
+
+  // Position: 88% from top (below play button)
+  exitButton.setPosition((windowWidth - buttonWidth) / 2.f, windowHeight * 0.88f);
+
+  // Button text
+  exitButtonText.setFont(font);
+  exitButtonText.setString("EXIT");
+  exitButtonText.setCharacterSize(28);
+  exitButtonText.setFillColor(sf::Color::White);
+
+  // Center text in button
+  sf::FloatRect textBounds = exitButtonText.getLocalBounds();
+  exitButtonText.setPosition(
+    exitButton.getPosition().x + (buttonWidth - textBounds.width) / 2.f - textBounds.left,
+    exitButton.getPosition().y + (buttonHeight - textBounds.height) / 2.f - textBounds.top - 5.f
+  );
+}
+
 void MenuState::setupHowToPlay() {
   if (!fontLoaded) return;
 
@@ -91,29 +121,46 @@ void MenuState::setupHowToPlay() {
   howToPlayTitle.setFillColor(sf::Color::Cyan);
 
   sf::FloatRect titleBounds = howToPlayTitle.getLocalBounds();
-  // ✅ Proportional: centered horizontally, 17.4% from top
   howToPlayTitle.setPosition((windowWidth - titleBounds.width) / 2.f, windowHeight * 0.174f);
 
   // Controls text
   howToPlayControls.setFont(font);
   howToPlayControls.setString(
-    "ARROW KEYS or WASD - Move Pac-Man\n"
-    "      ESC - Pause Game\n"
-    "      M - Return to Menu\n\n"
-    " Eat all dots to clear level!\n"
-    "Eat fruit for fear mode power!"
+    "CONTROLS:\n"
+    "Arrow Keys / WASD - Move\n"
+    "ESC - Pause   M - Menu"
   );
-  howToPlayControls.setCharacterSize(12);
+  howToPlayControls.setCharacterSize(13);  // ✅ INCREASED from 11 to 13
   howToPlayControls.setFillColor(sf::Color::White);
   howToPlayControls.setLineSpacing(1.5f);
 
   sf::FloatRect controlsBounds = howToPlayControls.getLocalBounds();
-  // ✅ Proportional: centered horizontally, 22% from top
   howToPlayControls.setPosition((windowWidth - controlsBounds.width) / 2.f, windowHeight * 0.22f);
+
+  // ✅ NEW: Points information
+  howToPlayPoints.setFont(font);
+  howToPlayPoints.setString(
+    "POINTS:\n"
+    "Coin: 10-30   Fruit: 50\n"
+    "Ghost: 200   Level: 1000"
+  );
+  howToPlayPoints.setCharacterSize(13);  // ✅ INCREASED from 11 to 13
+  howToPlayPoints.setFillColor(sf::Color(255, 255, 150));  // Light yellow
+  howToPlayPoints.setLineSpacing(1.5f);
+
+  sf::FloatRect pointsBounds = howToPlayPoints.getLocalBounds();
+  howToPlayPoints.setPosition((windowWidth - pointsBounds.width) / 2.f, windowHeight * 0.30f);
 }
 
 void MenuState::onEnter() {
   std::cout << "[MenuState] Entered menu state" << std::endl;
+
+  // ✅ REMOVED: Menu music (user doesn't want it)
+  // Just ensure any previous music/sounds are stopped
+  SoundManager& soundManager = SoundManager::getInstance();
+  soundManager.stopMusic();
+  soundManager.stopMovementSound();
+  soundManager.stopFearModeSound();
 
   // Load and setup leaderboard
   setupLeaderboard();
@@ -128,7 +175,6 @@ void MenuState::setupLeaderboard() {
   auto highScores = tempScore.getHighScores();
 
   // Yellow box for leaderboard
-  // ✅ Proportional: 75% width, 32.5% height
   float boxWidth = windowWidth * 0.75f;
   float boxHeight = windowHeight * 0.325f;
 
@@ -136,7 +182,6 @@ void MenuState::setupLeaderboard() {
   leaderboardBox.setFillColor(sf::Color(255, 255, 0, 40));  // Semi-transparent yellow
   leaderboardBox.setOutlineColor(sf::Color::Yellow);
   leaderboardBox.setOutlineThickness(4.f);
-  // ✅ Proportional: centered horizontally, 41.8% from top
   leaderboardBox.setPosition((windowWidth - boxWidth) / 2.f, windowHeight * 0.418f);
 
   // Title
@@ -146,18 +191,16 @@ void MenuState::setupLeaderboard() {
   leaderboardTitle.setFillColor(sf::Color::Yellow);
 
   sf::FloatRect titleBounds = leaderboardTitle.getLocalBounds();
-  // ✅ Proportional: centered horizontally, 44.2% from top
   leaderboardTitle.setPosition((windowWidth - titleBounds.width) / 2.f, windowHeight * 0.442f);
 
   // Create score entries
   scoreNameTexts.clear();
   scoreValueTexts.clear();
 
-  // ✅ Proportional positioning for scores
-  float startY = windowHeight * 0.5f;       // 50% from top
-  float leftX = windowWidth * 0.1875f;      // 18.75% from left
-  float rightX = windowWidth * 0.8125f;     // 81.25% from left
-  float spacing = windowHeight * 0.0523f;   // 5.23% spacing between entries
+  float startY = windowHeight * 0.5f;
+  float leftX = windowWidth * 0.1875f;
+  float rightX = windowWidth * 0.8125f;
+  float spacing = windowHeight * 0.0523f;
 
   for (size_t i = 0; i < 5; ++i) {
     float yPosition = startY + (i * spacing);
@@ -202,8 +245,9 @@ void MenuState::handleEvents(sf::RenderWindow& window) {
   static bool mouseWasPressed = false;
   bool mouseIsPressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
-  // Check for play button click
+  // Check for button clicks
   if (mouseIsPressed && !mouseWasPressed) {
+    // Play button
     if (isMouseOverButton(playButton, window)) {
       std::cout << "[MenuState] Play button clicked - starting game..." << std::endl;
 
@@ -211,24 +255,19 @@ void MenuState::handleEvents(sf::RenderWindow& window) {
         stateManager->pushState(std::make_unique<LevelState>(1));
       }
     }
+
+    // ✅ NEW: Exit button
+    if (isMouseOverButton(exitButton, window)) {
+      std::cout << "[MenuState] Exit button clicked - closing game..." << std::endl;
+      window.close();
+    }
   }
 
   mouseWasPressed = mouseIsPressed;
-
-  // Keep ESC to quit as backup
-  static bool escWasPressed = false;
-  bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
-
-  if (escIsPressed && !escWasPressed) {
-    std::cout << "[MenuState] Quitting game..." << std::endl;
-    window.close();
-  }
-
-  escWasPressed = escIsPressed;
 }
 
 void MenuState::update(float deltaTime) {
-  // Nothing to update - hover state is checked in render()
+  // Nothing to update
 }
 
 bool MenuState::isMouseOverButton(const sf::RectangleShape& button, sf::RenderWindow& window) {
@@ -241,14 +280,22 @@ bool MenuState::isMouseOverButton(const sf::RectangleShape& button, sf::RenderWi
 void MenuState::render(sf::RenderWindow& window) {
   if (!fontLoaded) return;
 
-  // Update hover state (needs window)
-  bool wasHovered = isPlayButtonHovered;
+  // Update hover states
   isPlayButtonHovered = isMouseOverButton(playButton, window);
+  isExitButtonHovered = isMouseOverButton(exitButton, window);
 
+  // Play button hover effect
   if (isPlayButtonHovered) {
-    playButton.setFillColor(sf::Color(140, 140, 140));
+    playButton.setFillColor(sf::Color(90, 140, 90));  // Lighter green on hover
   } else {
-    playButton.setFillColor(sf::Color(80, 80, 80));
+    playButton.setFillColor(sf::Color(60, 100, 60));
+  }
+
+  // ✅ NEW: Exit button hover effect
+  if (isExitButtonHovered) {
+    exitButton.setFillColor(sf::Color(180, 80, 80));  // Brighter red on hover
+  } else {
+    exitButton.setFillColor(sf::Color(140, 60, 60));
   }
 
   // Draw title
@@ -257,12 +304,13 @@ void MenuState::render(sf::RenderWindow& window) {
   // Draw how to play section
   window.draw(howToPlayTitle);
   window.draw(howToPlayControls);
+  window.draw(howToPlayPoints);  // ✅ NEW: Draw points info
 
   // Draw leaderboard yellow box
   window.draw(leaderboardBox);
   window.draw(leaderboardTitle);
 
-  // Draw score entries (names on left, scores on right)
+  // Draw score entries
   for (const auto& nameText : scoreNameTexts) {
     window.draw(nameText);
   }
@@ -270,7 +318,11 @@ void MenuState::render(sf::RenderWindow& window) {
     window.draw(scoreText);
   }
 
-  // Draw play button (at bottom)
+  // Draw buttons
   window.draw(playButton);
   window.draw(playButtonText);
+
+  // ✅ NEW: Draw exit button
+  window.draw(exitButton);
+  window.draw(exitButtonText);
 }
