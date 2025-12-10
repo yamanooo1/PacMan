@@ -4,8 +4,8 @@
 #include "logic/Lives.h"
 #include <iostream>
 
-HUD::HUD(sf::RenderWindow& win, int height)  // ✅ Reference
-    : window(win)  // ✅ Initialize reference
+HUD::HUD(sf::RenderWindow& win, int height)
+    : window(win)
     , hudHeight(height)
     , fontLoaded(false)
 {
@@ -25,15 +25,15 @@ void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
     if (!score || !lives) return;
 
     // Calculate HUD position dynamically based on current window size
-    float windowHeight = static_cast<float>(window.getSize().y);  // ✅ CHANGED
+    float windowHeight = static_cast<float>(window.getSize().y);
     float hudYPosition = windowHeight - hudHeight;
 
     // Draw black background for HUD area
     sf::RectangleShape hudBackground;
-    hudBackground.setSize(sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(hudHeight)));  // ✅ CHANGED
+    hudBackground.setSize(sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(hudHeight)));
     hudBackground.setPosition(0.f, hudYPosition);
     hudBackground.setFillColor(sf::Color::Black);
-    window.draw(hudBackground);  // ✅ CHANGED
+    window.draw(hudBackground);
 
     if (!fontLoaded) {
         return;
@@ -50,7 +50,7 @@ void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
     scoreText.setCharacterSize(20);
     scoreText.setFillColor(sf::Color::White);
     scoreText.setPosition(20.f, hudYPosition + 20.f);
-    window.draw(scoreText);  // ✅ CHANGED
+    window.draw(scoreText);
 
     // Draw lives text
     sf::Text livesText;
@@ -60,8 +60,8 @@ void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
     livesText.setFillColor(sf::Color::White);
 
     sf::FloatRect textBounds = livesText.getLocalBounds();
-    livesText.setPosition(window.getSize().x - textBounds.width - 20.f, hudYPosition + 20.f);  // ✅ CHANGED
-    window.draw(livesText);  // ✅ CHANGED
+    livesText.setPosition(window.getSize().x - textBounds.width - 20.f, hudYPosition + 20.f);
+    window.draw(livesText);
 
     // Draw level indicator (centered)
     sf::Text levelText;
@@ -71,9 +71,9 @@ void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
     levelText.setFillColor(sf::Color::Yellow);
 
     sf::FloatRect levelBounds = levelText.getLocalBounds();
-    float centerX = (window.getSize().x - levelBounds.width) / 2.f;  // ✅ CHANGED
+    float centerX = (window.getSize().x - levelBounds.width) / 2.f;
     levelText.setPosition(centerX, hudYPosition + 20.f);
-    window.draw(levelText);  // ✅ CHANGED
+    window.draw(levelText);
 }
 
 void HUD::drawReadyText(World* world) {
@@ -89,8 +89,8 @@ void HUD::drawReadyText(World* world) {
   float gridX = 10.5f;
   float gridY = 10.4f;
 
-  float gameHeight = static_cast<float>(window.getSize().y) - hudHeight;  // ✅ CHANGED
-  float gameWidth = static_cast<float>(window.getSize().x);  // ✅ CHANGED
+  float gameHeight = static_cast<float>(window.getSize().y) - hudHeight;
+  float gameWidth = static_cast<float>(window.getSize().x);
 
   float cellWidth = gameWidth / 21.0f;
   float cellHeight = gameHeight / 21.0f;
@@ -102,7 +102,7 @@ void HUD::drawReadyText(World* world) {
   readyText.setOrigin(textBounds.width / 2.0f, textBounds.height / 2.0f);
   readyText.setPosition(screenX, screenY);
 
-  window.draw(readyText);  // ✅ CHANGED
+  window.draw(readyText);
 }
 
 void HUD::drawLevelClearedText(World* world) {
@@ -113,13 +113,13 @@ void HUD::drawLevelClearedText(World* world) {
   clearedText.setFont(font);
   clearedText.setString("LEVEL CLEARED!");
   clearedText.setCharacterSize(30);
-  clearedText.setFillColor(sf::Color::Yellow);
+  clearedText.setFillColor(sf::Color::Green);  // ✅ CHANGED to green!
 
   float gridX = 10.5f;
   float gridY = 10.5f;
 
-  float gameHeight = static_cast<float>(window.getSize().y) - hudHeight;  // ✅ CHANGED
-  float gameWidth = static_cast<float>(window.getSize().x);  // ✅ CHANGED
+  float gameHeight = static_cast<float>(window.getSize().y) - hudHeight;
+  float gameWidth = static_cast<float>(window.getSize().x);
 
   float cellWidth = gameWidth / 21.0f;
   float cellHeight = gameHeight / 21.0f;
@@ -131,5 +131,5 @@ void HUD::drawLevelClearedText(World* world) {
   clearedText.setOrigin(textBounds.width / 2.0f, textBounds.height / 2.0f);
   clearedText.setPosition(screenX, screenY);
 
-  window.draw(clearedText);  // ✅ CHANGED
+  window.draw(clearedText);
 }

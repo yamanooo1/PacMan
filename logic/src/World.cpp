@@ -20,8 +20,8 @@ World::World(AbstractFactory *f, int level)
     : mapWidth(0)
     , mapHeight(0)
     , currentLevel(level)
-    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.09f)  // ✅ 5% faster per level
-    , fearDurationMultiplier(1.0f - (level - 1) * 0.09f)  // ✅ 5% shorter per level
+    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.09f)  // ✅ 9% faster per level
+    , fearDurationMultiplier(1.0f - (std::min(level, 6) - 1) * 0.09f)// ✅ 9% shorter per level until level 6. then it stays the same
     , factory(f)
     , pacman(nullptr)
     , score(nullptr)

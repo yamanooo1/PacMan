@@ -37,7 +37,14 @@ void LevelState::onEnter() {
   }
 
   soundManager.stopMusic();
-  soundManager.playBackgroundMusic(false);
+
+  // ✅ FIXED: Only play starting music on Level 1
+  if (currentLevel == 1) {
+    std::cout << "[LevelState] Playing starting music (Level 1)" << std::endl;
+    soundManager.playBackgroundMusic(false);  // One-shot starting music
+  } else {
+    std::cout << "[LevelState] Level " << currentLevel << " - no starting music" << std::endl;
+  }
 
   if (!loadLevel()) {
     std::cerr << "[LevelState] Failed to load level!" << std::endl;
@@ -169,8 +176,10 @@ void LevelState::update(float deltaTime) {
   bool coinWasCollectedThisFrame = (coinsAfterUpdate < previousCoinCount);
   previousCoinCount = coinsAfterUpdate;
 
-  // Freeze during special states
+  // ✅ Stop all sounds when level is cleared
   if (world->isLevelClearedDisplayActive()) {
+    soundManager.stopMovementSound();
+    soundManager.stopFearModeSound();
     return;
   }
 
@@ -258,10 +267,16 @@ void LevelState::update(float deltaTime) {
     return;
   }
 
-  // Check for level complete
+  // ✅ IMPROVED: Auto-advance to next level after display timer expires
   if (world->isLevelCleared() && !world->isLevelClearedDisplayActive()) {
-    std::cout << "[LevelState] ✅ PUSHING VICTORYSTATE now!" << std::endl;
-    stateManager->pushState(std::make_unique<VictoryState>(currentLevel + 1, score->getScore()));
+    std::cout << "[LevelState] ✅ Level cleared display expired - auto-advancing to next level!" << std::endl;
+    std::cout << "[LevelState]    Current score: " << score->getScore() << std::endl;
+    std::cout << "[LevelState]    Next level: " << (currentLevel + 1) << std::endl;
+
+    // Automatically advance to next level with current score
+    stateManager->clearAndPushState(
+      std::make_unique<LevelState>(currentLevel + 1, score->getScore())
+    );
   }
 }
 

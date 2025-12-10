@@ -20,23 +20,28 @@ VictoryState::VictoryState(int nextLevelNum, int score)
     , isEnteringName(false)
     , nameSubmitted(false)
     , playerNameInput("")
-    , windowWidth(800.0f)   // ✅ Initialize with default window size
+    , windowWidth(800.0f)
     , windowHeight(860.0f)
 {
   std::cout << "\n🎉 [VICTORYSTATE] CONSTRUCTOR CALLED!" << std::endl;
   std::cout << "    Next Level: " << nextLevel << std::endl;
   std::cout << "    Final Score: " << finalScore << std::endl;
+  std::cout << "    Is Game Over: " << (isGameOver ? "YES" : "NO") << std::endl;
 
-  // Check if score qualifies for high score
-  if (score > 0) {
+  // ✅ FIXED: Only check for high score on GAME OVER, not level clear!
+  if (isGameOver && score > 0) {
     Score tempScore;
     tempScore.loadHighScores();
     qualifiesForHighScore = tempScore.isHighScore(score);
 
     if (qualifiesForHighScore) {
-      std::cout << "[VictoryState] Score qualifies for top 5! Will ask for name." << std::endl;
+      std::cout << "[VictoryState] Game over with high score! Will ask for name." << std::endl;
       isEnteringName = true;  // Start in name entry mode
+    } else {
+      std::cout << "[VictoryState] Game over but not a high score." << std::endl;
     }
+  } else if (!isGameOver) {
+    std::cout << "[VictoryState] Level cleared - score carries to next level, no name entry." << std::endl;
   }
 
   if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
@@ -47,7 +52,7 @@ VictoryState::VictoryState(int nextLevelNum, int score)
   }
 
   setupTexts();
-  if (qualifiesForHighScore) {
+  if (qualifiesForHighScore && isGameOver) {
     setupNameInput();
   }
 }
@@ -61,7 +66,7 @@ void VictoryState::onWindowResize(float width, float height) {
             << " - recalculating positions" << std::endl;
 
   setupTexts();
-  if (qualifiesForHighScore) {
+  if (qualifiesForHighScore && isGameOver) {
     setupNameInput();
   }
 }
@@ -257,7 +262,7 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
   // Continue to next level
   if (!isGameOver && spaceIsPressed && !spaceWasPressed) {
     if (stateManager) {
-      std::cout << "[VictoryState] Starting level " << nextLevel << "..." << std::endl;
+      std::cout << "[VictoryState] Starting level " << nextLevel << " with score " << finalScore << "..." << std::endl;
       stateManager->clearAndPushState(std::make_unique<LevelState>(nextLevel, finalScore));
     }
   }
