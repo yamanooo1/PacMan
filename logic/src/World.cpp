@@ -562,7 +562,7 @@ void World::checkCollisions() {
   if (pacmanDied && lives) {
     pacman->die();
 
-    // ✅ Deactivate fear mode immediately when PacMan dies
+    // Deactivate fear mode immediately when PacMan dies
     if (fearModeActive) {
       fearModeActive = false;
       fearModeTimer = 0.0f;
@@ -576,9 +576,8 @@ void World::checkCollisions() {
       }
     }
 
-    if (!lives->isGameOver()) {
-      startDeathAnimation();
-    }
+    // ✅ ALWAYS start death animation, even on final death!
+    startDeathAnimation();
   }
 }
 

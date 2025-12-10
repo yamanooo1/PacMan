@@ -21,7 +21,7 @@ LevelState::LevelState(int level, int startingScore)
     , initialScore(startingScore)
     , mapFile("../../resources/map/map1.txt")
     , pauseRequested(false)
-    , windowWidth(800.0f)   // ✅ Initialize with defaults
+    , windowWidth(800.0f)
     , windowHeight(860.0f)
 {
   std::cout << "[LevelState] Constructor - Level: " << level
@@ -51,28 +51,22 @@ void LevelState::onExit() {
   soundManager.stopMusic();
 }
 
-// ✅ NEW: Handle window resize by updating camera
 void LevelState::onWindowResize(float width, float height) {
-  // ✅ Store current dimensions
   windowWidth = width;
   windowHeight = height;
 
   std::cout << "[LevelState] Window resized to " << width << "x" << height << std::endl;
 
   if (camera) {
-    // Calculate game area height (total height - HUD height)
     float gameHeight = height - HUD_HEIGHT;
     camera->setWindowSize(width, gameHeight);
     std::cout << "[LevelState] Camera updated: " << width << "x" << gameHeight << std::endl;
   }
-
-  // HUD will automatically adjust as it uses window reference
 }
 
 bool LevelState::loadLevel() {
   std::cout << "[LevelState] Loading level " << currentLevel << "..." << std::endl;
 
-  // ✅ Use actual window dimensions instead of hardcoded values
   float gameHeight = windowHeight - HUD_HEIGHT;
   camera = std::make_shared<Camera>(windowWidth, gameHeight, 10, 10);
   std::cout << "[LevelState] ✅ Camera created with dimensions: "
@@ -247,13 +241,20 @@ void LevelState::update(float deltaTime) {
     score->updateScoreDecay();
   }
 
-  // Check for game over
+  // ✅ FIXED: Check for game over ONLY after death animation completes
   if (lives && lives->isGameOver()) {
-    std::cout << "[LevelState] Game Over! Final score: " << score->getScore() << std::endl;
+    // Wait for death animation to finish before showing game over screen
+    if (!world->isDeathAnimationActive()) {
+      std::cout << "[LevelState] Game Over! Death animation complete. Final score: "
+                << score->getScore() << std::endl;
 
-    if (stateManager) {
-      stateManager->pushState(std::make_unique<VictoryState>(0, score->getScore()));
+      if (stateManager) {
+        stateManager->pushState(std::make_unique<VictoryState>(0, score->getScore()));
+      }
+      return;
     }
+    // Still in death animation - just return without showing game over yet
+    std::cout << "[LevelState] Game over but death animation still playing..." << std::endl;
     return;
   }
 
