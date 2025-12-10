@@ -1,13 +1,8 @@
-//
-// Ghost.cpp - FIXED: Store and reset original wait time
-//
-
 #include "logic/Ghost.h"
 #include "logic/World.h"
 #include "logic/PacMan.h"
 #include "logic/Random.h"
 #include <cmath>
-#include <iostream>
 #include <vector>
 
 Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime, float speedMultiplier)
@@ -24,9 +19,32 @@ Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime, float 
     , fearSpeed(1.5f)
     , hasLeftSpawn(false)
     , fearModeEnding(false)
-    , shouldEnterFearWhenLeaving(false)  // ✅ ADD THIS
-{
+    , shouldEnterFearWhenLeaving(false) {
   setDirection(Direction::UP);
+}
+
+bool Ghost::isInFearMode() const {
+  return state == GhostState::FEAR;
+}
+
+bool Ghost::shouldShowFearMode() const {
+  return state == GhostState::FEAR || shouldEnterFearWhenLeaving;
+}
+
+void Ghost::resetSpawnFlag() {
+  hasLeftSpawn = false;
+  state = GhostState::WAITING;
+  waitTimer = originalWaitTime;
+}
+
+void Ghost::respawnAfterEaten() {
+  hasLeftSpawn = false;
+  state = GhostState::EXITING;
+  waitTimer = -1.0f;
+}
+
+void Ghost::onEaten() {
+  notify(GameEvent::GHOST_EATEN);
 }
 
 bool Ghost::isInSpawnArea(int gridX, int gridY) const {
@@ -36,10 +54,9 @@ bool Ghost::isInSpawnArea(int gridX, int gridY) const {
 void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   if (!world) return;
 
-  // WAITING state
   if (state == GhostState::WAITING) {
     waitTimer -= deltaTime;
-    if (waitTimer <= 0.0f) {  // ✅ This will be true immediately if waitTimer is negative
+    if (waitTimer <= 0.0f) {
       state = GhostState::EXITING;
 
       auto [x, y] = getPosition();
@@ -54,14 +71,10 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
         lastDecisionGridX = gridX;
         lastDecisionGridY = gridY;
       }
-
-      std::cout << "[GHOST] Type " << static_cast<int>(type)
-                << " starting to exit via 'w'" << std::endl;
     }
     return;
   }
 
-  // EXITING state
   if (state == GhostState::EXITING) {
     auto [x, y] = getPosition();
     float centerX = x + getWidth() / 2.0f;
@@ -70,22 +83,15 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
     int gridY = static_cast<int>(std::floor(centerY));
 
     if (world->isExitPosition(gridX, gridY)) {
-      // ✅ Check if we should enter fear mode instead of chasing
       if (shouldEnterFearWhenLeaving) {
         state = GhostState::FEAR;
         speed = fearSpeed;
         shouldEnterFearWhenLeaving = false;
-        std::cout << "[GHOST] Type " << static_cast<int>(type)
-                  << " exited spawn and entered FEAR mode!" << std::endl;
       } else {
         state = GhostState::CHASING;
       }
 
       hasLeftSpawn = true;
-
-      std::cout << "[GHOST] Type " << static_cast<int>(type)
-                << " passed through 'w' at (" << gridX << "," << gridY
-                << ") - now " << (state == GhostState::FEAR ? "FEAR" : "CHASING") << "!" << std::endl;
 
       Direction chaseDir = chooseNextDirection(gridX, gridY, world, pacman);
       if (chaseDir != Direction::NONE) {
@@ -96,7 +102,6 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
     }
   }
 
-  // Movement
   auto [x, y] = getPosition();
   Direction currentDir = getDirection();
 
@@ -210,7 +215,6 @@ Direction Ghost::chooseDirectionToExit(int gridX, int gridY, World* world) const
   auto exitPositions = world->getExitPositions();
 
   if (exitPositions.empty()) {
-    std::cerr << "[ERROR] No exit positions!" << std::endl;
     return Direction::UP;
   }
 
@@ -280,7 +284,6 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
     Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT
   };
 
-  // First pass: Add all directions except opposite
   for (Direction dir : allDirections) {
     if (dir == opposite) continue;
 
@@ -300,7 +303,6 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
     viable.push_back(dir);
   }
 
-  // At intersections (2+ directions), also allow reversing
   if (viable.size() >= 2 && opposite != Direction::NONE) {
     int nextGridX = gridX;
     int nextGridY = gridY;
@@ -320,7 +322,6 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* w
     }
   }
 
-  // Dead end: must reverse
   if (viable.empty() && opposite != Direction::NONE) {
     int nextGridX = gridX;
     int nextGridY = gridY;
@@ -353,190 +354,153 @@ int Ghost::manhattanDistance(int x1, int y1, int x2, int y2) const {
 }
 
 Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman) {
-    auto viable = getViableDirections(gridX, gridY, world);
+  auto viable = getViableDirections(gridX, gridY, world);
 
-    if (viable.empty()) return getDirection();
-    if (viable.size() == 1) return viable[0];
+  if (viable.empty()) return getDirection();
+  if (viable.size() == 1) return viable[0];
 
-    Random& random = Random::getInstance();
+  Random& random = Random::getInstance();
 
-    std::string typeStr = (type == GhostType::RANDOM) ? "RANDOM" :
-                         (type == GhostType::CHASER) ? "CHASER" : "AMBUSHER";
+  if (type == GhostType::RANDOM) {
+    Direction current = getDirection();
 
-    if (type == GhostType::RANDOM) {
-        Direction current = getDirection();
-
-        bool currentViable = false;
-        for (Direction dir : viable) {
-            if (dir == current) {
-                currentViable = true;
-                break;
-            }
-        }
-
-        if (random.getBool()) {
-            int index = random.getInt(0, viable.size() - 1);
-            return viable[index];
-        } else {
-            if (currentViable) {
-                return current;
-            } else {
-                int index = random.getInt(0, viable.size() - 1);
-                return viable[index];
-            }
-        }
-    }
-
-    if (!pacman) {
-        int index = random.getInt(0, viable.size() - 1);
-        return viable[index];
-    }
-
-    auto [px, py] = pacman->getPosition();
-    float centerX = px + pacman->getWidth() / 2.0f;
-    float centerY = py + pacman->getHeight() / 2.0f;
-    int pacmanGridX = static_cast<int>(std::floor(centerX));
-    int pacmanGridY = static_cast<int>(std::floor(centerY));
-
-    int targetX, targetY;
-
-    if (state == GhostState::FEAR) {
-        targetX = pacmanGridX;
-        targetY = pacmanGridY;
-    } else if (type == GhostType::CHASER) {
-        targetX = pacmanGridX;
-        targetY = pacmanGridY;
-
-        std::cout << "[" << typeStr << "] At (" << gridX << "," << gridY
-                  << ") chasing PacMan at (" << targetX << "," << targetY << ")" << std::endl;
-    } else {  // AMBUSHER
-      Direction pacmanDir = pacman->getDirection();
-      int lookAhead = 4;
-
-      if (pacmanDir == Direction::NONE) {
-        targetX = pacmanGridX;
-        targetY = pacmanGridY;
-
-        std::cout << "[" << typeStr << "] PacMan stationary - chasing directly at ("
-                  << targetX << "," << targetY << ")" << std::endl;
-      } else {
-        int lookAheadX = pacmanGridX;
-        int lookAheadY = pacmanGridY;
-
-        switch (pacmanDir) {
-        case Direction::UP:    lookAheadY -= lookAhead; break;
-        case Direction::DOWN:  lookAheadY += lookAhead; break;
-        case Direction::LEFT:  lookAheadX -= lookAhead; break;
-        case Direction::RIGHT: lookAheadX += lookAhead; break;
-        case Direction::NONE: break;
-        }
-
-        // ✅ CLAMP to map bounds
-        int mapWidth = 21;
-        int mapHeight = 21;
-        lookAheadX = std::max(0, std::min(mapWidth - 1, lookAheadX));
-        lookAheadY = std::max(0, std::min(mapHeight - 1, lookAheadY));
-
-        int ghostToTarget = manhattanDistance(gridX, gridY, lookAheadX, lookAheadY);
-        int pacmanToTarget = manhattanDistance(pacmanGridX, pacmanGridY, lookAheadX, lookAheadY);
-
-        if (ghostToTarget < pacmanToTarget) {
-          targetX = pacmanGridX;
-          targetY = pacmanGridY;
-
-          std::cout << "[" << typeStr << "] CLOSE MODE - chasing PacMan at ("
-                    << targetX << "," << targetY << ")" << std::endl;
-        } else {
-          targetX = lookAheadX;
-          targetY = lookAheadY;
-
-          std::cout << "[" << typeStr << "] AMBUSH MODE - targeting ("
-                    << targetX << "," << targetY << ") [PacMan at ("
-                    << pacmanGridX << "," << pacmanGridY << ")]" << std::endl;
-        }
+    bool currentViable = false;
+    for (Direction dir : viable) {
+      if (dir == current) {
+        currentViable = true;
+        break;
       }
     }
 
-    bool shouldMaximize = (state == GhostState::FEAR);
-
-    std::cout << "  Viable directions: " << viable.size()
-              << " | Should maximize: " << (shouldMaximize ? "YES" : "NO") << std::endl;
-
-    std::vector<Direction> bestDirections;
-    int bestDistance = shouldMaximize ? -1 : 999999;
-
-    for (Direction dir : viable) {
-        int nextGridX = gridX;
-        int nextGridY = gridY;
-
-        switch (dir) {
-            case Direction::UP:    nextGridY--; break;
-            case Direction::DOWN:  nextGridY++; break;
-            case Direction::LEFT:  nextGridX--; break;
-            case Direction::RIGHT: nextGridX++; break;
-            case Direction::NONE: break;
-        }
-
-        int distance = manhattanDistance(nextGridX, nextGridY, targetX, targetY);
-
-        std::string dirStr = (dir == Direction::UP) ? "UP" :
-                            (dir == Direction::DOWN) ? "DOWN" :
-                            (dir == Direction::LEFT) ? "LEFT" : "RIGHT";
-        std::cout << "    " << dirStr << " -> (" << nextGridX << "," << nextGridY
-                  << ") distance: " << distance << std::endl;
-
-        if (shouldMaximize) {
-            if (distance > bestDistance) {
-                bestDistance = distance;
-                bestDirections.clear();
-                bestDirections.push_back(dir);
-            } else if (distance == bestDistance) {
-                bestDirections.push_back(dir);
-            }
-        } else {
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestDirections.clear();
-                bestDirections.push_back(dir);
-            } else if (distance == bestDistance) {
-                bestDirections.push_back(dir);
-            }
-        }
-    }
-
-    if (bestDirections.empty()) {
+    if (random.getBool()) {
+      int index = random.getInt(0, viable.size() - 1);
+      return viable[index];
+    } else {
+      if (currentViable) {
+        return current;
+      } else {
         int index = random.getInt(0, viable.size() - 1);
         return viable[index];
+      }
+    }
+  }
+
+  if (!pacman) {
+    int index = random.getInt(0, viable.size() - 1);
+    return viable[index];
+  }
+
+  auto [px, py] = pacman->getPosition();
+  float centerX = px + pacman->getWidth() / 2.0f;
+  float centerY = py + pacman->getHeight() / 2.0f;
+  int pacmanGridX = static_cast<int>(std::floor(centerX));
+  int pacmanGridY = static_cast<int>(std::floor(centerY));
+
+  int targetX, targetY;
+
+  if (state == GhostState::FEAR) {
+    targetX = pacmanGridX;
+    targetY = pacmanGridY;
+  } else if (type == GhostType::CHASER) {
+    targetX = pacmanGridX;
+    targetY = pacmanGridY;
+  } else {
+    Direction pacmanDir = pacman->getDirection();
+    int lookAhead = 4;
+
+    if (pacmanDir == Direction::NONE) {
+      targetX = pacmanGridX;
+      targetY = pacmanGridY;
+    } else {
+      int lookAheadX = pacmanGridX;
+      int lookAheadY = pacmanGridY;
+
+      switch (pacmanDir) {
+      case Direction::UP:    lookAheadY -= lookAhead; break;
+      case Direction::DOWN:  lookAheadY += lookAhead; break;
+      case Direction::LEFT:  lookAheadX -= lookAhead; break;
+      case Direction::RIGHT: lookAheadX += lookAhead; break;
+      case Direction::NONE: break;
+      }
+
+      int mapWidth = 21;
+      int mapHeight = 21;
+      lookAheadX = std::max(0, std::min(mapWidth - 1, lookAheadX));
+      lookAheadY = std::max(0, std::min(mapHeight - 1, lookAheadY));
+
+      int ghostToTarget = manhattanDistance(gridX, gridY, lookAheadX, lookAheadY);
+      int pacmanToTarget = manhattanDistance(pacmanGridX, pacmanGridY, lookAheadX, lookAheadY);
+
+      if (ghostToTarget < pacmanToTarget) {
+        targetX = pacmanGridX;
+        targetY = pacmanGridY;
+      } else {
+        targetX = lookAheadX;
+        targetY = lookAheadY;
+      }
+    }
+  }
+
+  bool shouldMaximize = (state == GhostState::FEAR);
+
+  std::vector<Direction> bestDirections;
+  int bestDistance = shouldMaximize ? -1 : 999999;
+
+  for (Direction dir : viable) {
+    int nextGridX = gridX;
+    int nextGridY = gridY;
+
+    switch (dir) {
+      case Direction::UP:    nextGridY--; break;
+      case Direction::DOWN:  nextGridY++; break;
+      case Direction::LEFT:  nextGridX--; break;
+      case Direction::RIGHT: nextGridX++; break;
+      case Direction::NONE: break;
     }
 
-    // ✅ Break ties at random (as per assignment requirements)
-    Direction chosen = bestDirections.size() == 1 ? bestDirections[0] :
-                      bestDirections[random.getInt(0, bestDirections.size() - 1)];
+    int distance = manhattanDistance(nextGridX, nextGridY, targetX, targetY);
 
-    std::string chosenStr = (chosen == Direction::UP) ? "UP" :
-                           (chosen == Direction::DOWN) ? "DOWN" :
-                           (chosen == Direction::LEFT) ? "LEFT" : "RIGHT";
-    std::cout << "  CHOSE: " << chosenStr << " (distance: " << bestDistance << ")" << std::endl << std::endl;
+    if (shouldMaximize) {
+      if (distance > bestDistance) {
+        bestDistance = distance;
+        bestDirections.clear();
+        bestDirections.push_back(dir);
+      } else if (distance == bestDistance) {
+        bestDirections.push_back(dir);
+      }
+    } else {
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestDirections.clear();
+        bestDirections.push_back(dir);
+      } else if (distance == bestDistance) {
+        bestDirections.push_back(dir);
+      }
+    }
+  }
 
-    return chosen;
+  if (bestDirections.empty()) {
+    int index = random.getInt(0, viable.size() - 1);
+    return viable[index];
+  }
+
+  Direction chosen = bestDirections.size() == 1 ? bestDirections[0] :
+                    bestDirections[random.getInt(0, bestDirections.size() - 1)];
+
+  return chosen;
 }
 
 void Ghost::enterFearMode() {
-  // ✅ ALWAYS reset fearModeEnding when new fear mode starts
   fearModeEnding = false;
 
-  // If ghost hasn't left spawn yet, just mark it to enter fear mode later
   if (state == GhostState::WAITING || state == GhostState::EXITING) {
     shouldEnterFearWhenLeaving = true;
-    // ❌ DON'T reverse direction when in spawn - let them exit normally
     return;
   }
 
-  // Ghost is already chasing, enter fear mode immediately
   state = GhostState::FEAR;
   speed = fearSpeed;
 
-  // Reverse direction when entering fear mode (only if already out and chasing)
   Direction current = getDirection();
   Direction opposite = Direction::NONE;
 
@@ -555,7 +519,6 @@ void Ghost::enterFearMode() {
 
 void Ghost::exitFearMode() {
   if (state != GhostState::FEAR) {
-    // Clear the flag if fear mode ends before ghost leaves spawn
     shouldEnterFearWhenLeaving = false;
     return;
   }
@@ -563,7 +526,7 @@ void Ghost::exitFearMode() {
   state = GhostState::CHASING;
   speed = normalSpeed;
   fearModeEnding = false;
-  shouldEnterFearWhenLeaving = false;  // ✅ Clear flag
+  shouldEnterFearWhenLeaving = false;
 
   lastDecisionGridX = -999;
   lastDecisionGridY = -999;

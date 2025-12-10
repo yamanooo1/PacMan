@@ -1,5 +1,5 @@
-//
-// Created by yamanooo on 11/22/25.
-//
-
 #include "logic/Wall.h"
+
+Wall::Wall(float x, float y, float width, float height)
+    : EntityModel(x, y, width, height) {
+}

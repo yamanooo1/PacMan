@@ -1,7 +1,3 @@
-//
-// CoinView.h - UPDATED with window reference
-//
-
 #ifndef PACMAN_COINVIEW_H
 #define PACMAN_COINVIEW_H
 
@@ -11,15 +7,14 @@
 
 class CoinView: public EntityView {
 private:
-  // ✅ REMOVED: sf::RenderWindow* window;
   sf::CircleShape shape;
 
 public:
-  CoinView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
+  CoinView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
            std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent) override;
   void draw() override;
 };
 
-#endif //PACMAN_COINVIEW_H
+#endif

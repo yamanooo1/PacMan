@@ -1,14 +1,8 @@
-//
-// Lives.h - UPDATED with enable_shared_from_this
-//
-
 #ifndef PACMAN_LIVES_H
 #define PACMAN_LIVES_H
-
 #include "Observer.h"
 #include <memory>
 
-// ✅ ADD: Enable shared_from_this for Observer pattern
 class Lives : public Observer, public std::enable_shared_from_this<Lives> {
 private:
   int remainingLives;
@@ -27,4 +21,4 @@ public:
   void reset(int lives = 3);
 };
 
-#endif // PACMAN_LIVES_H
+#endif

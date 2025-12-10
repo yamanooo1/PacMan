@@ -10,22 +10,18 @@ private:
   sf::Font font;
   sf::Text titleText;
 
-  // Play button
   sf::RectangleShape playButton;
   sf::Text playButtonText;
   bool isPlayButtonHovered;
 
-  // ✅ NEW: Exit button
   sf::RectangleShape exitButton;
   sf::Text exitButtonText;
   bool isExitButtonHovered;
 
-  // How to play section
   sf::Text howToPlayTitle;
   sf::Text howToPlayControls;
-  sf::Text howToPlayPoints;  // ✅ NEW: Points information
+  sf::Text howToPlayPoints;
 
-  // Leaderboard with yellow box
   sf::RectangleShape leaderboardBox;
   sf::Text leaderboardTitle;
   std::vector<sf::Text> scoreNameTexts;
@@ -33,7 +29,6 @@ private:
 
   bool fontLoaded;
 
-  // Window size tracking for proportional positioning
   float windowWidth;
   float windowHeight;
 
@@ -51,10 +46,10 @@ public:
 private:
   void setupTexts();
   void setupPlayButton();
-  void setupExitButton();  // ✅ NEW
+  void setupExitButton();
   void setupHowToPlay();
   void setupLeaderboard();
   bool isMouseOverButton(const sf::RectangleShape& button, sf::RenderWindow& window);
 };
 
-#endif // PACMAN_MENUSTATE_H
+#endif

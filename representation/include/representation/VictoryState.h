@@ -13,7 +13,6 @@ private:
   sf::Text continueText;
   sf::Text menuText;
 
-  // Name input for high scores
   sf::Text namePromptText;
   sf::Text nameInputText;
   sf::RectangleShape nameInputBox;
@@ -33,7 +32,6 @@ private:
   bool isGameOver;
   bool qualifiesForHighScore;
 
-  // ✅ NEW: Window size tracking for proportional positioning
   float windowWidth;
   float windowHeight;
 
@@ -43,7 +41,7 @@ public:
 
   void onEnter() override;
   void onExit() override;
-  void onWindowResize(float width, float height) override;  // ✅ NEW
+  void onWindowResize(float width, float height) override;
 
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;
@@ -58,4 +56,4 @@ private:
   void submitHighScore();
 };
 
-#endif // PACMAN_VICTORYSTATE_H
+#endif

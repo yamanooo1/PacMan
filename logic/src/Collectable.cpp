@@ -1,5 +1,10 @@
-//
-// Created by yamanooo on 11/22/25.
-//
-
 #include "logic/Collectable.h"
+
+Collectable::Collectable(float x, float y, float width, float height)
+    : EntityModel(x, y, width, height) {
+}
+
+void Collectable::onCollisionWithPacMan() {
+  onCollected();
+  markDead();
+}

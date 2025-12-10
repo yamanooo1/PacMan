@@ -40,10 +40,9 @@ private:
   std::string mapFile;
   bool pauseRequested;
 
-  // ✅ NEW: Window size tracking
   float windowWidth;
   float windowHeight;
   static constexpr float HUD_HEIGHT = 60.0f;
 };
 
-#endif // LEVELSTATE_H
+#endif

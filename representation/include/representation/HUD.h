@@ -11,7 +11,7 @@ class Lives;
 
 class HUD {
 public:
-  HUD(sf::RenderWindow& window, int hudHeight);  // ✅ CHANGED to reference
+  HUD(sf::RenderWindow& window, int hudHeight);
 
   void loadFont(const std::string& fontPath);
   void draw(World* world, Score* score, Lives* lives, int currentLevel);
@@ -19,10 +19,10 @@ public:
   void drawLevelClearedText(World* world);
 
 private:
-  sf::RenderWindow& window;  // ✅ CHANGED to reference
+  sf::RenderWindow& window;
   sf::Font font;
   int hudHeight;
   bool fontLoaded;
 };
 
-#endif // HUD_H
+#endif

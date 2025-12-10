@@ -1,5 +1,9 @@
-//
-// Created by yamanooo on 11/22/25.
-//
-
 #include "logic/Coin.h"
+
+Coin::Coin(float x, float y)
+    : Collectable(x, y, 0.02f, 0.02f) {
+}
+
+void Coin::onCollected() {
+  notify(GameEvent::COIN_COLLECTED);
+}

@@ -1,7 +1,3 @@
-//
-// PacManView.h - UPDATED with window reference
-//
-
 #ifndef PACMAN_PACMANVIEW_H
 #define PACMAN_PACMANVIEW_H
 
@@ -12,7 +8,6 @@
 
 class PacManView: public EntityView {
 private:
-  // ✅ REMOVED: sf::RenderWindow* window; - now in base class
   sf::RectangleShape shape;
 
   float animationTimer;
@@ -25,7 +20,7 @@ private:
   float deathFrameDuration;
 
 public:
-  PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
+  PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
              std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent event) override;
@@ -33,4 +28,4 @@ public:
   void draw() override;
 };
 
-#endif //PACMAN_PACMANVIEW_H
+#endif

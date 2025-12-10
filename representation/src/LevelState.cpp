@@ -11,8 +11,7 @@
 #include "logic/Score.h"
 #include "logic/Lives.h"
 #include "logic/PacMan.h"
-#include <iostream>
-
+#include <cmath>
 
 LevelState::~LevelState() = default;
 
@@ -22,15 +21,10 @@ LevelState::LevelState(int level, int startingScore)
     , mapFile("../../resources/map/map1.txt")
     , pauseRequested(false)
     , windowWidth(800.0f)
-    , windowHeight(860.0f)
-{
-  std::cout << "[LevelState] Constructor - Level: " << level
-            << ", Starting Score: " << startingScore << std::endl;
+    , windowHeight(860.0f) {
 }
 
 void LevelState::onEnter() {
-  std::cout << "[LevelState] Entering level " << currentLevel << std::endl;
-
   SoundManager& soundManager = SoundManager::getInstance();
   if (!soundManager.isLoaded()) {
     soundManager.loadSounds("../../resources/sound effects");
@@ -38,22 +32,15 @@ void LevelState::onEnter() {
 
   soundManager.stopMusic();
 
-  // ✅ FIXED: Only play starting music on Level 1
   if (currentLevel == 1) {
-    std::cout << "[LevelState] Playing starting music (Level 1)" << std::endl;
-    soundManager.playBackgroundMusic(false);  // One-shot starting music
-  } else {
-    std::cout << "[LevelState] Level " << currentLevel << " - no starting music" << std::endl;
+    soundManager.playBackgroundMusic(false);
   }
 
   if (!loadLevel()) {
-    std::cerr << "[LevelState] Failed to load level!" << std::endl;
   }
 }
 
 void LevelState::onExit() {
-  std::cout << "[LevelState] Exiting level " << currentLevel << std::endl;
-
   SoundManager& soundManager = SoundManager::getInstance();
   soundManager.stopMusic();
 }
@@ -62,33 +49,21 @@ void LevelState::onWindowResize(float width, float height) {
   windowWidth = width;
   windowHeight = height;
 
-  std::cout << "[LevelState] Window resized to " << width << "x" << height << std::endl;
-
   if (camera) {
     float gameHeight = height - HUD_HEIGHT;
     camera->setWindowSize(width, gameHeight);
-    std::cout << "[LevelState] Camera updated: " << width << "x" << gameHeight << std::endl;
   }
 }
 
 bool LevelState::loadLevel() {
-  std::cout << "[LevelState] Loading level " << currentLevel << "..." << std::endl;
-
   float gameHeight = windowHeight - HUD_HEIGHT;
   camera = std::make_shared<Camera>(windowWidth, gameHeight, 10, 10);
-  std::cout << "[LevelState] ✅ Camera created with dimensions: "
-            << windowWidth << "x" << gameHeight << std::endl;
 
-  std::cout << "[LevelState] Creating Score with initialScore: " << initialScore << std::endl;
   score = std::make_shared<Score>();
   score->setScore(initialScore);
-  std::cout << "[LevelState] ✅ Score set to: " << initialScore << std::endl;
 
   lives = std::make_shared<Lives>(3);
-  std::cout << "[LevelState] ✅ Lives created" << std::endl;
 
-  std::cout << "[LevelState] ✅ Sound system ready" << std::endl;
-  std::cout << "[LevelState] Level " << currentLevel << " loaded successfully!" << std::endl;
   return true;
 }
 
@@ -101,7 +76,6 @@ void LevelState::handleEvents(sf::RenderWindow& window) {
   bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
 
   if (escIsPressed && !escWasPressed) {
-    std::cout << "[LevelState] Pause requested" << std::endl;
     pauseRequested = true;
 
     if (stateManager) {
@@ -124,24 +98,20 @@ void LevelState::update(float deltaTime) {
 
   SoundManager& soundManager = SoundManager::getInstance();
 
-  // Track game state changes to reset coin timer
   static bool wasInSpecialState = false;
   bool isInSpecialState = (world->isDeathAnimationActive() ||
                            world->isReadyStateActive() ||
                            world->isLevelClearedDisplayActive());
 
-  // Monitor fear mode state and stop music when it ends naturally
   static bool wasFearModeActive = false;
   bool isFearModeActive = world->isFearModeActive();
 
   if (wasFearModeActive && !isFearModeActive) {
     soundManager.stopFearModeSound();
-    std::cout << "[LevelState] Fear mode ended naturally - stopped music" << std::endl;
   }
 
   wasFearModeActive = isFearModeActive;
 
-  // Count coins BEFORE update
   static int previousCoinCount = -1;
   int coinsBeforeUpdate = 0;
 
@@ -159,10 +129,8 @@ void LevelState::update(float deltaTime) {
     previousCoinCount = coinsBeforeUpdate;
   }
 
-  // Update world
   world->update(deltaTime);
 
-  // Count coins AFTER update
   int coinsAfterUpdate = 0;
   for (const auto& entity : world->getEntities()) {
     if (entity->isDead()) continue;
@@ -172,33 +140,27 @@ void LevelState::update(float deltaTime) {
     if (isCoin) coinsAfterUpdate++;
   }
 
-  // Detect coin collection THIS frame
   bool coinWasCollectedThisFrame = (coinsAfterUpdate < previousCoinCount);
   previousCoinCount = coinsAfterUpdate;
 
-  // ✅ Stop all sounds when level is cleared
   if (world->isLevelClearedDisplayActive()) {
     soundManager.stopMovementSound();
     soundManager.stopFearModeSound();
     return;
   }
 
-  // Handle input
   handleInput();
 
   PacMan* pacman = world->getPacMan();
 
-  // Only play movement sound during normal gameplay
   bool isNormalGameplay = (pacman && lives && !lives->isGameOver() &&
                            world && !world->isDeathAnimationActive() &&
                            !world->isReadyStateActive() &&
                            !world->isLevelClearedDisplayActive());
 
   if (isNormalGameplay) {
-    // Detect state transition
     bool justExitedSpecialState = (wasInSpecialState && !isInSpecialState);
 
-    // Track position for movement detection
     static float prevX = 0.0f;
     static float prevY = 0.0f;
     auto [currentX, currentY] = pacman->getPosition();
@@ -209,27 +171,22 @@ void LevelState::update(float deltaTime) {
     Direction currentDirection = pacman->getDirection();
     bool wantsToMove = (currentDirection != Direction::NONE);
 
-    // Coin eating sound: Track recent coin collection with timer
     static float timeSinceLastCoin = 999.0f;
 
-    // Reset timer when exiting special states
     if (justExitedSpecialState) {
       timeSinceLastCoin = 999.0f;
-      std::cout << "[SOUND] Reset coin timer on state transition" << std::endl;
     } else if (coinWasCollectedThisFrame) {
       timeSinceLastCoin = 0.0f;
     } else {
       timeSinceLastCoin += deltaTime;
     }
 
-    // Play sound only if moving through coins recently
     if (actuallyMoving && wantsToMove && timeSinceLastCoin < 0.3f && coinsAfterUpdate > 0) {
       soundManager.startMovementSound();
     } else {
       soundManager.stopMovementSound();
     }
 
-    // Reset timer when stopped
     if (!actuallyMoving) {
       timeSinceLastCoin = 999.0f;
     }
@@ -242,7 +199,6 @@ void LevelState::update(float deltaTime) {
 
   wasInSpecialState = isInSpecialState;
 
-  // Update score decay
   if (score && lives && !lives->isGameOver() &&
       world && !world->isDeathAnimationActive() &&
       !world->isReadyStateActive() &&
@@ -250,30 +206,17 @@ void LevelState::update(float deltaTime) {
     score->updateScoreDecay();
   }
 
-  // ✅ FIXED: Check for game over ONLY after death animation completes
   if (lives && lives->isGameOver()) {
-    // Wait for death animation to finish before showing game over screen
     if (!world->isDeathAnimationActive()) {
-      std::cout << "[LevelState] Game Over! Death animation complete. Final score: "
-                << score->getScore() << std::endl;
-
       if (stateManager) {
         stateManager->pushState(std::make_unique<VictoryState>(0, score->getScore()));
       }
       return;
     }
-    // Still in death animation - just return without showing game over yet
-    std::cout << "[LevelState] Game over but death animation still playing..." << std::endl;
     return;
   }
 
-  // ✅ IMPROVED: Auto-advance to next level after display timer expires
   if (world->isLevelCleared() && !world->isLevelClearedDisplayActive()) {
-    std::cout << "[LevelState] ✅ Level cleared display expired - auto-advancing to next level!" << std::endl;
-    std::cout << "[LevelState]    Current score: " << score->getScore() << std::endl;
-    std::cout << "[LevelState]    Next level: " << (currentLevel + 1) << std::endl;
-
-    // Automatically advance to next level with current score
     stateManager->clearAndPushState(
       std::make_unique<LevelState>(currentLevel + 1, score->getScore())
     );
@@ -285,13 +228,11 @@ void LevelState::render(sf::RenderWindow& window) {
     factory = std::make_unique<ConcreteFactory>(window, camera);
 
     if (!factory->loadSprites("../../resources/sprites/spritemap.png")) {
-      std::cerr << "[LevelState] Failed to load sprites!" << std::endl;
       return;
     }
 
     auto soundObserver = std::make_shared<SoundObserver>();
     factory->setSoundObserver(soundObserver);
-    std::cout << "[LevelState] ✅ SoundObserver attached to factory" << std::endl;
 
     hud = std::make_unique<HUD>(window, static_cast<int>(HUD_HEIGHT));
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
@@ -301,15 +242,10 @@ void LevelState::render(sf::RenderWindow& window) {
     world->setLives(lives);
 
     if (!world->loadFromFile(mapFile)) {
-      std::cerr << "[LevelState] Failed to load map: " << mapFile << std::endl;
       return;
     }
 
     camera->setMapSize(world->getMapWidth(), world->getMapHeight());
-
-    std::cout << "[LevelState] Map loaded: " << world->getMapWidth() << "x"
-              << world->getMapHeight() << std::endl;
-    std::cout << "[LevelState] Entities: " << world->getEntityCount() << std::endl;
 
     world->startReadyState();
   }

@@ -1,7 +1,3 @@
-//
-// GhostView.h - UPDATED with window reference
-//
-
 #ifndef PACMAN_GHOSTVIEW_H
 #define PACMAN_GHOSTVIEW_H
 
@@ -12,7 +8,6 @@
 
 class GhostView: public EntityView {
 private:
-  // ✅ REMOVED: sf::RenderWindow* window;
   sf::CircleShape shape;
   SpriteGhostType spriteType;
 
@@ -24,7 +19,7 @@ private:
   bool showWhite;
 
 public:
-  GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
+  GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
             std::shared_ptr<SpriteAtlas> atlas);
 
   void update(GameEvent) override;
@@ -35,4 +30,4 @@ public:
   void setSpriteType(SpriteGhostType type) { spriteType = type; }
 };
 
-#endif //PACMAN_GHOSTVIEW_H
+#endif

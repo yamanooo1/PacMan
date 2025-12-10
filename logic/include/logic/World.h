@@ -1,6 +1,5 @@
 #ifndef PACMAN_WORLD_H
 #define PACMAN_WORLD_H
-
 #include "EntityModel.h"
 #include "AbstractFactory.h"
 #include <memory>
@@ -18,19 +17,17 @@ class Lives;
 class World {
 private:
   std::vector<std::unique_ptr<EntityModel>> entities;
-  std::vector<Ghost*> ghosts;  // ⚠️ Non-owning - point to entities owned above
+  std::vector<Ghost*> ghosts;
 
   int mapWidth;
   int mapHeight;
-
   int currentLevel;
   float ghostSpeedMultiplier;
   float fearDurationMultiplier;
 
-  AbstractFactory* factory;  // ⚠️ Non-owning - owned by LevelState
-  PacMan* pacman;  // ⚠️ Non-owning - points to entity in 'entities' vector
+  AbstractFactory* factory;
+  PacMan* pacman;
 
-  // ✅ CHANGED to shared_ptr (for Observer pattern)
   std::shared_ptr<Score> score;
   std::shared_ptr<Lives> lives;
 
@@ -54,12 +51,18 @@ private:
   float levelClearedDisplayTimer;
   float levelClearedDisplayDuration;
 
+  std::vector<std::pair<int, int>> exitPositions;
+
+  void updatePacMan(float deltaTime);
+  void updateGhosts(float deltaTime);
+  void checkCollisions();
+  void removeDeadEntities();
+  void checkLevelComplete();
+
 public:
   explicit World(AbstractFactory* f, int level = 1);
 
   void setMapDimensions(int w, int h);
-
-  // ✅ CHANGED to take shared_ptr
   void setScore(std::shared_ptr<Score> s) { score = s; }
   void setLives(std::shared_ptr<Lives> l) { lives = l; }
 
@@ -95,7 +98,7 @@ public:
   float getGhostSpeedMultiplier() const { return ghostSpeedMultiplier; }
 
   void updateFearMode(float deltaTime);
-  bool isFearModeEnding() const { return fearModeActive && fearModeTimer <= 2.0f; }
+  bool isFearModeEnding() const;
 
   void startDeathAnimation();
   void updateDeathAnimation(float deltaTime);
@@ -107,15 +110,6 @@ public:
 
   bool isExitPosition(int gridX, int gridY) const;
   std::vector<std::pair<int, int>> getExitPositions() const;
-
-private:
-  void updatePacMan(float deltaTime);
-  void updateGhosts(float deltaTime);
-  void checkCollisions();
-  void removeDeadEntities();
-  void checkLevelComplete();
-
-  std::vector<std::pair<int, int>> exitPositions;
 };
 
-#endif //PACMAN_WORLD_H
+#endif

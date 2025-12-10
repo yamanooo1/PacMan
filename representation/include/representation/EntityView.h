@@ -1,7 +1,3 @@
-//
-// EntityView.h - UPDATED: No auto-attach, factory handles it
-//
-
 #ifndef PACMAN_ENTITYVIEW_H
 #define PACMAN_ENTITYVIEW_H
 
@@ -17,12 +13,9 @@ class EntityView: public Observer {
 public:
   explicit EntityView(EntityModel* m, sf::RenderWindow& win, std::shared_ptr<Camera> cam, std::shared_ptr<SpriteAtlas> atlas)
       : model(m), window(win), camera(cam), spriteAtlas(atlas) {
-    // ❌ REMOVED: Auto-attach (factory will handle this)
   }
 
-  ~EntityView() override {
-    // ❌ REMOVED: Auto-detach (weak_ptr handles cleanup automatically)
-  }
+  ~EntityView() override = default;
 
   void update(GameEvent event) override {}
   virtual void updateAnimation(float deltaTime) {}
@@ -34,10 +27,10 @@ public:
   EntityModel* getModel() const { return model; }
 
 protected:
-  EntityModel* model;  // ⚠️ Non-owning pointer to model owned by World
+  EntityModel* model;
   sf::RenderWindow& window;
   std::shared_ptr<Camera> camera;
   std::shared_ptr<SpriteAtlas> spriteAtlas;
 };
 
-#endif //PACMAN_ENTITYVIEW_H
+#endif

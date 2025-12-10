@@ -1,7 +1,3 @@
-//
-// ConcreteFactory.h - UPDATED with SoundObserver support
-//
-
 #ifndef PACMAN_CONCRETEFACTORY_H
 #define PACMAN_CONCRETEFACTORY_H
 
@@ -13,7 +9,7 @@
 class EntityView;
 class Camera;
 class SpriteAtlas;
-class Observer;  // ✅ Forward declaration
+class Observer;
 
 class ConcreteFactory: public AbstractFactory {
 private:
@@ -21,8 +17,6 @@ private:
   std::shared_ptr<Camera> camera;
   std::shared_ptr<SpriteAtlas> spriteAtlas;
   std::vector<std::shared_ptr<EntityView>> views;
-
-  // ✅ NEW: Sound observer to attach to entities
   std::shared_ptr<Observer> soundObserver;
 
 public:
@@ -31,7 +25,6 @@ public:
 
   bool loadSprites(const std::string& filepath);
 
-  // ✅ NEW: Set sound observer that will be attached to all entities
   void setSoundObserver(std::shared_ptr<Observer> observer) {
     soundObserver = observer;
   }
@@ -48,4 +41,4 @@ public:
   void updateAll();
 };
 
-#endif //PACMAN_CONCRETEFACTORY_H
+#endif

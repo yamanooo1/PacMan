@@ -1,15 +1,53 @@
-//
-// Created by yamanooo on 11/22/25.
-//
-
 #include "logic/PacMan.h"
 #include <cmath>
+
+PacMan::PacMan(float x, float y)
+    : EntityModel(x, y, 0.8f, 0.8f)
+    , speed(4.0f)
+    , desiredDirection(Direction::LEFT)
+    , spawnX(x)
+    , spawnY(y) {
+  setDirection(Direction::LEFT);
+}
+
+void PacMan::setDesiredDirection(Direction dir) {
+  desiredDirection = dir;
+}
+
+void PacMan::executeTurn() {
+  if (desiredDirection != Direction::NONE) {
+    setDirection(desiredDirection);
+  }
+}
+
+void PacMan::die() {
+  notify(GameEvent::PACMAN_DIED);
+}
+
+void PacMan::respawn() {
+  setPosition(spawnX, spawnY);
+  setDirection(Direction::LEFT);
+  desiredDirection = Direction::NONE;
+  notify(GameEvent::DIRECTION_CHANGED);
+}
+
+void PacMan::setSpawnPosition(float x, float y) {
+  spawnX = x;
+  spawnY = y;
+}
+
+void PacMan::notifyDirectionChange() {
+  notify(GameEvent::DIRECTION_CHANGED);
+}
+
+void PacMan::hitWall() {
+  notify(GameEvent::WALL_HIT);
+}
 
 bool PacMan::isAlignedWithGrid() const {
   auto [x, y] = getPosition();
   const float tolerance = 0.1f;
 
-  // Check if we're close to a grid cell center
   float fractX = x - std::floor(x);
   float fractY = y - std::floor(y);
 
@@ -20,10 +58,10 @@ bool PacMan::isAlignedWithGrid() const {
           std::abs(fractY) < tolerance ||
           std::abs(fractY - 1.0f) < tolerance);
 }
+
 void PacMan::update(float deltaTime, bool canMove) {
   auto [x, y] = getPosition();
 
-  // Just move - turning is handled by World now
   if (canMove && getDirection() != Direction::NONE) {
     switch (getDirection()) {
     case Direction::UP:
@@ -45,4 +83,3 @@ void PacMan::update(float deltaTime, bool canMove) {
     setPosition(x, y);
   }
 }
-

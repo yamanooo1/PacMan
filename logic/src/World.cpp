@@ -1,8 +1,3 @@
-//
-// World.cpp - WITH DEATH ANIMATION
-// Implements proper death sequence: die → animate → reset
-//
-
 #include "logic/World.h"
 #include "logic/PacMan.h"
 #include "logic/Ghost.h"
@@ -13,15 +8,15 @@
 #include "logic/Lives.h"
 #include <fstream>
 #include <sstream>
-#include <iostream>
 #include <cmath>
+#include <algorithm>
 
 World::World(AbstractFactory *f, int level)
     : mapWidth(0)
     , mapHeight(0)
     , currentLevel(level)
-    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.09f)  // ✅ 9% faster per level
-    , fearDurationMultiplier(1.0f - (std::min(level, 6) - 1) * 0.09f)// ✅ 9% shorter per level until level 6. then it stays the same
+    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.09f)
+    , fearDurationMultiplier(1.0f - (std::min(level, 6) - 1) * 0.09f)
     , factory(f)
     , pacman(nullptr)
     , score(nullptr)
@@ -30,7 +25,7 @@ World::World(AbstractFactory *f, int level)
     , pacmanSpawnY(0.0f)
     , fearModeActive(false)
     , fearModeTimer(0.0f)
-    , fearModeDuration(7.0f * fearDurationMultiplier)  // ✅ Apply multiplier
+    , fearModeDuration(7.0f * fearDurationMultiplier)
     , deathAnimationActive(false)
     , deathAnimationTimer(0.0f)
     , deathAnimationDuration(2.0f)
@@ -40,17 +35,12 @@ World::World(AbstractFactory *f, int level)
     , levelCleared(false)
     , levelClearedDisplayActive(false)
     , levelClearedDisplayTimer(0.0f)
-    , levelClearedDisplayDuration(3.0f)
-{
-  std::cout << "[WORLD] Level " << currentLevel
-            << " - Ghost speed: x" << ghostSpeedMultiplier
-            << " Fear duration: x" << fearDurationMultiplier << std::endl;
+    , levelClearedDisplayDuration(3.0f) {
 }
 
 void World::startReadyState() {
   readyStateActive = true;
   readyStateTimer = readyStateDuration;
-  std::cout << "[WORLD] READY state started (" << readyStateDuration << " seconds)" << std::endl;
 }
 
 void World::updateReadyState(float deltaTime) {
@@ -60,7 +50,6 @@ void World::updateReadyState(float deltaTime) {
 
   if (readyStateTimer <= 0.0f) {
     readyStateActive = false;
-    std::cout << "[WORLD] READY state complete - game starting!" << std::endl;
   }
 }
 
@@ -85,7 +74,6 @@ void World::createPacMan(float x, float y) {
   pacmanSpawnY = centeredY;
   pacman->setSpawnPosition(centeredX, centeredY);
 
-  // ✅ CORRECTED: Use shared_from_this() to attach
   if (lives) {
     pacman->attach(lives->shared_from_this());
   }
@@ -101,14 +89,6 @@ void World::createGhost(float x, float y, GhostType type, GhostColor color, floa
   float centeredY = y + (1.0f - ghost->getHeight()) / 2.0f;
   ghost->setPosition(centeredX, centeredY);
 
-  float centerX = centeredX + ghost->getWidth() / 2.0f;
-  float centerY = centeredY + ghost->getHeight() / 2.0f;
-  std::cout << "[SPAWN] Ghost type " << static_cast<int>(type)
-            << " at grid (" << x << "," << y << ")"
-            << " position (" << centeredX << "," << centeredY << ")"
-            << " center (" << centerX << "," << centerY << ")" << std::endl;
-
-  // ✅ CORRECTED: Use shared_from_this() to attach
   if (score) {
     ghost->attach(score->shared_from_this());
   }
@@ -130,7 +110,6 @@ void World::createCoin(float x, float y) {
   float centeredY = y + (1.0f - coin->getHeight()) / 2.0f;
   coin->setPosition(centeredX, centeredY);
 
-  // ✅ CORRECTED: Use shared_from_this() to attach
   if (score) {
     coin->attach(score->shared_from_this());
   }
@@ -145,7 +124,6 @@ void World::createFruit(float x, float y) {
   float centeredY = y + (1.0f - fruit->getHeight()) / 2.0f;
   fruit->setPosition(centeredX, centeredY);
 
-  // ✅ CORRECTED: Use shared_from_this() to attach
   if (score) {
     fruit->attach(score->shared_from_this());
   }
@@ -156,7 +134,6 @@ void World::createFruit(float x, float y) {
 bool World::loadFromFile(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    std::cerr << "Failed to open map file: " << filename << std::endl;
     return false;
   }
 
@@ -203,7 +180,6 @@ bool World::loadFromFile(const std::string &filename) {
         break;
       case 'w':
         exitPositions.push_back({col, row});
-        std::cout << "[MAP] Exit gate at (" << col << "," << row << ")" << std::endl;
         break;
       case ' ':
         break;
@@ -219,18 +195,14 @@ bool World::loadFromFile(const std::string &filename) {
 void World::respawnPacManAndGhosts() {
   if (!pacman) return;
 
-  std::cout << "[WORLD] Respawning PacMan and Ghosts..." << std::endl;
-
   pacman->respawn();
 
-  // ✅ Exit fear mode for all ghosts on respawn
   for (Ghost* ghost : ghosts) {
     if (ghost) {
       ghost->exitFearMode();
     }
   }
 
-  // Reset ghost positions and states
   for (size_t i = 0; i < ghosts.size(); ++i) {
     if (i < ghostSpawnPositions.size()) {
       auto [spawnX, spawnY] = ghostSpawnPositions[i];
@@ -241,51 +213,43 @@ void World::respawnPacManAndGhosts() {
   }
 }
 
-
 void World::update(float deltaTime) {
   if (!pacman) return;
 
-  // ✅ Handle ready state FIRST - freeze game during "READY!"
   if (readyStateActive) {
     updateReadyState(deltaTime);
-    return;  // Don't update anything else during ready state
+    return;
   }
 
-  // ✅ Handle death animation - freeze game during animation
   if (deathAnimationActive) {
     updateDeathAnimation(deltaTime);
-    return;  // Don't update anything else during death animation
+    return;
   }
 
-  // ✅ Handle level cleared display - freeze game and count down timer
   if (levelClearedDisplayActive) {
     levelClearedDisplayTimer -= deltaTime;
     if (levelClearedDisplayTimer <= 0.0f) {
       levelClearedDisplayActive = false;
-      std::cout << "[WORLD] ✅ 3-second timer EXPIRED! Display inactive now." << std::endl;
     }
-    return;  // Freeze all game logic during display
-  }
-
-  if (lives && lives->isGameOver()) {
-    std::cout << "[WORLD] Game Over! Press ESC to quit." << std::endl;
     return;
   }
 
+  if (lives && lives->isGameOver()) {
+    return;
+  }
+
+  updatePacMan(deltaTime);
+  updateGhosts(deltaTime);
+  updateFearMode(deltaTime);
+  checkCollisions();
+  removeDeadEntities();
+  checkLevelComplete();
+}
+
+void World::updatePacMan(float deltaTime) {
   auto [x, y] = pacman->getPosition();
   Direction currentDir = pacman->getDirection();
   Direction desiredDir = pacman->getDesiredDirection();
-
-  static int pacmanFrameCount = 0;
-  pacmanFrameCount++;
-  if (pacmanFrameCount % 60 == 0) {
-    std::cout << "[DEBUG PacMan] Frame " << pacmanFrameCount
-              << " | Pos(" << x << "," << y << ")"
-              << " | CurrentDir=" << static_cast<int>(currentDir)
-              << " | DesiredDir=" << static_cast<int>(desiredDir)
-              << " | Speed=" << pacman->getSpeed()
-              << std::endl;
-  }
 
   float centerX = x + pacman->getWidth() / 2.0f;
   float centerY = y + pacman->getHeight() / 2.0f;
@@ -295,11 +259,9 @@ void World::update(float deltaTime) {
   float gridCenterX = currentGridX + 0.5f;
   float gridCenterY = currentGridY + 0.5f;
 
-  // Store previous position for crossing detection
   static float prevCenterX = centerX;
   static float prevCenterY = centerY;
 
-  // Check if we're at or crossed the center
   float speed = pacman->getSpeed();
   float maxMovePerFrame = speed * deltaTime;
   const float centerTolerance = std::max(0.15f, maxMovePerFrame * 1.5f);
@@ -307,35 +269,25 @@ void World::update(float deltaTime) {
   bool atCenterX = std::abs(centerX - gridCenterX) < centerTolerance;
   bool atCenterY = std::abs(centerY - gridCenterY) < centerTolerance;
 
-  // Check if we crossed the center line between frames
-  bool crossedCenterX = false;
-  bool crossedCenterY = false;
-
   if (currentDir == Direction::LEFT || currentDir == Direction::RIGHT) {
-    // Moving horizontally - check if we crossed the vertical center line
     if ((prevCenterX < gridCenterX && centerX >= gridCenterX) ||
         (prevCenterX > gridCenterX && centerX <= gridCenterX)) {
-      crossedCenterX = true;
-      atCenterX = true;  // Consider it centered if we crossed
+      atCenterX = true;
     }
   }
 
   if (currentDir == Direction::UP || currentDir == Direction::DOWN) {
-    // Moving vertically - check if we crossed the horizontal center line
     if ((prevCenterY < gridCenterY && centerY >= gridCenterY) ||
         (prevCenterY > gridCenterY && centerY <= gridCenterY)) {
-      crossedCenterY = true;
-      atCenterY = true;  // Consider it centered if we crossed
+      atCenterY = true;
     }
   }
 
   bool atCenter = atCenterX && atCenterY;
 
-  // Update previous position for next frame
   prevCenterX = centerX;
   prevCenterY = centerY;
 
-  // Check desired direction EVERY frame (not just when centered)
   if (desiredDir != Direction::NONE && desiredDir != currentDir) {
     int testX = currentGridX;
     int testY = currentGridY;
@@ -348,11 +300,9 @@ void World::update(float deltaTime) {
       case Direction::NONE:  break;
     }
 
-    // Check if the desired path is clear
     bool pathIsClear = !hasWallInGridCell(testX, testY);
 
     if (pathIsClear) {
-      // Determine if this is a perpendicular turn
       bool isPerpendicular = false;
       if ((currentDir == Direction::UP || currentDir == Direction::DOWN) &&
           (desiredDir == Direction::LEFT || desiredDir == Direction::RIGHT)) {
@@ -363,24 +313,19 @@ void World::update(float deltaTime) {
         isPerpendicular = true;
       }
 
-      // Decide if we can turn now
       bool canTurn = false;
 
       if (currentDir == Direction::NONE) {
-        // Starting from stopped - can always turn
         canTurn = true;
       }
       else if (!isPerpendicular) {
-        // Opposite direction (180° turn) - turn immediately
         canTurn = true;
       }
       else if (atCenter) {
-        // Perpendicular turn - only when centered to avoid corner cutting
         canTurn = true;
       }
 
       if (canTurn) {
-        // Snap to grid center when turning to ensure perfect centering
         float newX = gridCenterX - pacman->getWidth() / 2.0f;
         float newY = gridCenterY - pacman->getHeight() / 2.0f;
         pacman->setPosition(newX, newY);
@@ -391,7 +336,6 @@ void World::update(float deltaTime) {
     }
   }
 
-  // Check for walls ahead in current direction
   int testX = currentGridX;
   int testY = currentGridY;
 
@@ -404,32 +348,27 @@ void World::update(float deltaTime) {
   }
 
   if (hasWallInGridCell(testX, testY)) {
-    // Check if Pac-Man's edge would collide with the wall
     float halfWidth = pacman->getWidth() / 2.0f;
     float halfHeight = pacman->getHeight() / 2.0f;
     bool shouldStop = false;
 
     switch (currentDir) {
       case Direction::LEFT:
-        // Wall is to the left, stop if left edge would cross the boundary
         if (centerX <= (testX + 1.0f) + halfWidth) {
           shouldStop = true;
         }
         break;
       case Direction::RIGHT:
-        // Wall is to the right, stop if right edge would cross the boundary
         if (centerX >= testX - halfWidth) {
           shouldStop = true;
         }
         break;
       case Direction::UP:
-        // Wall is above, stop if top edge would cross the boundary
         if (centerY <= (testY + 1.0f) + halfHeight) {
           shouldStop = true;
         }
         break;
       case Direction::DOWN:
-        // Wall is below, stop if bottom edge would cross the boundary
         if (centerY >= testY - halfHeight) {
           shouldStop = true;
         }
@@ -440,18 +379,11 @@ void World::update(float deltaTime) {
 
     if (shouldStop) {
       pacman->setDirection(Direction::NONE);
-      pacman->hitWall();  // ← THIS LINE MUST BE HERE!
+      pacman->hitWall();
     }
   }
 
-  // Normal movement - no special sliding logic
   pacman->update(deltaTime, true);
-
-  updateGhosts(deltaTime);
-  updateFearMode(deltaTime);
-  checkCollisions();
-  removeDeadEntities();
-  checkLevelComplete();
 }
 
 bool World::isWall(float x, float y, float width, float height) const {
@@ -531,7 +463,6 @@ void World::checkCollisions() {
         }
 
         if (collidedGhost && collidedGhost->isInFearMode()) {
-          std::cout << "[COLLISION] PacMan ate a ghost!" << std::endl;
           collidedGhost->onEaten();
 
           if (ghostIndex >= 0 && ghostIndex < ghostSpawnPositions.size()) {
@@ -540,16 +471,12 @@ void World::checkCollisions() {
             collidedGhost->setDirection(Direction::UP);
             collidedGhost->exitFearMode();
             collidedGhost->respawnAfterEaten();
-
-            std::cout << "[GHOST] Ghost respawned after being eaten - will exit immediately" << std::endl;
           }
         } else {
           pacmanDied = true;
-          std::cout << "[COLLISION] Ghost hit PacMan!" << std::endl;
         }
       }
       else if (ew > 0.02f && ew < 0.04f && eh > 0.02f && eh < 0.04f) {
-        std::cout << "[COLLISION] PacMan ate a fruit!" << std::endl;
         entity->onCollisionWithPacMan();
         activateFearMode();
       }
@@ -562,13 +489,10 @@ void World::checkCollisions() {
   if (pacmanDied && lives) {
     pacman->die();
 
-    // Deactivate fear mode immediately when PacMan dies
     if (fearModeActive) {
       fearModeActive = false;
       fearModeTimer = 0.0f;
-      std::cout << "[WORLD] Fear mode cancelled - PacMan died!" << std::endl;
 
-      // Exit fear mode for all ghosts
       for (Ghost* ghost : ghosts) {
         if (ghost) {
           ghost->exitFearMode();
@@ -576,7 +500,6 @@ void World::checkCollisions() {
       }
     }
 
-    // ✅ ALWAYS start death animation, even on final death!
     startDeathAnimation();
   }
 }
@@ -597,8 +520,6 @@ void World::activateFearMode() {
   fearModeActive = true;
   fearModeTimer = fearModeDuration;
 
-  std::cout << "[WORLD] Fear mode activated for " << fearModeDuration
-              << " seconds (level " << currentLevel << ")!" << std::endl;
   for (Ghost* ghost : ghosts) {
     if (ghost) {
       ghost->enterFearMode();
@@ -611,7 +532,6 @@ void World::updateFearMode(float deltaTime) {
 
   fearModeTimer -= deltaTime;
 
-  // ✅ Notify ALL ghosts when fear mode is ending (last 2 seconds)
   if (fearModeTimer <= 2.0f && fearModeTimer > 0.0f) {
     for (Ghost* ghost : ghosts) {
       if (ghost) {
@@ -622,7 +542,6 @@ void World::updateFearMode(float deltaTime) {
 
   if (fearModeTimer <= 0.0f) {
     fearModeActive = false;
-    std::cout << "[WORLD] Fear mode ended!" << std::endl;
 
     for (Ghost* ghost : ghosts) {
       if (ghost) {
@@ -632,11 +551,13 @@ void World::updateFearMode(float deltaTime) {
   }
 }
 
+bool World::isFearModeEnding() const {
+  return fearModeActive && fearModeTimer <= 2.0f;
+}
+
 void World::startDeathAnimation() {
   deathAnimationActive = true;
   deathAnimationTimer = deathAnimationDuration;
-
-  std::cout << "[WORLD] Death animation started (" << deathAnimationDuration << " seconds)" << std::endl;
 }
 
 void World::updateDeathAnimation(float deltaTime) {
@@ -646,13 +567,7 @@ void World::updateDeathAnimation(float deltaTime) {
 
   if (deathAnimationTimer <= 0.0f) {
     deathAnimationActive = false;
-
-    std::cout << "[WORLD] Death animation complete - respawning!" << std::endl;
-
-    // Respawn everything
     respawnPacManAndGhosts();
-
-    // ✅ Start ready state after respawn
     startReadyState();
   }
 }
@@ -702,14 +617,8 @@ void World::checkLevelComplete() {
     levelClearedDisplayActive = true;
     levelClearedDisplayTimer = levelClearedDisplayDuration;
 
-    std::cout << "\n========================================" << std::endl;
-    std::cout << "       🎉 LEVEL CLEARED! 🎉" << std::endl;
-    std::cout << "========================================\n" << std::endl;
-
     if (score) {
       score->update(GameEvent::LEVEL_CLEARED);
     }
-
-    std::cout << "[WORLD] Press ESC to quit" << std::endl;
   }
 }

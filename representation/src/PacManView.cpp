@@ -1,7 +1,3 @@
-//
-// PacManView.cpp - UPDATED with window reference
-//
-
 #include "representation/PacManView.h"
 #include "representation/Camera.h"
 #include "representation/SpriteAtlas.h"

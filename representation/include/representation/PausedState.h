@@ -15,7 +15,6 @@ private:
   bool resumeRequested;
   bool menuRequested;
 
-  // ✅ NEW: Window size tracking for proportional positioning
   float windowWidth;
   float windowHeight;
 
@@ -25,7 +24,7 @@ public:
 
   void onEnter() override;
   void onExit() override;
-  void onWindowResize(float width, float height) override;  // ✅ NEW
+  void onWindowResize(float width, float height) override;
 
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;
@@ -37,4 +36,4 @@ private:
   void setupTexts();
 };
 
-#endif // PACMAN_PAUSEDSTATE_H
+#endif

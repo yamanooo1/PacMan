@@ -2,78 +2,66 @@
 #include "logic/World.h"
 #include "logic/Score.h"
 #include "logic/Lives.h"
-#include <iostream>
 
 HUD::HUD(sf::RenderWindow& win, int height)
     : window(win)
     , hudHeight(height)
-    , fontLoaded(false)
-{
+    , fontLoaded(false) {
 }
 
 void HUD::loadFont(const std::string& fontPath) {
-    if (font.loadFromFile(fontPath)) {
-        fontLoaded = true;
-        std::cout << "[HUD] Font loaded: " << fontPath << std::endl;
-    } else {
-        std::cerr << "[HUD] Failed to load font: " << fontPath << std::endl;
-        fontLoaded = false;
-    }
+  if (font.loadFromFile(fontPath)) {
+    fontLoaded = true;
+  }
 }
 
 void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
-    if (!score || !lives) return;
+  if (!score || !lives) return;
 
-    // Calculate HUD position dynamically based on current window size
-    float windowHeight = static_cast<float>(window.getSize().y);
-    float hudYPosition = windowHeight - hudHeight;
+  float windowHeight = static_cast<float>(window.getSize().y);
+  float hudYPosition = windowHeight - hudHeight;
 
-    // Draw black background for HUD area
-    sf::RectangleShape hudBackground;
-    hudBackground.setSize(sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(hudHeight)));
-    hudBackground.setPosition(0.f, hudYPosition);
-    hudBackground.setFillColor(sf::Color::Black);
-    window.draw(hudBackground);
+  sf::RectangleShape hudBackground;
+  hudBackground.setSize(sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(hudHeight)));
+  hudBackground.setPosition(0.f, hudYPosition);
+  hudBackground.setFillColor(sf::Color::Black);
+  window.draw(hudBackground);
 
-    if (!fontLoaded) {
-        return;
-    }
+  if (!fontLoaded) {
+    return;
+  }
 
-    // Get current score and lives
-    int currentScore = score->getScore();
-    int currentLives = lives->getLives();
+  int currentScore = score->getScore();
+  int currentLives = lives->getLives();
 
-    // Draw score text
-    sf::Text scoreText;
-    scoreText.setFont(font);
-    scoreText.setString("SCORE: " + std::to_string(currentScore));
-    scoreText.setCharacterSize(20);
-    scoreText.setFillColor(sf::Color::White);
-    scoreText.setPosition(20.f, hudYPosition + 20.f);
-    window.draw(scoreText);
+  sf::Text scoreText;
+  scoreText.setFont(font);
+  scoreText.setString("SCORE: " + std::to_string(currentScore));
+  scoreText.setCharacterSize(20);
+  scoreText.setFillColor(sf::Color::White);
+  scoreText.setPosition(20.f, hudYPosition + 20.f);
+  window.draw(scoreText);
 
-    // Draw lives text
-    sf::Text livesText;
-    livesText.setFont(font);
-    livesText.setString("LIVES: " + std::to_string(currentLives));
-    livesText.setCharacterSize(20);
-    livesText.setFillColor(sf::Color::White);
+  sf::Text livesText;
+  livesText.setFont(font);
+  livesText.setString("LIVES: " + std::to_string(currentLives));
+  livesText.setCharacterSize(20);
+  livesText.setFillColor(sf::Color::White);
 
-    sf::FloatRect textBounds = livesText.getLocalBounds();
-    livesText.setPosition(window.getSize().x - textBounds.width - 20.f, hudYPosition + 20.f);
-    window.draw(livesText);
+  sf::FloatRect textBounds = livesText.getLocalBounds();
+  livesText.setPosition(window.getSize().x - textBounds.width - 20.f, hudYPosition + 20.f);
+  window.draw(livesText);
 
-    // Draw level indicator (centered)
-    sf::Text levelText;
-    levelText.setFont(font);
-    levelText.setString("LEVEL " + std::to_string(currentLevel));
-    levelText.setCharacterSize(20);
-    levelText.setFillColor(sf::Color::Yellow);
+  sf::Text levelText;
+  levelText.setFont(font);
+  levelText.setString("LEVEL " + std::to_string(currentLevel));
+  levelText.setCharacterSize(20);
+  levelText.setFillColor(sf::Color::Yellow);
 
-    sf::FloatRect levelBounds = levelText.getLocalBounds();
-    float centerX = (window.getSize().x - levelBounds.width) / 2.f;
-    levelText.setPosition(centerX, hudYPosition + 20.f);
-    window.draw(levelText);
+  sf::FloatRect levelBounds = levelText.getLocalBounds();
+  float centerX = (window.getSize().x - levelBounds.width) / 2.f;
+  levelText.setPosition(centerX, hudYPosition + 20.f);
+  window.draw(levelText);
 }
 
 void HUD::drawReadyText(World* world) {
@@ -113,7 +101,7 @@ void HUD::drawLevelClearedText(World* world) {
   clearedText.setFont(font);
   clearedText.setString("LEVEL CLEARED!");
   clearedText.setCharacterSize(30);
-  clearedText.setFillColor(sf::Color::Green);  // ✅ CHANGED to green!
+  clearedText.setFillColor(sf::Color::Green);
 
   float gridX = 10.5f;
   float gridY = 10.5f;
