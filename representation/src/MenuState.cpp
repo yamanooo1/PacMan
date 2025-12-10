@@ -7,6 +7,8 @@
 MenuState::MenuState()
     : fontLoaded(false)
     , isPlayButtonHovered(false)
+    , windowWidth(800.0f)   // ✅ Initialize with default window size
+    , windowHeight(860.0f)
 {
   if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
     fontLoaded = true;
@@ -20,6 +22,21 @@ MenuState::MenuState()
   setupHowToPlay();
 }
 
+// ✅ NEW: Recalculate all positions when window resizes
+void MenuState::onWindowResize(float width, float height) {
+  windowWidth = width;
+  windowHeight = height;
+
+  std::cout << "[MenuState] Window resized to " << width << "x" << height
+            << " - recalculating positions" << std::endl;
+
+  // Recalculate all UI element positions
+  setupTexts();
+  setupPlayButton();
+  setupHowToPlay();
+  setupLeaderboard();  // Also refresh leaderboard
+}
+
 void MenuState::setupTexts() {
   if (!fontLoaded) return;
 
@@ -30,21 +47,25 @@ void MenuState::setupTexts() {
   titleText.setFillColor(sf::Color::Yellow);
 
   sf::FloatRect titleBounds = titleText.getLocalBounds();
-  titleText.setPosition((800.f - titleBounds.width) / 2.f, 50.f);
+  // ✅ Proportional: centered horizontally, 6% from top
+  titleText.setPosition((windowWidth - titleBounds.width) / 2.f, windowHeight * 0.06f);
 }
 
-// ✅ NEW: Setup clickable play button
 void MenuState::setupPlayButton() {
   if (!fontLoaded) return;
 
   // Button shape (grey, will lighten on hover)
-  playButton.setSize(sf::Vector2f(300.f, 60.f));
+  // ✅ Proportional size: 37.5% of window width, 7% of window height
+  float buttonWidth = windowWidth * 0.375f;
+  float buttonHeight = windowHeight * 0.07f;
+
+  playButton.setSize(sf::Vector2f(buttonWidth, buttonHeight));
   playButton.setFillColor(sf::Color(80, 80, 80));  // Dark grey
   playButton.setOutlineColor(sf::Color::White);
   playButton.setOutlineThickness(3.f);
 
-  // Center button horizontally, near bottom
-  playButton.setPosition((800.f - 300.f) / 2.f, 680.f);
+  // ✅ Proportional: centered horizontally, 79% from top
+  playButton.setPosition((windowWidth - buttonWidth) / 2.f, windowHeight * 0.79f);
 
   // Button text
   playButtonText.setFont(font);
@@ -55,12 +76,11 @@ void MenuState::setupPlayButton() {
   // Center text in button
   sf::FloatRect textBounds = playButtonText.getLocalBounds();
   playButtonText.setPosition(
-    playButton.getPosition().x + (300.f - textBounds.width) / 2.f - textBounds.left,
-    playButton.getPosition().y + (60.f - textBounds.height) / 2.f - textBounds.top - 5.f
+    playButton.getPosition().x + (buttonWidth - textBounds.width) / 2.f - textBounds.left,
+    playButton.getPosition().y + (buttonHeight - textBounds.height) / 2.f - textBounds.top - 5.f
   );
 }
 
-// ✅ NEW: Setup how to play section
 void MenuState::setupHowToPlay() {
   if (!fontLoaded) return;
 
@@ -71,7 +91,8 @@ void MenuState::setupHowToPlay() {
   howToPlayTitle.setFillColor(sf::Color::Cyan);
 
   sf::FloatRect titleBounds = howToPlayTitle.getLocalBounds();
-  howToPlayTitle.setPosition((800.f - titleBounds.width) / 2.f, 150.f);
+  // ✅ Proportional: centered horizontally, 17.4% from top
+  howToPlayTitle.setPosition((windowWidth - titleBounds.width) / 2.f, windowHeight * 0.174f);
 
   // Controls text
   howToPlayControls.setFont(font);
@@ -87,7 +108,8 @@ void MenuState::setupHowToPlay() {
   howToPlayControls.setLineSpacing(1.5f);
 
   sf::FloatRect controlsBounds = howToPlayControls.getLocalBounds();
-  howToPlayControls.setPosition((800.f - controlsBounds.width) / 2.f, 190.f);
+  // ✅ Proportional: centered horizontally, 22% from top
+  howToPlayControls.setPosition((windowWidth - controlsBounds.width) / 2.f, windowHeight * 0.22f);
 }
 
 void MenuState::onEnter() {
@@ -97,7 +119,6 @@ void MenuState::onEnter() {
   setupLeaderboard();
 }
 
-// ✅ NEW: Setup leaderboard with yellow box
 void MenuState::setupLeaderboard() {
   if (!fontLoaded) return;
 
@@ -107,11 +128,16 @@ void MenuState::setupLeaderboard() {
   auto highScores = tempScore.getHighScores();
 
   // Yellow box for leaderboard
-  leaderboardBox.setSize(sf::Vector2f(600.f, 280.f));
+  // ✅ Proportional: 75% width, 32.5% height
+  float boxWidth = windowWidth * 0.75f;
+  float boxHeight = windowHeight * 0.325f;
+
+  leaderboardBox.setSize(sf::Vector2f(boxWidth, boxHeight));
   leaderboardBox.setFillColor(sf::Color(255, 255, 0, 40));  // Semi-transparent yellow
   leaderboardBox.setOutlineColor(sf::Color::Yellow);
   leaderboardBox.setOutlineThickness(4.f);
-  leaderboardBox.setPosition((800.f - 600.f) / 2.f, 360.f);
+  // ✅ Proportional: centered horizontally, 41.8% from top
+  leaderboardBox.setPosition((windowWidth - boxWidth) / 2.f, windowHeight * 0.418f);
 
   // Title
   leaderboardTitle.setFont(font);
@@ -120,28 +146,31 @@ void MenuState::setupLeaderboard() {
   leaderboardTitle.setFillColor(sf::Color::Yellow);
 
   sf::FloatRect titleBounds = leaderboardTitle.getLocalBounds();
-  leaderboardTitle.setPosition((800.f - titleBounds.width) / 2.f, 380.f);
+  // ✅ Proportional: centered horizontally, 44.2% from top
+  leaderboardTitle.setPosition((windowWidth - titleBounds.width) / 2.f, windowHeight * 0.442f);
 
   // Create score entries
   scoreNameTexts.clear();
   scoreValueTexts.clear();
 
-  float yPosition = 430.f;
-  float leftX = 150.f;    // Position for player names (left side)
-  float rightX = 650.f;   // Position for scores (right side)
+  // ✅ Proportional positioning for scores
+  float startY = windowHeight * 0.5f;       // 50% from top
+  float leftX = windowWidth * 0.1875f;      // 18.75% from left
+  float rightX = windowWidth * 0.8125f;     // 81.25% from left
+  float spacing = windowHeight * 0.0523f;   // 5.23% spacing between entries
 
   for (size_t i = 0; i < 5; ++i) {
+    float yPosition = startY + (i * spacing);
+
     // Player name (left side)
     sf::Text nameText;
     nameText.setFont(font);
     nameText.setCharacterSize(16);
 
     if (i < highScores.size()) {
-      // Format: "1. PLAYERNAME"
       nameText.setString(std::to_string(i + 1) + ". " + highScores[i].playerName);
       nameText.setFillColor(sf::Color::White);
     } else {
-      // Empty slot
       nameText.setString(std::to_string(i + 1) + ". ------");
       nameText.setFillColor(sf::Color(100, 100, 100));
     }
@@ -166,8 +195,6 @@ void MenuState::setupLeaderboard() {
     sf::FloatRect scoreBounds = scoreText.getLocalBounds();
     scoreText.setPosition(rightX - scoreBounds.width, yPosition);
     scoreValueTexts.push_back(scoreText);
-
-    yPosition += 45.f;
   }
 }
 
@@ -179,7 +206,7 @@ void MenuState::handleEvents(sf::RenderWindow& window) {
   static bool mouseWasPressed = false;
   bool mouseIsPressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
 
-  // ✅ NEW: Check for play button click
+  // Check for play button click
   if (mouseIsPressed && !mouseWasPressed) {
     if (isMouseOverButton(playButton, window)) {
       std::cout << "[MenuState] Play button clicked - starting game..." << std::endl;
@@ -235,7 +262,7 @@ void MenuState::render(sf::RenderWindow& window) {
   window.draw(howToPlayTitle);
   window.draw(howToPlayControls);
 
-  // ✅ Draw leaderboard yellow box
+  // Draw leaderboard yellow box
   window.draw(leaderboardBox);
   window.draw(leaderboardTitle);
 
@@ -247,7 +274,7 @@ void MenuState::render(sf::RenderWindow& window) {
     window.draw(scoreText);
   }
 
-  // ✅ Draw play button (at bottom)
+  // Draw play button (at bottom)
   window.draw(playButton);
   window.draw(playButtonText);
 }

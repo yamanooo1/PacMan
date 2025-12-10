@@ -20,12 +20,14 @@ VictoryState::VictoryState(int nextLevelNum, int score)
     , isEnteringName(false)
     , nameSubmitted(false)
     , playerNameInput("")
+    , windowWidth(800.0f)   // ✅ Initialize with default window size
+    , windowHeight(860.0f)
 {
   std::cout << "\n🎉 [VICTORYSTATE] CONSTRUCTOR CALLED!" << std::endl;
   std::cout << "    Next Level: " << nextLevel << std::endl;
   std::cout << "    Final Score: " << finalScore << std::endl;
 
-  // ✅ Check if score qualifies for high score
+  // Check if score qualifies for high score
   if (score > 0) {
     Score tempScore;
     tempScore.loadHighScores();
@@ -50,6 +52,20 @@ VictoryState::VictoryState(int nextLevelNum, int score)
   }
 }
 
+// ✅ NEW: Recalculate all positions when window resizes
+void VictoryState::onWindowResize(float width, float height) {
+  windowWidth = width;
+  windowHeight = height;
+
+  std::cout << "[VictoryState] Window resized to " << width << "x" << height
+            << " - recalculating positions" << std::endl;
+
+  setupTexts();
+  if (qualifiesForHighScore) {
+    setupNameInput();
+  }
+}
+
 void VictoryState::setupTexts() {
   if (!fontLoaded) return;
 
@@ -66,7 +82,8 @@ void VictoryState::setupTexts() {
 
   sf::FloatRect titleBounds = titleText.getLocalBounds();
   titleText.setOrigin(titleBounds.width / 2.f, titleBounds.height / 2.f);
-  titleText.setPosition(400.f, 200.f);
+  // ✅ Proportional: centered horizontally, 23.3% from top
+  titleText.setPosition(windowWidth * 0.5f, windowHeight * 0.233f);
 
   // Score
   scoreText.setFont(font);
@@ -76,7 +93,8 @@ void VictoryState::setupTexts() {
 
   sf::FloatRect scoreBounds = scoreText.getLocalBounds();
   scoreText.setOrigin(scoreBounds.width / 2.f, scoreBounds.height / 2.f);
-  scoreText.setPosition(400.f, 280.f);
+  // ✅ Proportional: centered horizontally, 32.6% from top
+  scoreText.setPosition(windowWidth * 0.5f, windowHeight * 0.326f);
 
   // Continue text
   continueText.setFont(font);
@@ -89,7 +107,8 @@ void VictoryState::setupTexts() {
 
     sf::FloatRect contBounds = continueText.getLocalBounds();
     continueText.setOrigin(contBounds.width / 2.f, contBounds.height / 2.f);
-    continueText.setPosition(400.f, 550.f);
+    // ✅ Proportional: centered horizontally, 64% from top
+    continueText.setPosition(windowWidth * 0.5f, windowHeight * 0.64f);
   }
 
   // Menu text
@@ -100,10 +119,10 @@ void VictoryState::setupTexts() {
 
   sf::FloatRect menuBounds = menuText.getLocalBounds();
   menuText.setOrigin(menuBounds.width / 2.f, menuBounds.height / 2.f);
-  menuText.setPosition(400.f, 600.f);
+  // ✅ Proportional: centered horizontally, 69.8% from top
+  menuText.setPosition(windowWidth * 0.5f, windowHeight * 0.698f);
 }
 
-// ✅ NEW: Setup name input UI
 void VictoryState::setupNameInput() {
   if (!fontLoaded) return;
 
@@ -116,11 +135,16 @@ void VictoryState::setupNameInput() {
 
   sf::FloatRect promptBounds = namePromptText.getLocalBounds();
   namePromptText.setOrigin(promptBounds.width / 2.f, promptBounds.height / 2.f);
-  namePromptText.setPosition(400.f, 360.f);
+  // ✅ Proportional: centered horizontally, 41.9% from top
+  namePromptText.setPosition(windowWidth * 0.5f, windowHeight * 0.419f);
 
   // Input box
-  nameInputBox.setSize(sf::Vector2f(300.f, 50.f));
-  nameInputBox.setPosition((800.f - 300.f) / 2.f, 430.f);
+  // ✅ Proportional: 37.5% width, 5.8% height
+  float boxWidth = windowWidth * 0.375f;
+  float boxHeight = windowHeight * 0.058f;
+
+  nameInputBox.setSize(sf::Vector2f(boxWidth, boxHeight));
+  nameInputBox.setPosition((windowWidth - boxWidth) / 2.f, windowHeight * 0.5f);
   nameInputBox.setFillColor(sf::Color(30, 30, 30));
   nameInputBox.setOutlineColor(sf::Color::Yellow);
   nameInputBox.setOutlineThickness(3.f);
@@ -130,7 +154,11 @@ void VictoryState::setupNameInput() {
   nameInputText.setString("");
   nameInputText.setCharacterSize(24);
   nameInputText.setFillColor(sf::Color::White);
-  nameInputText.setPosition(260.f, 442.f);
+  // ✅ Proportional: position inside box with padding
+  nameInputText.setPosition(
+    nameInputBox.getPosition().x + (boxWidth * 0.05f),  // 5% padding from left edge
+    nameInputBox.getPosition().y + (boxHeight * 0.2f)   // 20% padding from top edge
+  );
 }
 
 void VictoryState::onEnter() {
@@ -146,7 +174,7 @@ void VictoryState::onExit() {
 }
 
 void VictoryState::handleEvents(sf::RenderWindow& window) {
-  // ✅ Handle name input first if we're entering a high score
+  // Handle name input first if we're entering a high score
   if (isEnteringName && !nameSubmitted) {
     // Handle backspace
     static bool backspaceWasPressed = false;
@@ -162,8 +190,6 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
 
     // Handle letter/number input (A-Z, 0-9)
     // Only accept input if name is less than 10 characters
-    bool textChanged = false;
-
     if (playerNameInput.length() < 10) {
       static std::map<sf::Keyboard::Key, char> keyMap;
       static bool keyMapInitialized = false;
@@ -191,26 +217,25 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
         keyMapInitialized = true;
       }
 
-      // ✅ FIXED: Track all keys and update them all each frame
+      // Track all keys and update them all each frame
       static std::map<sf::Keyboard::Key, bool> keyWasPressed;
 
       // Check each key and only add character if key was just pressed
       for (const auto& pair : keyMap) {
         bool isPressed = sf::Keyboard::isKeyPressed(pair.first);
 
-        // ✅ Key just pressed (wasn't pressed last frame, is pressed now)
+        // Key just pressed (wasn't pressed last frame, is pressed now)
         if (isPressed && !keyWasPressed[pair.first]) {
           playerNameInput += pair.second;
-          textChanged = true;
           std::cout << "[VictoryState] Name: " << playerNameInput << std::endl;
         }
 
-        // ✅ Update state for this key AFTER checking
+        // Update state for this key AFTER checking
         keyWasPressed[pair.first] = isPressed;
       }
     }
 
-    // ✅ Update text display every frame (ensures it always shows correctly)
+    // Update text display every frame (ensures it always shows correctly)
     nameInputText.setString(playerNameInput);
 
     // Check for Enter key to submit
@@ -249,12 +274,10 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
   mWasPressed = mIsPressed;
 }
 
-// ✅ NEW: Handle text input for name (simplified version using key states)
 void VictoryState::handleTextInput(sf::Uint32 unicode) {
   // This method is kept for potential future use but simplified version uses keys directly
 }
 
-// ✅ NEW: Submit the high score with player name
 void VictoryState::submitHighScore() {
   if (playerNameInput.empty()) {
     playerNameInput = "PLAYER";
@@ -262,7 +285,7 @@ void VictoryState::submitHighScore() {
 
   Score tempScore;
   tempScore.loadHighScores();
-  tempScore.addHighScore(playerNameInput, finalScore);  // ✅ Now includes name
+  tempScore.addHighScore(playerNameInput, finalScore);
 
   nameSubmitted = true;
   isEnteringName = false;
@@ -270,7 +293,7 @@ void VictoryState::submitHighScore() {
   std::cout << "[VictoryState] High score saved: " << playerNameInput
             << " - " << finalScore << std::endl;
 
-  // ✅ NEW: If game over, automatically return to menu
+  // If game over, automatically return to menu
   if (isGameOver && stateManager) {
     std::cout << "[VictoryState] Game over - returning to menu automatically..." << std::endl;
     stateManager->clearAndPushState(std::make_unique<MenuState>());
@@ -285,7 +308,7 @@ void VictoryState::render(sf::RenderWindow& window) {
   if (!fontLoaded) return;
 
   // Draw overlay
-  sf::RectangleShape overlay(sf::Vector2f(window.getSize().x, window.getSize().y));
+  sf::RectangleShape overlay(sf::Vector2f(windowWidth, windowHeight));
   overlay.setFillColor(sf::Color(0, 0, 0, 200));
   window.draw(overlay);
 
@@ -293,7 +316,7 @@ void VictoryState::render(sf::RenderWindow& window) {
   window.draw(titleText);
   window.draw(scoreText);
 
-  // ✅ If entering name, show name input UI
+  // If entering name, show name input UI
   if (isEnteringName && !nameSubmitted) {
     window.draw(namePromptText);
     window.draw(nameInputBox);
@@ -308,11 +331,12 @@ void VictoryState::render(sf::RenderWindow& window) {
 
     sf::FloatRect hintBounds = hintText.getLocalBounds();
     hintText.setOrigin(hintBounds.width / 2.f, hintBounds.height / 2.f);
-    hintText.setPosition(400.f, 510.f);
+    // ✅ Proportional: centered horizontally, 59.3% from top
+    hintText.setPosition(windowWidth * 0.5f, windowHeight * 0.593f);
     window.draw(hintText);
   } else {
     // Show normal victory screen buttons
-    // ✅ Don't show controls if we just submitted high score on game over (auto-transitioning)
+    // Don't show controls if we just submitted high score on game over (auto-transitioning)
     if (!(nameSubmitted && isGameOver)) {
       if (!isGameOver) {
         window.draw(continueText);

@@ -38,7 +38,7 @@ public:
   void update(float deltaTime);
   void render(sf::RenderWindow& window);
 
-  // ✅ NEW: Propagate window resize to current state
+  // ✅ UPDATED: Propagate window resize to current state
   void onWindowResize(float width, float height);
 
   // Process pending changes (call at end of frame)
@@ -52,6 +52,10 @@ private:
   enum class PendingAction { None, Push, Pop, Change, Clear, ClearAndPush };
   PendingAction pendingAction = PendingAction::None;
   std::unique_ptr<State> pendingState = nullptr;
+
+  // ✅ NEW: Track current window dimensions
+  float currentWindowWidth = 800.0f;
+  float currentWindowHeight = 860.0f;
 };
 
 #endif // PACMAN_STATEMANAGER_H

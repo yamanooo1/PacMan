@@ -26,6 +26,9 @@ bool Game::initialize() {
   // Create state manager
   stateManager = std::make_unique<StateManager>();
 
+  // ✅ NEW: Initialize StateManager with current window dimensions
+  stateManager->onWindowResize(window->getSize().x, window->getSize().y);
+
   // Push initial MenuState
   stateManager->pushState(std::make_unique<MenuState>());
 

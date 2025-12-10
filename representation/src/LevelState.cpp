@@ -21,6 +21,8 @@ LevelState::LevelState(int level, int startingScore)
     , initialScore(startingScore)
     , mapFile("../../resources/map/map1.txt")
     , pauseRequested(false)
+    , windowWidth(800.0f)   // ✅ Initialize with defaults
+    , windowHeight(860.0f)
 {
   std::cout << "[LevelState] Constructor - Level: " << level
             << ", Starting Score: " << startingScore << std::endl;
@@ -51,23 +53,30 @@ void LevelState::onExit() {
 
 // ✅ NEW: Handle window resize by updating camera
 void LevelState::onWindowResize(float width, float height) {
+  // ✅ Store current dimensions
+  windowWidth = width;
+  windowHeight = height;
+
+  std::cout << "[LevelState] Window resized to " << width << "x" << height << std::endl;
+
   if (camera) {
     // Calculate game area height (total height - HUD height)
-    float hudHeight = 60.0f;
-    float gameHeight = height - hudHeight;
-
+    float gameHeight = height - HUD_HEIGHT;
     camera->setWindowSize(width, gameHeight);
-    std::cout << "[LevelState] Camera updated for resize: " << width << "x" << gameHeight << std::endl;
+    std::cout << "[LevelState] Camera updated: " << width << "x" << gameHeight << std::endl;
   }
+
+  // HUD will automatically adjust as it uses window reference
 }
 
 bool LevelState::loadLevel() {
   std::cout << "[LevelState] Loading level " << currentLevel << "..." << std::endl;
 
-  int gameHeight = 800;
-  int hudHeight = 60;
-  camera = std::make_shared<Camera>(800, gameHeight, 10, 10);
-  std::cout << "[LevelState] ✅ Camera created" << std::endl;
+  // ✅ Use actual window dimensions instead of hardcoded values
+  float gameHeight = windowHeight - HUD_HEIGHT;
+  camera = std::make_shared<Camera>(windowWidth, gameHeight, 10, 10);
+  std::cout << "[LevelState] ✅ Camera created with dimensions: "
+            << windowWidth << "x" << gameHeight << std::endl;
 
   std::cout << "[LevelState] Creating Score with initialScore: " << initialScore << std::endl;
   score = std::make_shared<Score>();
@@ -268,7 +277,7 @@ void LevelState::render(sf::RenderWindow& window) {
     factory->setSoundObserver(soundObserver);
     std::cout << "[LevelState] ✅ SoundObserver attached to factory" << std::endl;
 
-    hud = std::make_unique<HUD>(window, 60);
+    hud = std::make_unique<HUD>(window, static_cast<int>(HUD_HEIGHT));
     hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
     world = std::make_unique<World>(factory.get(), currentLevel);

@@ -15,12 +15,17 @@ private:
   bool resumeRequested;
   bool menuRequested;
 
+  // ✅ NEW: Window size tracking for proportional positioning
+  float windowWidth;
+  float windowHeight;
+
 public:
   PausedState();
   ~PausedState() override = default;
 
   void onEnter() override;
   void onExit() override;
+  void onWindowResize(float width, float height) override;  // ✅ NEW
 
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;

@@ -10,22 +10,26 @@ private:
   sf::Font font;
   sf::Text titleText;
 
-  // ✅ NEW: Play button instead of text
+  // Play button
   sf::RectangleShape playButton;
   sf::Text playButtonText;
   bool isPlayButtonHovered;
 
-  // ✅ NEW: How to play section
+  // How to play section
   sf::Text howToPlayTitle;
   sf::Text howToPlayControls;
 
-  // ✅ NEW: Leaderboard with yellow box
+  // Leaderboard with yellow box
   sf::RectangleShape leaderboardBox;
   sf::Text leaderboardTitle;
-  std::vector<sf::Text> scoreNameTexts;  // Player names
-  std::vector<sf::Text> scoreValueTexts; // Scores
+  std::vector<sf::Text> scoreNameTexts;
+  std::vector<sf::Text> scoreValueTexts;
 
   bool fontLoaded;
+
+  // ✅ NEW: Window size tracking for proportional positioning
+  float windowWidth;
+  float windowHeight;
 
 public:
   MenuState();
@@ -33,6 +37,7 @@ public:
 
   void onEnter() override;
   void onExit() override;
+  void onWindowResize(float width, float height) override;  // ✅ NEW
 
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;

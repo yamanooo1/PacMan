@@ -19,7 +19,7 @@ public:
 
   void onEnter() override;
   void onExit() override;
-  void onWindowResize(float width, float height) override;  // ✅ NEW
+  void onWindowResize(float width, float height) override;
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;
   void render(sf::RenderWindow& window) override;
@@ -39,6 +39,11 @@ private:
   int initialScore;
   std::string mapFile;
   bool pauseRequested;
+
+  // ✅ NEW: Window size tracking
+  float windowWidth;
+  float windowHeight;
+  static constexpr float HUD_HEIGHT = 60.0f;
 };
 
 #endif // LEVELSTATE_H

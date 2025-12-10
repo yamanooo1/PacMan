@@ -13,7 +13,7 @@ private:
   sf::Text continueText;
   sf::Text menuText;
 
-  // ✅ NEW: Name input for high scores
+  // Name input for high scores
   sf::Text namePromptText;
   sf::Text nameInputText;
   sf::RectangleShape nameInputBox;
@@ -31,7 +31,11 @@ private:
   int nextLevel;
   int finalScore;
   bool isGameOver;
-  bool qualifiesForHighScore;  // ✅ NEW
+  bool qualifiesForHighScore;
+
+  // ✅ NEW: Window size tracking for proportional positioning
+  float windowWidth;
+  float windowHeight;
 
 public:
   VictoryState(int nextLevelNum, int score);
@@ -39,6 +43,7 @@ public:
 
   void onEnter() override;
   void onExit() override;
+  void onWindowResize(float width, float height) override;  // ✅ NEW
 
   void handleEvents(sf::RenderWindow& window) override;
   void update(float deltaTime) override;
