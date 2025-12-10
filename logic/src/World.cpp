@@ -440,6 +440,7 @@ void World::update(float deltaTime) {
 
     if (shouldStop) {
       pacman->setDirection(Direction::NONE);
+      pacman->hitWall();  // ← THIS LINE MUST BE HERE!
     }
   }
 

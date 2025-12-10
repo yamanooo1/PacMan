@@ -1,6 +1,7 @@
 //
 // PacMan.h - IMPROVED VERSION
 // Adds notifyDirectionChange() for Observer pattern compliance
+// Adds hitWall() for wall collision sound
 //
 
 #ifndef PACMAN_PACMAN_H
@@ -67,10 +68,15 @@ public:
     spawnY = y;
   }
 
-  // ✅ NEW: Notify observers when direction changes (for sprite updates)
+  // ✅ Notify observers when direction changes (for sprite updates)
   // Should be called by World after successful turn
   void notifyDirectionChange() {
     notify(GameEvent::DIRECTION_CHANGED);
+  }
+
+  // ✅ NEW: Notify observers when hitting a wall
+  void hitWall() {
+    notify(GameEvent::WALL_HIT);
   }
 };
 

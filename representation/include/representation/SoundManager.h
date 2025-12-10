@@ -1,6 +1,6 @@
 //
 // SoundManager.h - Singleton manager for game audio
-// FIXED: Added looping fear mode music
+// UPDATED: Added pause music only (no wall hit sound)
 //
 
 #ifndef PACMAN_SOUNDMANAGER_H
@@ -32,12 +32,13 @@ private:
   // Background music
   sf::Music backgroundMusic;
   sf::Music menuMusic;
+  sf::Music pauseScreenMusic;  // ✅ NEW: Pause screen music
 
   // ✅ Continuous movement sound (plays while PacMan moves)
   sf::Music movementSound;
   bool movementSoundPlaying;
 
-  // ✅ NEW: Continuous fear mode sound (loops while fear mode active)
+  // ✅ Continuous fear mode sound (loops while fear mode active)
   sf::Music fearModeSound;
   bool fearModeSoundPlaying;
 
@@ -69,7 +70,7 @@ public:
   void stopMovementSound();
   bool isMovementSoundPlaying() const { return movementSoundPlaying; }
 
-  // ✅ NEW: Fear mode sound controls
+  // ✅ Fear mode sound controls
   void startFearModeSound();
   void stopFearModeSound();
   bool isFearModeSoundPlaying() const { return fearModeSoundPlaying; }
@@ -77,6 +78,7 @@ public:
   // Music controls
   void playBackgroundMusic(bool loop = true);
   void playMenuMusic(bool loop = true);
+  void playPauseMusic(bool loop = true);  // ✅ NEW: Pause music
   void stopMusic();
   void pauseMusic();
   void resumeMusic();

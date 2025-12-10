@@ -14,7 +14,7 @@ int main() {
   return 0;
 }
 
-//todo:: menu muziek moet spelen
 //todo:: Na victory: keuze 1. "want to continue?" space dan blijft de score tellen. 2."no" dan krijg jij de score naam screen
 //todo:: Na dood: first death animation dan keuze.
 //todo:: when level cleared the sound effects should stop
+//todo:: exit button

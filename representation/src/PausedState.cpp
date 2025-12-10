@@ -1,13 +1,14 @@
 #include "representation/PausedState.h"
 #include "representation/StateManager.h"
 #include "representation/MenuState.h"
+#include "representation/SoundManager.h"  // ✅ NEW: Include SoundManager
 #include <iostream>
 
 PausedState::PausedState()
     : fontLoaded(false)
     , resumeRequested(false)
     , menuRequested(false)
-    , windowWidth(800.0f)   // ✅ Initialize with default window size
+    , windowWidth(800.0f)
     , windowHeight(860.0f)
 {
   if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
@@ -20,7 +21,6 @@ PausedState::PausedState()
   setupTexts();
 }
 
-// ✅ NEW: Recalculate all positions when window resizes
 void PausedState::onWindowResize(float width, float height) {
   windowWidth = width;
   windowHeight = height;
@@ -40,7 +40,7 @@ void PausedState::setupTexts() {
   pausedText.setCharacterSize(50);
   pausedText.setFillColor(sf::Color::Yellow);
 
-  // ✅ Proportional: centered horizontally, 29% from top
+  // Proportional: centered horizontally, 29% from top
   sf::FloatRect pausedBounds = pausedText.getLocalBounds();
   pausedText.setOrigin(pausedBounds.width / 2.f, pausedBounds.height / 2.f);
   pausedText.setPosition(windowWidth * 0.5f, windowHeight * 0.29f);
@@ -51,7 +51,7 @@ void PausedState::setupTexts() {
   resumeText.setCharacterSize(18);
   resumeText.setFillColor(sf::Color::White);
 
-  // ✅ Proportional: centered horizontally, 46.5% from top
+  // Proportional: centered horizontally, 46.5% from top
   sf::FloatRect resumeBounds = resumeText.getLocalBounds();
   resumeText.setOrigin(resumeBounds.width / 2.f, resumeBounds.height / 2.f);
   resumeText.setPosition(windowWidth * 0.5f, windowHeight * 0.465f);
@@ -62,7 +62,7 @@ void PausedState::setupTexts() {
   menuText.setCharacterSize(18);
   menuText.setFillColor(sf::Color::Cyan);
 
-  // ✅ Proportional: centered horizontally, 55.8% from top
+  // Proportional: centered horizontally, 55.8% from top
   sf::FloatRect menuBounds = menuText.getLocalBounds();
   menuText.setOrigin(menuBounds.width / 2.f, menuBounds.height / 2.f);
   menuText.setPosition(windowWidth * 0.5f, windowHeight * 0.558f);
@@ -70,10 +70,19 @@ void PausedState::setupTexts() {
 
 void PausedState::onEnter() {
   std::cout << "[PausedState] Game paused" << std::endl;
+
+  // ✅ NEW: Play pause music
+  SoundManager& soundManager = SoundManager::getInstance();
+  soundManager.stopMusic();  // Stop game music
+  soundManager.playPauseMusic(true);  // Start pause music (looping)
 }
 
 void PausedState::onExit() {
   std::cout << "[PausedState] Resuming game" << std::endl;
+
+  // ✅ NEW: Stop pause music
+  SoundManager& soundManager = SoundManager::getInstance();
+  soundManager.stopMusic();
 }
 
 void PausedState::handleEvents(sf::RenderWindow& window) {

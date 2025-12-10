@@ -198,10 +198,6 @@ void MenuState::setupLeaderboard() {
   }
 }
 
-void MenuState::onExit() {
-  std::cout << "[MenuState] Exited menu state" << std::endl;
-}
-
 void MenuState::handleEvents(sf::RenderWindow& window) {
   static bool mouseWasPressed = false;
   bool mouseIsPressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);

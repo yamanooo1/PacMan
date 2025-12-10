@@ -1,6 +1,6 @@
 //
 // SoundManager.cpp - Implementation of audio system
-// FIXED: Added looping fear mode music (no latency)
+// UPDATED: Added pause music only (no wall hit sound)
 //
 
 #include "representation/SoundManager.h"
@@ -11,7 +11,7 @@ SoundManager::SoundManager()
     , musicVolume(30.0f)
     , soundsLoaded(false)
     , movementSoundPlaying(false)
-    , fearModeSoundPlaying(false)  // ✅ NEW
+    , fearModeSoundPlaying(false)
 {
   std::cout << "[SOUND] SoundManager initialized" << std::endl;
 }
@@ -24,7 +24,6 @@ SoundManager& SoundManager::getInstance() {
 bool SoundManager::loadSounds(const std::string& soundDirectory) {
   std::cout << "[SOUND] Loading sounds from: " << soundDirectory << std::endl;
 
-  // ✅ REMOVED FEAR_MODE_START from sound effects (now using looping music)
   std::map<SoundEffect, std::string> soundFiles = {
     {SoundEffect::FRUIT_COLLECTED, soundDirectory + "/11. PAC-MAN - Eating The Fruit.wav"},
     {SoundEffect::GHOST_EATEN, soundDirectory + "/13. PAC-MAN - Eating The Ghost.wav"},
@@ -62,15 +61,15 @@ bool SoundManager::loadSounds(const std::string& soundDirectory) {
     std::cerr << "[SOUND] ✗ Failed to load background music" << std::endl;
   }
 
-  // Load menu music
-  if (menuMusic.openFromFile(soundDirectory + "/16. Coffee Break Music.wav")) {
-    menuMusic.setVolume(musicVolume);
-    std::cout << "[SOUND] ✓ Loaded menu music" << std::endl;
+  // ✅ NEW: Load pause screen music (same as menu music)
+  if (pauseScreenMusic.openFromFile(soundDirectory + "/meow.wav")) {
+    pauseScreenMusic.setVolume(musicVolume);
+    std::cout << "[SOUND] ✓ Loaded pause screen music" << std::endl;
   } else {
-    std::cerr << "[SOUND] ✗ Failed to load menu music" << std::endl;
+    std::cerr << "[SOUND] ✗ Failed to load pause screen music" << std::endl;
   }
 
-  // ✅ Load continuous movement sound
+  // Load continuous movement sound
   if (movementSound.openFromFile(soundDirectory + "/03. PAC-MAN - Eating The Pac-dots.wav")) {
     movementSound.setVolume(soundVolume);
     movementSound.setLoop(true);  // Loop continuously
@@ -79,7 +78,7 @@ bool SoundManager::loadSounds(const std::string& soundDirectory) {
     std::cerr << "[SOUND] ✗ Failed to load movement sound" << std::endl;
   }
 
-  // ✅ NEW: Load continuous fear mode sound
+  // Load continuous fear mode sound
   if (fearModeSound.openFromFile(soundDirectory + "/12. Ghost - Turn to Blue.wav")) {
     fearModeSound.setVolume(musicVolume);  // Use music volume
     fearModeSound.setLoop(true);  // Loop continuously while fear mode active
@@ -132,7 +131,7 @@ void SoundManager::playSound(SoundEffect effect) {
   }
 }
 
-// ✅ Start continuous movement sound
+// Start continuous movement sound
 void SoundManager::startMovementSound() {
   if (!soundsLoaded) return;
 
@@ -144,7 +143,7 @@ void SoundManager::startMovementSound() {
   }
 }
 
-// ✅ Stop continuous movement sound
+// Stop continuous movement sound
 void SoundManager::stopMovementSound() {
   if (movementSound.getStatus() == sf::Music::Playing) {
     movementSound.stop();
@@ -153,7 +152,7 @@ void SoundManager::stopMovementSound() {
   }
 }
 
-// ✅ NEW: Start continuous fear mode sound
+// Start continuous fear mode sound
 void SoundManager::startFearModeSound() {
   if (!soundsLoaded) return;
 
@@ -165,7 +164,7 @@ void SoundManager::startFearModeSound() {
   }
 }
 
-// ✅ NEW: Stop continuous fear mode sound
+// Stop continuous fear mode sound
 void SoundManager::stopFearModeSound() {
   if (fearModeSound.getStatus() == sf::Music::Playing) {
     fearModeSound.stop();
@@ -199,19 +198,32 @@ void SoundManager::playMenuMusic(bool loop) {
   std::cout << "[SOUND] Started menu music (loop: " << loop << ")" << std::endl;
 }
 
+// ✅ NEW: Play pause screen music
+void SoundManager::playPauseMusic(bool loop) {
+  if (pauseScreenMusic.getStatus() == sf::Music::Playing) {
+    return;  // Already playing
+  }
+
+  pauseScreenMusic.setLoop(loop);
+  pauseScreenMusic.play();
+  std::cout << "[SOUND] Started pause screen music (loop: " << loop << ")" << std::endl;
+}
+
 void SoundManager::stopMusic() {
   backgroundMusic.stop();
   menuMusic.stop();
-  stopMovementSound();      // ✅ Also stop movement sound
-  stopFearModeSound();       // ✅ Also stop fear mode sound
+  pauseScreenMusic.stop();
+  stopMovementSound();
+  stopFearModeSound();
   std::cout << "[SOUND] Stopped all music" << std::endl;
 }
 
 void SoundManager::pauseMusic() {
   backgroundMusic.pause();
   menuMusic.pause();
-  movementSound.pause();     // ✅ Also pause movement sound
-  fearModeSound.pause();     // ✅ Also pause fear mode sound
+  pauseScreenMusic.pause();
+  movementSound.pause();
+  fearModeSound.pause();
 }
 
 void SoundManager::resumeMusic() {
@@ -220,6 +232,9 @@ void SoundManager::resumeMusic() {
   }
   if (menuMusic.getStatus() == sf::Music::Paused) {
     menuMusic.play();
+  }
+  if (pauseScreenMusic.getStatus() == sf::Music::Paused) {
+    pauseScreenMusic.play();
   }
   if (movementSoundPlaying && movementSound.getStatus() == sf::Music::Paused) {
     movementSound.play();
@@ -239,7 +254,7 @@ void SoundManager::setSoundVolume(float volume) {
     }
   }
 
-  // ✅ Also update movement sound volume
+  // Also update movement sound volume
   movementSound.setVolume(soundVolume);
 
   std::cout << "[SOUND] Sound volume set to: " << soundVolume << std::endl;
@@ -249,7 +264,8 @@ void SoundManager::setMusicVolume(float volume) {
   musicVolume = std::max(0.0f, std::min(100.0f, volume));
   backgroundMusic.setVolume(musicVolume);
   menuMusic.setVolume(musicVolume);
-  fearModeSound.setVolume(musicVolume);  // ✅ Fear mode uses music volume
+  pauseScreenMusic.setVolume(musicVolume);
+  fearModeSound.setVolume(musicVolume);
 
   std::cout << "[SOUND] Music volume set to: " << musicVolume << std::endl;
 }

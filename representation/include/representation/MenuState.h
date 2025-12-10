@@ -36,7 +36,6 @@ public:
   ~MenuState() override = default;
 
   void onEnter() override;
-  void onExit() override;
   void onWindowResize(float width, float height) override;  // ✅ NEW
 
   void handleEvents(sf::RenderWindow& window) override;

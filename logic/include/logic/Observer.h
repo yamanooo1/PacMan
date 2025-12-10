@@ -12,7 +12,8 @@ enum class GameEvent {
   FRUIT_COLLECTED,
   PACMAN_DIED,
   LEVEL_CLEARED,
-  DIRECTION_CHANGED  // ← NEW: Triggered when PacMan/Ghost changes direction
+  DIRECTION_CHANGED,  // ← Triggered when PacMan/Ghost changes direction
+  WALL_HIT           // ← NEW: Triggered when PacMan hits a wall
 };
 
 class Observer {
