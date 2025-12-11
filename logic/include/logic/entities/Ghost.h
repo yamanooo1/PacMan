@@ -44,12 +44,12 @@ private:
   bool fearModeEnding;
   bool shouldEnterFearWhenLeaving;
 
-  std::vector<Direction> getViableDirections(int gridX, int gridY, World* world) const;
+  std::vector<Direction> getViableDirections(int gridX, int gridY, const World* world) const;
   bool isAtIntersection(int gridX, int gridY, World* world) const;
-  Direction chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman);
+  Direction chooseNextDirection(int gridX, int gridY, const World* world, const PacMan* pacman);
   Direction chooseDirectionToExit(int gridX, int gridY, World* world) const;
-  [[nodiscard]] int manhattanDistance(int x1, int y1, int x2, int y2) const;
-  [[nodiscard]] bool isInSpawnArea(int gridX, int gridY) const;
+  [[nodiscard]] static int manhattanDistance(int x1, int y1, int x2, int y2);
+  [[nodiscard]] static bool isInSpawnArea(int gridX, int gridY);
 
 public:
   Ghost(float x, float y, GhostType t, GhostColor c, float waitTime, float speedMultiplier = 1.0f);
@@ -68,7 +68,7 @@ public:
   void respawnAfterEaten();
   void onEaten();
 
-  void update(float deltaTime, World* world, PacMan* pacman);
+  void update(float deltaTime, World* world,const PacMan* pacman);
 
   [[nodiscard]] bool isFearModeEnding() const { return fearModeEnding; }
   void setFearModeEnding(bool ending) { fearModeEnding = ending; }

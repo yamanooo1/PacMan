@@ -15,8 +15,8 @@ World::World(AbstractFactory *f, int level)
     : mapWidth(0)
     , mapHeight(0)
     , currentLevel(level)
-    , ghostSpeedMultiplier(1.0f + (level - 1) * 0.09f)
-    , fearDurationMultiplier(1.0f - (std::min(level, 6) - 1) * 0.09f)
+    , ghostSpeedMultiplier(1.0f + static_cast<float>((level - 1)) * 0.09f)
+    , fearDurationMultiplier(1.0f - static_cast<float>((std::min(level, 6) - 1)) * 0.09f)
     , factory(f)
     , pacman(nullptr)
     , score(nullptr)
@@ -150,8 +150,8 @@ bool World::loadFromFile(const std::string &filename) {
   while (std::getline(file, line) && row < mapHeight) {
     for (int col = 0; col < line.length() && col < mapWidth; ++col) {
       char c = line[col];
-      float x = static_cast<float>(col);
-      float y = static_cast<float>(row);
+      auto x = static_cast<float>(col);
+      auto y = static_cast<float>(row);
 
       switch (c) {
       case 'x':
@@ -256,8 +256,8 @@ void World::updatePacMan(float deltaTime) const {
 
   int currentGridX = static_cast<int>(std::floor(centerX));
   int currentGridY = static_cast<int>(std::floor(centerY));
-  float gridCenterX = currentGridX + 0.5f;
-  float gridCenterY = currentGridY + 0.5f;
+  float gridCenterX = static_cast<float>(currentGridX) + 0.5f;
+  float gridCenterY = static_cast<float>(currentGridY) + 0.5f;
 
   static float prevCenterX = centerX;
   static float prevCenterY = centerY;
@@ -302,27 +302,15 @@ void World::updatePacMan(float deltaTime) const {
 
     if (!hasWallInGridCell(testX, testY)) {
       bool isPerpendicular = false;
-      if ((currentDir == Direction::UP || currentDir == Direction::DOWN) &&
-          (desiredDir == Direction::LEFT || desiredDir == Direction::RIGHT)) {
-        isPerpendicular = true;
-      }
-      else if ((currentDir == Direction::LEFT || currentDir == Direction::RIGHT) &&
-               (desiredDir == Direction::UP || desiredDir == Direction::DOWN)) {
-        isPerpendicular = true;
-      }
+      if (  ((currentDir == Direction::UP || currentDir == Direction::DOWN) && (desiredDir == Direction::LEFT || desiredDir == Direction::RIGHT))
+        ||
+            ((currentDir == Direction::LEFT || currentDir == Direction::RIGHT) && (desiredDir == Direction::UP || desiredDir == Direction::DOWN))
+            ) {isPerpendicular = true;}
 
       bool canTurn = false;
-
-      if (currentDir == Direction::NONE) {
+      if (currentDir == Direction::NONE || !isPerpendicular || atCenter) {
         canTurn = true;
       }
-      else if (!isPerpendicular) {
-        canTurn = true;
-      }
-      else if (atCenter) {
-        canTurn = true;
-      }
-
       if (canTurn) {
         float newX = gridCenterX - pacman->getWidth() / 2.0f;
         float newY = gridCenterY - pacman->getHeight() / 2.0f;
@@ -352,22 +340,22 @@ void World::updatePacMan(float deltaTime) const {
 
     switch (currentDir) {
       case Direction::LEFT:
-        if (centerX <= (testX + 1.0f) + halfWidth) {
+        if (centerX <= (static_cast<float>(testX) + 1.0f) + halfWidth) {
           shouldStop = true;
         }
         break;
       case Direction::RIGHT:
-        if (centerX >= testX - halfWidth) {
+        if (centerX >= static_cast<float>(testX) - halfWidth) {
           shouldStop = true;
         }
         break;
       case Direction::UP:
-        if (centerY <= (testY + 1.0f) + halfHeight) {
+        if (centerY <= (static_cast<float>(testY) + 1.0f) + halfHeight) {
           shouldStop = true;
         }
         break;
       case Direction::DOWN:
-        if (centerY >= testY - halfHeight) {
+        if (centerY >= static_cast<float>(testY) - halfHeight) {
           shouldStop = true;
         }
         break;

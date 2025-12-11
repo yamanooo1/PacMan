@@ -1,13 +1,14 @@
+#include <utility>
+
 #include "../../include/representation/entities/GhostView.h"
 #include "../../../logic/include/logic/core/World.h"
 #include "../../../logic/include/logic/entities/Ghost.h"
-#include "../../../logic/include/logic/utils/Stopwatch.h"
 #include "../../include/representation/core/Camera.h"
 #include "../../include/representation/core/SpriteAtlas.h"
 
 GhostView::GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                      std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, cam, atlas)
+    : EntityView(model, win, std::move(cam), std::move(atlas))
     , spriteType(SpriteGhostType::RED)
     , animationTimer(0.0f)
     , currentFrame(0)

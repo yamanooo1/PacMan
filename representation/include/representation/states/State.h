@@ -2,7 +2,6 @@
 #define PACMAN_STATE_H
 
 #include <SFML/Graphics.hpp>
-#include <memory>
 
 class StateManager;
 

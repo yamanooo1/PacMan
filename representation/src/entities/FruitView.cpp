@@ -1,10 +1,12 @@
+#include <utility>
+
 #include "../../include/representation/entities/FruitView.h"
 #include "../../include/representation/core/Camera.h"
 #include "../../include/representation/core/SpriteAtlas.h"
 
 FruitView::FruitView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                      std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, cam, atlas) {
+    : EntityView(model, win, std::move(cam), std::move(atlas)) {
   shape.setRadius(8.f);
   shape.setFillColor(sf::Color::Green);
 }
@@ -29,8 +31,8 @@ void FruitView::draw() {
       sf::IntRect rect = spriteAtlas->getFruitSprite();
       sprite.setTextureRect(rect);
 
-      float spriteWidth = static_cast<float>(rect.width);
-      float spriteHeight = static_cast<float>(rect.height);
+      auto spriteWidth = static_cast<float>(rect.width);
+      auto spriteHeight = static_cast<float>(rect.height);
 
       if (spriteWidth > 0 && spriteHeight > 0) {
         float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());

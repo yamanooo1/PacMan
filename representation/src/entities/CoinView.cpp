@@ -1,10 +1,12 @@
+#include <utility>
+
 #include "../../include/representation/entities/CoinView.h"
 #include "../../include/representation/core/Camera.h"
 #include "../../include/representation/core/SpriteAtlas.h"
 
 CoinView::CoinView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                    std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, cam, atlas) {
+    : EntityView(model, win, std::move(cam), std::move(atlas)) {
   shape.setRadius(5.f);
   shape.setFillColor(sf::Color::White);
 }
@@ -29,8 +31,8 @@ void CoinView::draw() {
       sf::IntRect rect = spriteAtlas->getCoinSprite();
       sprite.setTextureRect(rect);
 
-      float spriteWidth = static_cast<float>(rect.width);
-      float spriteHeight = static_cast<float>(rect.height);
+      auto spriteWidth = static_cast<float>(rect.width);
+      auto spriteHeight = static_cast<float>(rect.height);
 
       if (spriteWidth > 0 && spriteHeight > 0) {
         float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());

@@ -1,10 +1,12 @@
+#include <utility>
+
 #include "../../include/representation/entities/WallView.h"
 #include "../../include/representation/core/Camera.h"
 #include "../../include/representation/core/SpriteAtlas.h"
 
 WallView::WallView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                    std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, cam, atlas)
+    : EntityView(model, win, std::move(cam), std::move(atlas))
 {
   if (model) {
     shape.setSize(sf::Vector2f(model->getWidth() * 400, model->getHeight() * 400));

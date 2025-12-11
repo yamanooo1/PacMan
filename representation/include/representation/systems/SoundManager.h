@@ -4,7 +4,6 @@
 #include <SFML/Audio.hpp>
 #include <map>
 #include <string>
-#include <memory>
 
 enum class SoundEffect {
   FRUIT_COLLECTED,

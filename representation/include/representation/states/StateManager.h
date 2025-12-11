@@ -18,9 +18,9 @@ public:
   void clearStates();
   void clearAndPushState(std::unique_ptr<State> state);
 
-  bool isEmpty() const { return states.empty(); }
+  [[nodiscard]] bool isEmpty() const { return states.empty(); }
 
-  State* getCurrentState() const;
+  [[nodiscard]] State* getCurrentState() const;
 
   void handleEvents(sf::RenderWindow& window);
   void update(float deltaTime);

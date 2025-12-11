@@ -1,10 +1,12 @@
+#include <utility>
+
 #include "../../include/representation/entities/PacManView.h"
 #include "../../include/representation/core/Camera.h"
 #include "../../include/representation/core/SpriteAtlas.h"
 
 PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                        std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, cam, atlas)
+    : EntityView(model, win, std::move(cam), std::move(atlas))
     , animationTimer(0.0f)
     , currentMouthFrame(0)
     , frameDuration(0.1f)
@@ -99,7 +101,7 @@ void PacManView::draw() {
         sf::IntRect rect;
 
         if (playingDeathAnimation) {
-          DeathFrame frame = static_cast<DeathFrame>(deathFrame);
+          auto frame = static_cast<DeathFrame>(deathFrame);
           rect = spriteAtlas->getDeathSprite(frame);
         } else {
           Direction dir = model->getDirection();
@@ -117,8 +119,8 @@ void PacManView::draw() {
 
         sprite.setTextureRect(rect);
 
-        float spriteWidth = static_cast<float>(rect.width);
-        float spriteHeight = static_cast<float>(rect.height);
+        auto spriteWidth = static_cast<float>(rect.width);
+        auto spriteHeight = static_cast<float>(rect.height);
 
         if (spriteWidth > 0 && spriteHeight > 0) {
           float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());

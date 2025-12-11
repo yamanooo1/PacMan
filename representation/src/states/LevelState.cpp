@@ -36,8 +36,7 @@ void LevelState::onEnter() {
     soundManager.playBackgroundMusic(false);
   }
 
-  if (!loadLevel()) {
-  }
+  loadLevel();
 }
 
 void LevelState::onExit() {

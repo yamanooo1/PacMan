@@ -48,11 +48,11 @@ void Ghost::onEaten() {
   notify(GameEvent::GHOST_EATEN);
 }
 
-bool Ghost::isInSpawnArea(int gridX, int gridY) const {
+bool Ghost::isInSpawnArea(int gridX, int gridY) {
   return (gridX >= 7 && gridX <= 11 && gridY >= 8 && gridY <= 10);
 }
 
-void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
+void Ghost::update(float deltaTime, World* world,const PacMan* pacman) {
   if (!world) return;
 
   if (state == GhostState::WAITING) {
@@ -124,8 +124,8 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   }
   bool wallAhead = world->hasWallInGridCell(nextGridX, nextGridY);
 
-  float gridCenterX = gridX + 0.5f;
-  float gridCenterY = gridY + 0.5f;
+  float gridCenterX = static_cast<float>(gridX) + 0.5f;
+  float gridCenterY = static_cast<float>(gridY) + 0.5f;
   constexpr float centerTolerance = 0.1f;
   bool atCenterX = std::abs(centerX - gridCenterX) < centerTolerance;
   bool atCenterY = std::abs(centerY - gridCenterY) < centerTolerance;
@@ -135,7 +135,7 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
   bool canMakeDecision = isAtIntersection(gridX, gridY, world) || wallAhead;
 
   if (needsDecision && canMakeDecision) {
-    Direction newDir = Direction::NONE;
+    Direction newDir;
 
     if (state == GhostState::EXITING) {
       newDir = chooseDirectionToExit(gridX, gridY, world);
@@ -177,8 +177,8 @@ void Ghost::update(float deltaTime, World* world, PacMan* pacman) {
 
     setPosition(newX, newY);
   } else {
-    float targetCenterX = gridX + 0.5f;
-    float targetCenterY = gridY + 0.5f;
+    float targetCenterX = static_cast<float>(gridX) + 0.5f;
+    float targetCenterY = static_cast<float>(gridY) + 0.5f;
 
     bool atTargetCenter = (std::abs(centerX - targetCenterX) < 0.01f &&
                            std::abs(centerY - targetCenterY) < 0.01f);
@@ -271,7 +271,7 @@ Direction Ghost::chooseDirectionToExit(int gridX, int gridY, World* world) const
   return bestDirections[index];
 }
 
-std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, World* world) const {
+std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY,const World* world) const {
   std::vector<Direction> viable;
   Direction current = getDirection();
 
@@ -350,11 +350,11 @@ bool Ghost::isAtIntersection(int gridX, int gridY, World* world) const {
   return viable.size() >= 2;
 }
 
-int Ghost::manhattanDistance(int x1, int y1, int x2, int y2) const {
+int Ghost::manhattanDistance(int x1, int y1, int x2, int y2) {
   return std::abs(x1 - x2) + std::abs(y1 - y2);
 }
 
-Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan* pacman) {
+Direction Ghost::chooseNextDirection(int gridX, int gridY, const World* world, const PacMan* pacman) {
   auto viable = getViableDirections(gridX, gridY, world);
 
   if (viable.empty()) return getDirection();
@@ -399,20 +399,17 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, World* world, PacMan*
 
   int targetX, targetY;
 
-  if (state == GhostState::FEAR) {
-    targetX = pacmanGridX;
-    targetY = pacmanGridY;
-  } else if (type == GhostType::CHASER) {
+  if (state == GhostState::FEAR || type == GhostType::CHASER) {
     targetX = pacmanGridX;
     targetY = pacmanGridY;
   } else {
     Direction pacmanDir = pacman->getDirection();
-    int lookAhead = 4;
 
     if (pacmanDir == Direction::NONE) {
       targetX = pacmanGridX;
       targetY = pacmanGridY;
     } else {
+      int lookAhead = 4;
       int lookAheadX = pacmanGridX;
       int lookAheadY = pacmanGridY;
 
