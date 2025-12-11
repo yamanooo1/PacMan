@@ -1,5 +1,5 @@
+#include "../representation/include/representation/core/Game.h"
 #include <iostream>
-#include "representation/Game.h"
 
 int main() {
   Game game;

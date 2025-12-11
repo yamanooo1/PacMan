@@ -1,26 +1,26 @@
 find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
 
 add_library(representation STATIC
-        src/PacManView.cpp
-        src/GhostView.cpp
-        src/CoinView.cpp
-        src/FruitView.cpp
-        src/WallView.cpp
-        src/Camera.cpp
-        src/StateManager.cpp
-        src/MenuState.cpp
-        src/LevelState.cpp
-        src/PausedState.cpp
-        src/VictoryState.cpp
-        src/Game.cpp
-        src/ConcreteFactory.cpp
-        src/SpriteAtlas.cpp
-        src/HUD.cpp
-        src/SoundManager.cpp
-        src/SoundObserver.cpp
-        include/representation/HUD.h
-        include/representation/SoundManager.h
-        include/representation/SoundObserver.h
+        src/entities/PacManView.cpp
+        src/entities/GhostView.cpp
+        src/entities/CoinView.cpp
+        src/entities/FruitView.cpp
+        src/entities/WallView.cpp
+        src/core/Camera.cpp
+        src/states/StateManager.cpp
+        src/states/MenuState.cpp
+        src/states/LevelState.cpp
+        src/states/PausedState.cpp
+        src/states/VictoryState.cpp
+        src/core/Game.cpp
+        src/core/ConcreteFactory.cpp
+        src/core/SpriteAtlas.cpp
+        src/systems/HUD.cpp
+        src/systems/SoundManager.cpp
+        src/systems/SoundObserver.cpp
+        include/representation/systems/HUD.h
+        include/representation/systems/SoundManager.h
+        include/representation/systems/SoundObserver.h
 )
 
 target_include_directories(representation PUBLIC include)
