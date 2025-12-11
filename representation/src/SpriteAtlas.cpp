@@ -1,60 +1,42 @@
-//
-// SpriteAtlas.cpp - Sprite region definitions based on spritemap.png
-//
-
 #include "representation/SpriteAtlas.h"
-#include "logic/EntityModel.h"  // For Direction enum
-#include <iostream>
+#include "logic/EntityModel.h"
 
 SpriteAtlas::SpriteAtlas()
-    : spriteTexture(std::make_shared<sf::Texture>())  // ✅ Smart pointer
+    : spriteTexture(std::make_shared<sf::Texture>())
 {
 }
 
 bool SpriteAtlas::loadFromFile(const std::string& filepath) {
     if (!spriteTexture->loadFromFile(filepath)) {
-        std::cerr << "[SPRITE] Failed to load: " << filepath << std::endl;
         return false;
     }
 
-    std::cout << "[SPRITE] Loaded sprite atlas: " << filepath << std::endl;
-
-    // Define all sprite regions after successful load
     defineAllSpriteRegions();
 
     return true;
 }
 
 void SpriteAtlas::defineAllSpriteRegions() {
-    // ===== PACMAN SPRITES =====
-    // Based on your friend's coordinates, organized by direction and frame
-
-    // RIGHT direction
     pacmanSprites[Direction::RIGHT][PacManFrame::CLOSED] = sf::IntRect(853, 5, 33, 33);
     pacmanSprites[Direction::RIGHT][PacManFrame::HALF_OPEN] = sf::IntRect(853, 55, 33, 33);
     pacmanSprites[Direction::RIGHT][PacManFrame::FULL_OPEN] = sf::IntRect(853, 105, 33, 33);
 
-    // DOWN direction
     pacmanSprites[Direction::DOWN][PacManFrame::CLOSED] = sf::IntRect(852, 155, 33, 33);
     pacmanSprites[Direction::DOWN][PacManFrame::HALF_OPEN] = sf::IntRect(852, 205, 33, 33);
     pacmanSprites[Direction::DOWN][PacManFrame::FULL_OPEN] = sf::IntRect(852, 255, 33, 33);
 
-    // LEFT direction
     pacmanSprites[Direction::LEFT][PacManFrame::CLOSED] = sf::IntRect(853, 305, 33, 33);
     pacmanSprites[Direction::LEFT][PacManFrame::HALF_OPEN] = sf::IntRect(853, 355, 33, 33);
     pacmanSprites[Direction::LEFT][PacManFrame::FULL_OPEN] = sf::IntRect(853, 405, 33, 33);
 
-    // UP direction
     pacmanSprites[Direction::UP][PacManFrame::CLOSED] = sf::IntRect(853, 454, 33, 33);
     pacmanSprites[Direction::UP][PacManFrame::HALF_OPEN] = sf::IntRect(853, 504, 33, 33);
     pacmanSprites[Direction::UP][PacManFrame::FULL_OPEN] = sf::IntRect(853, 554, 33, 33);
 
-    // NONE direction (use closed mouth)
     pacmanSprites[Direction::NONE][PacManFrame::CLOSED] = sf::IntRect(853, 5, 33, 33);
     pacmanSprites[Direction::NONE][PacManFrame::HALF_OPEN] = sf::IntRect(853, 5, 33, 33);
     pacmanSprites[Direction::NONE][PacManFrame::FULL_OPEN] = sf::IntRect(853, 5, 33, 33);
 
-    // ===== PACMAN DEATH ANIMATION =====
     deathSprites[DeathFrame::FRAME_0] = sf::IntRect(351, 7, 33, 33);
     deathSprites[DeathFrame::FRAME_1] = sf::IntRect(351, 57, 33, 33);
     deathSprites[DeathFrame::FRAME_2] = sf::IntRect(351, 107, 33, 33);
@@ -67,7 +49,6 @@ void SpriteAtlas::defineAllSpriteRegions() {
     deathSprites[DeathFrame::FRAME_9] = sf::IntRect(351, 457, 33, 33);
     deathSprites[DeathFrame::FRAME_10] = sf::IntRect(351, 517, 33, 33);
 
-    // ===== GHOST RED (Chaser) =====
     ghostSprites[SpriteGhostType::RED][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(1, 4, 35, 35);
     ghostSprites[SpriteGhostType::RED][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(1, 54, 35, 35);
     ghostSprites[SpriteGhostType::RED][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(1, 104, 35, 35);
@@ -77,7 +58,6 @@ void SpriteAtlas::defineAllSpriteRegions() {
     ghostSprites[SpriteGhostType::RED][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(1, 304, 35, 35);
     ghostSprites[SpriteGhostType::RED][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(1, 354, 35, 35);
 
-    // ===== GHOST PINK (Ambusher) =====
     ghostSprites[SpriteGhostType::PINK][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(51, 4, 35, 35);
     ghostSprites[SpriteGhostType::PINK][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(51, 54, 35, 35);
     ghostSprites[SpriteGhostType::PINK][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(51, 104, 35, 35);
@@ -87,7 +67,6 @@ void SpriteAtlas::defineAllSpriteRegions() {
     ghostSprites[SpriteGhostType::PINK][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(51, 304, 35, 35);
     ghostSprites[SpriteGhostType::PINK][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(51, 354, 35, 35);
 
-    // ===== GHOST CYAN (Blue Ambusher) =====
     ghostSprites[SpriteGhostType::CYAN][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(101, 4, 35, 35);
     ghostSprites[SpriteGhostType::CYAN][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(101, 54, 35, 35);
     ghostSprites[SpriteGhostType::CYAN][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(101, 104, 35, 35);
@@ -97,7 +76,6 @@ void SpriteAtlas::defineAllSpriteRegions() {
     ghostSprites[SpriteGhostType::CYAN][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(101, 304, 35, 35);
     ghostSprites[SpriteGhostType::CYAN][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(101, 354, 35, 35);
 
-    // ===== GHOST ORANGE (Random) =====
     ghostSprites[SpriteGhostType::ORANGE][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(151, 4, 35, 35);
     ghostSprites[SpriteGhostType::ORANGE][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(151, 54, 35, 35);
     ghostSprites[SpriteGhostType::ORANGE][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(151, 104, 35, 35);
@@ -107,14 +85,12 @@ void SpriteAtlas::defineAllSpriteRegions() {
     ghostSprites[SpriteGhostType::ORANGE][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(151, 304, 35, 35);
     ghostSprites[SpriteGhostType::ORANGE][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(151, 354, 35, 35);
 
-    // ===== GHOST SCARED (fear mode) =====
     fearSprites[0] = sf::IntRect(1, 554, 35, 35);
     fearSprites[1] = sf::IntRect(1, 604, 35, 35);
 
     fearSprites[2] = sf::IntRect(51, 554, 35, 35);
     fearSprites[3] = sf::IntRect(51, 604, 35, 35);
 
-    // ===== COLLECTIBLES =====
     coinSprite = sf::IntRect(411, 313, 16, 16);
     fruitSprite = sf::IntRect(601, 200, 33, 42);
 }
@@ -128,7 +104,6 @@ sf::IntRect SpriteAtlas::getPacManSprite(Direction dir, PacManFrame frame) const
         }
     }
 
-    // Fallback: return closed mouth facing right
     return sf::IntRect(853, 5, 33, 33);
 }
 
@@ -137,7 +112,7 @@ sf::IntRect SpriteAtlas::getDeathSprite(DeathFrame frame) const {
     if (it != deathSprites.end()) {
         return it->second;
     }
-    return sf::IntRect(351, 7, 33, 33);  // First death frame as fallback
+    return sf::IntRect(351, 7, 33, 33);
 }
 
 sf::IntRect SpriteAtlas::getGhostSprite(SpriteGhostType type, Direction dir, GhostFrame frame) const {
@@ -152,7 +127,6 @@ sf::IntRect SpriteAtlas::getGhostSprite(SpriteGhostType type, Direction dir, Gho
         }
     }
 
-    // Fallback: return red ghost facing right frame 1
     return sf::IntRect(1, 4, 35, 35);
 }
 
@@ -161,5 +135,5 @@ sf::IntRect SpriteAtlas::getFearSprite(int frame) const {
     if (it != fearSprites.end()) {
         return it->second;
     }
-    return sf::IntRect(1, 554, 35, 35);  // First fear frame as fallback
+    return sf::IntRect(1, 554, 35, 35);
 }

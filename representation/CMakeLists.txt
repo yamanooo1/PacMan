@@ -8,7 +8,6 @@ add_library(representation STATIC
         src/WallView.cpp
         src/Camera.cpp
         src/StateManager.cpp
-        src/State.cpp
         src/MenuState.cpp
         src/LevelState.cpp
         src/PausedState.cpp

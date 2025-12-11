@@ -1,11 +1,10 @@
 #include "representation/PacManView.h"
 #include "representation/Camera.h"
 #include "representation/SpriteAtlas.h"
-#include <iostream>
 
-PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,  // ✅ Reference
+PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                        std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, cam, atlas)  // ✅ Pass to base class
+    : EntityView(model, win, cam, atlas)
     , animationTimer(0.0f)
     , currentMouthFrame(0)
     , frameDuration(0.1f)
@@ -20,7 +19,6 @@ PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_pt
 void PacManView::update(GameEvent event) {
   switch (event) {
   case GameEvent::PACMAN_DIED:
-    std::cout << "[VIEW] PacMan died - starting death animation" << std::endl;
     playingDeathAnimation = true;
     deathFrame = 0;
     deathAnimationTimer = 0.0f;
@@ -30,12 +28,9 @@ void PacManView::update(GameEvent event) {
 
   case GameEvent::DIRECTION_CHANGED:
     if (playingDeathAnimation && deathFrame >= 10) {
-      std::cout << "[VIEW] Detected respawn - resetting death animation" << std::endl;
       playingDeathAnimation = false;
       deathFrame = 0;
       deathAnimationTimer = 0.0f;
-    } else if (!playingDeathAnimation) {
-      std::cout << "[VIEW] PacMan changed direction" << std::endl;
     }
     break;
 
@@ -87,7 +82,7 @@ void PacManView::updateAnimation(float deltaTime) {
 }
 
 void PacManView::draw() {
-  if (!model || !camera) return;  // ✅ window is always valid (reference)
+  if (!model || !camera) return;
 
   auto [x, y] = model->getPosition();
   float screenX = camera->gridToScreenX(x);
@@ -142,11 +137,10 @@ void PacManView::draw() {
 
           sprite.setPosition(centerScreenX, centerScreenY);
 
-          window.draw(sprite);  // ✅ CHANGED from window->draw()
+          window.draw(sprite);
           return;
         }
       } catch (const std::exception& e) {
-        std::cerr << "[PACMAN] Error drawing sprite: " << e.what() << std::endl;
       }
     }
   }
@@ -157,5 +151,5 @@ void PacManView::draw() {
   shape.setSize(sf::Vector2f(screenWidth, screenHeight));
   shape.setPosition(screenX, screenY);
 
-  window.draw(shape);  // ✅ CHANGED from window->draw()
+  window.draw(shape);
 }
