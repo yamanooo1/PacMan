@@ -212,7 +212,8 @@ void Ghost::update(float deltaTime, World* world,const PacMan* pacman) {
   }
 }
 
-Direction Ghost::chooseDirectionToExit(int gridX, int gridY, World* world) const {
+Direction Ghost::chooseDirectionToExit(int gridX, int gridY,
+                                       const World * world) const {
   auto exitPositions = world->getExitPositions();
 
   if (exitPositions.empty()) {
@@ -354,7 +355,7 @@ int Ghost::manhattanDistance(int x1, int y1, int x2, int y2) {
   return std::abs(x1 - x2) + std::abs(y1 - y2);
 }
 
-Direction Ghost::chooseNextDirection(int gridX, int gridY, const World* world, const PacMan* pacman) {
+Direction Ghost::chooseNextDirection(int gridX, int gridY, const World* world, const PacMan* pacman) const {
   auto viable = getViableDirections(gridX, gridY, world);
 
   if (viable.empty()) return getDirection();

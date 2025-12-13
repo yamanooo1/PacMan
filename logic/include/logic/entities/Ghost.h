@@ -46,8 +46,9 @@ private:
 
   std::vector<Direction> getViableDirections(int gridX, int gridY, const World* world) const;
   bool isAtIntersection(int gridX, int gridY, World* world) const;
-  Direction chooseNextDirection(int gridX, int gridY, const World* world, const PacMan* pacman);
-  Direction chooseDirectionToExit(int gridX, int gridY, World* world) const;
+  Direction chooseNextDirection(int gridX, int gridY, const World* world, const PacMan* pacman) const;
+  Direction chooseDirectionToExit(int gridX, int gridY,
+                                  const World * world) const;
   [[nodiscard]] static int manhattanDistance(int x1, int y1, int x2, int y2);
   [[nodiscard]] static bool isInSpawnArea(int gridX, int gridY);
 
