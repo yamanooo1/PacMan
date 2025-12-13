@@ -6,34 +6,34 @@
 
 class PausedState : public State {
 private:
-  sf::Font font;
-  sf::Text pausedText;
-  sf::Text resumeText;
-  sf::Text menuText;
+    sf::Font font;
+    sf::Text pausedText;
+    sf::Text resumeText;
+    sf::Text menuText;
 
-  bool fontLoaded;
-  bool resumeRequested;
-  bool menuRequested;
+    bool fontLoaded;
+    bool resumeRequested;
+    bool menuRequested;
 
-  float windowWidth;
-  float windowHeight;
+    float windowWidth;
+    float windowHeight;
 
 public:
-  PausedState();
-  ~PausedState() override = default;
+    PausedState();
+    ~PausedState() override = default;
 
-  void onEnter() override;
-  void onExit() override;
-  void onWindowResize(float width, float height) override;
+    void onEnter() override;
+    void onExit() override;
+    void onWindowResize(float width, float height) override;
 
-  void handleEvents(sf::RenderWindow& window) override;
-  void update(float deltaTime) override;
-  void render(sf::RenderWindow& window) override;
+    void handleEvents(sf::RenderWindow& window) override;
+    void update(float deltaTime) override;
+    void render(sf::RenderWindow& window) override;
 
-  bool isTransparent() const override { return true; }
+    bool isTransparent() const override { return true; }
 
 private:
-  void setupTexts();
+    void setupTexts();
 };
 
 #endif

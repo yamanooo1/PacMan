@@ -5,20 +5,20 @@
 
 class Lives : public Observer, public std::enable_shared_from_this<Lives> {
 private:
-  int remainingLives;
-  int maxLives;
+    int remainingLives;
+    int maxLives;
 
 public:
-  explicit Lives(int startingLives = 3);
-  ~Lives() override = default;
+    explicit Lives(int startingLives = 3);
+    ~Lives() override = default;
 
-  void update(GameEvent event) override;
+    void update(GameEvent event) override;
 
-  int getLives() const { return remainingLives; }
-  int getMaxLives() const { return maxLives; }
-  bool isGameOver() const { return remainingLives <= 0; }
+    int getLives() const { return remainingLives; }
+    int getMaxLives() const { return maxLives; }
+    bool isGameOver() const { return remainingLives <= 0; }
 
-  void reset(int lives = 3);
+    void reset(int lives = 3);
 };
 
 #endif

@@ -2,10 +2,10 @@
 #define PACMAN_WALL_H
 #include "../core/EntityModel.h"
 
-class Wall: public EntityModel {
+class Wall : public EntityModel {
 public:
-  Wall(float x, float y, float width, float height);
-  ~Wall() override = default;
+    Wall(float x, float y, float width, float height);
+    ~Wall() override = default;
 };
 
 #endif

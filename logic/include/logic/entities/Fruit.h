@@ -2,12 +2,12 @@
 #define PACMAN_FRUIT_H
 #include "Collectable.h"
 
-class Fruit: public Collectable {
+class Fruit : public Collectable {
 public:
-  Fruit(float x, float y);
-  ~Fruit() override = default;
+    Fruit(float x, float y);
+    ~Fruit() override = default;
 
-  void onCollected() override;
+    void onCollected() override;
 };
 
 #endif

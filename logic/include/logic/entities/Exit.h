@@ -4,8 +4,8 @@
 
 class Exit : public EntityModel {
 public:
-  Exit(float x, float y);
-  ~Exit() override = default;
+    Exit(float x, float y);
+    ~Exit() override = default;
 };
 
 #endif

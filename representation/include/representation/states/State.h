@@ -7,22 +7,22 @@ class StateManager;
 
 class State {
 public:
-  virtual ~State() = default;
+    virtual ~State() = default;
 
-  virtual void onEnter() {}
-  virtual void onExit() {}
-  virtual void onWindowResize(float width, float height) {}
+    virtual void onEnter() {}
+    virtual void onExit() {}
+    virtual void onWindowResize(float width, float height) {}
 
-  virtual void handleEvents(sf::RenderWindow& window) = 0;
-  virtual void update(float deltaTime) = 0;
-  virtual void render(sf::RenderWindow& window) = 0;
+    virtual void handleEvents(sf::RenderWindow& window) = 0;
+    virtual void update(float deltaTime) = 0;
+    virtual void render(sf::RenderWindow& window) = 0;
 
-  virtual bool isTransparent() const { return false; }
+    virtual bool isTransparent() const { return false; }
 
 protected:
-  StateManager* stateManager = nullptr;
+    StateManager* stateManager = nullptr;
 
-  friend class StateManager;
+    friend class StateManager;
 };
 
 #endif

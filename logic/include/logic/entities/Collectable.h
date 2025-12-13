@@ -2,14 +2,14 @@
 #define PACMAN_COLLECTABLES_H
 #include "../core/EntityModel.h"
 
-class Collectable: public EntityModel {
+class Collectable : public EntityModel {
 public:
-  Collectable(float x, float y, float width, float height);
-  ~Collectable() override = default;
+    Collectable(float x, float y, float width, float height);
+    ~Collectable() override = default;
 
-  virtual void onCollected() = 0;
+    virtual void onCollected() = 0;
 
-  void onCollisionWithPacMan() override;
+    void onCollisionWithPacMan() override;
 };
 
 #endif

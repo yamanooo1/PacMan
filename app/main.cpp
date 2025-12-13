@@ -2,16 +2,16 @@
 #include <iostream>
 
 int main() {
-  Game game;
+    Game game;
 
-  if (!game.initialize()) {
-    std::cerr << "Failed to initialize game!" << std::endl;
-    return 1;
-  }
+    if (!game.initialize()) {
+        std::cerr << "Failed to initialize game!" << std::endl;
+        return 1;
+    }
 
-  game.run();
+    game.run();
 
-  return 0;
+    return 0;
 }
 
-//todo:: exit button
+// todo:: exit button

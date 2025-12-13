@@ -2,12 +2,12 @@
 #define PACMAN_COIN_H
 #include "Collectable.h"
 
-class Coin: public Collectable {
+class Coin : public Collectable {
 public:
-  Coin(float x, float y);
-  ~Coin() override = default;
+    Coin(float x, float y);
+    ~Coin() override = default;
 
-  void onCollected() override;
+    void onCollected() override;
 };
 
 #endif

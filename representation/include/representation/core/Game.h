@@ -8,20 +8,20 @@ class StateManager;
 
 class Game {
 private:
-  std::unique_ptr<sf::RenderWindow> window;
-  std::unique_ptr<StateManager> stateManager;
-  bool isRunning;
+    std::unique_ptr<sf::RenderWindow> window;
+    std::unique_ptr<StateManager> stateManager;
+    bool isRunning;
 
-  void handleEvents();
+    void handleEvents();
 
 public:
-  Game();
-  ~Game();
+    Game();
+    ~Game();
 
-  bool initialize();
-  void run();
+    bool initialize();
+    void run();
 
-  [[nodiscard]] sf::RenderWindow* getWindow() const { return window.get(); }
+    [[nodiscard]] sf::RenderWindow* getWindow() const { return window.get(); }
 };
 
 #endif

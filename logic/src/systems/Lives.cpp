@@ -1,17 +1,14 @@
 #include "../../include/logic/systems/Lives.h"
 
-Lives::Lives(int startingLives)
-    : remainingLives(startingLives)
-    , maxLives(startingLives) {
-}
+Lives::Lives(int startingLives) : remainingLives(startingLives), maxLives(startingLives) {}
 
 void Lives::update(GameEvent event) {
-  if (event == GameEvent::PACMAN_DIED) {
-    remainingLives--;
-  }
+    if (event == GameEvent::PACMAN_DIED) {
+        remainingLives--;
+    }
 }
 
 void Lives::reset(int lives) {
-  remainingLives = lives;
-  maxLives = lives;
+    remainingLives = lives;
+    maxLives = lives;
 }

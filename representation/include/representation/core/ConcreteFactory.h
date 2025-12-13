@@ -11,34 +11,33 @@ class Camera;
 class SpriteAtlas;
 class Observer;
 
-class ConcreteFactory: public AbstractFactory {
+class ConcreteFactory : public AbstractFactory {
 private:
-  sf::RenderWindow& window;
-  std::shared_ptr<Camera> camera;
-  std::shared_ptr<SpriteAtlas> spriteAtlas;
-  std::vector<std::shared_ptr<EntityView>> views;
-  std::shared_ptr<Observer> soundObserver;
+    sf::RenderWindow& window;
+    std::shared_ptr<Camera> camera;
+    std::shared_ptr<SpriteAtlas> spriteAtlas;
+    std::vector<std::shared_ptr<EntityView>> views;
+    std::shared_ptr<Observer> soundObserver;
 
 public:
-  explicit ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam);
-  ~ConcreteFactory() override;
+    explicit ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam);
+    ~ConcreteFactory() override;
 
-  bool loadSprites(const std::string& filepath);
+    bool loadSprites(const std::string& filepath);
 
-  void setSoundObserver(const std::shared_ptr<Observer>& observer) {
-    soundObserver = observer;
-  }
+    void setSoundObserver(const std::shared_ptr<Observer>& observer) { soundObserver = observer; }
 
-  std::unique_ptr<PacMan> createPacMan(float x, float y) override;
-  std::unique_ptr<Ghost> createGhost(float x, float y, GhostType type, GhostColor color, float waitTime, float speedMultiplier) override;
-  std::unique_ptr<Wall> createWall(float x, float y, float w, float h) override;
-  std::unique_ptr<Coin> createCoin(float x, float y) override;
-  std::unique_ptr<Fruit> createFruit(float x, float y) override;
+    std::unique_ptr<PacMan> createPacMan(float x, float y) override;
+    std::unique_ptr<Ghost> createGhost(float x, float y, GhostType type, GhostColor color, float waitTime,
+                                       float speedMultiplier) override;
+    std::unique_ptr<Wall> createWall(float x, float y, float w, float h) override;
+    std::unique_ptr<Coin> createCoin(float x, float y) override;
+    std::unique_ptr<Fruit> createFruit(float x, float y) override;
 
-  void removeDeadViews() override;
+    void removeDeadViews() override;
 
-  void drawAll();
-  void updateAll();
+    void drawAll();
+    void updateAll();
 };
 
 #endif

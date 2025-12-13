@@ -6,26 +6,26 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
-class PacManView: public EntityView {
+class PacManView : public EntityView {
 private:
-  sf::RectangleShape shape;
+    sf::RectangleShape shape;
 
-  float animationTimer;
-  int currentMouthFrame;
-  float frameDuration;
+    float animationTimer;
+    int currentMouthFrame;
+    float frameDuration;
 
-  bool playingDeathAnimation;
-  int deathFrame;
-  float deathAnimationTimer;
-  float deathFrameDuration;
+    bool playingDeathAnimation;
+    int deathFrame;
+    float deathAnimationTimer;
+    float deathFrameDuration;
 
 public:
-  PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-             std::shared_ptr<SpriteAtlas> atlas);
+    PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+               std::shared_ptr<SpriteAtlas> atlas);
 
-  void update(GameEvent event) override;
-  void updateAnimation(float deltaTime) override;
-  void draw() override;
+    void update(GameEvent event) override;
+    void updateAnimation(float deltaTime) override;
+    void draw() override;
 };
 
 #endif

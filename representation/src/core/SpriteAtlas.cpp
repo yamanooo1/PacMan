@@ -1,10 +1,7 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../../logic/include/logic/core/EntityModel.h"
 
-SpriteAtlas::SpriteAtlas()
-    : spriteTexture(std::make_shared<sf::Texture>())
-{
-}
+SpriteAtlas::SpriteAtlas() : spriteTexture(std::make_shared<sf::Texture>()) {}
 
 bool SpriteAtlas::loadFromFile(const std::string& filepath) {
     if (!spriteTexture->loadFromFile(filepath)) {

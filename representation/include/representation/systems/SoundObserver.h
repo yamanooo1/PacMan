@@ -7,10 +7,10 @@
 
 class SoundObserver : public Observer, public std::enable_shared_from_this<SoundObserver> {
 public:
-  SoundObserver();
-  ~SoundObserver() override = default;
+    SoundObserver();
+    ~SoundObserver() override = default;
 
-  void update(GameEvent event) override;
+    void update(GameEvent event) override;
 };
 
 #endif

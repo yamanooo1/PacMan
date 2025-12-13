@@ -9,28 +9,28 @@
 class Camera;
 class SpriteAtlas;
 
-class EntityView: public Observer {
+class EntityView : public Observer {
 public:
-  explicit EntityView(EntityModel* m, sf::RenderWindow& win, std::shared_ptr<Camera> cam, std::shared_ptr<SpriteAtlas> atlas)
-      : model(m), window(win), camera(std::move(cam)), spriteAtlas(std::move(atlas)) {
-  }
+    explicit EntityView(EntityModel* m, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+                        std::shared_ptr<SpriteAtlas> atlas)
+        : model(m), window(win), camera(std::move(cam)), spriteAtlas(std::move(atlas)) {}
 
-  ~EntityView() override = default;
+    ~EntityView() override = default;
 
-  void update(GameEvent event) override {}
-  virtual void updateAnimation(float deltaTime) {}
-  virtual void draw() = 0;
+    void update(GameEvent event) override {}
+    virtual void updateAnimation(float deltaTime) {}
+    virtual void draw() = 0;
 
-  EntityView(const EntityView&) = delete;
-  EntityView& operator=(const EntityView&) = delete;
+    EntityView(const EntityView&) = delete;
+    EntityView& operator=(const EntityView&) = delete;
 
-  [[nodiscard]] EntityModel* getModel() const { return model; }
+    [[nodiscard]] EntityModel* getModel() const { return model; }
 
 protected:
-  EntityModel* model;
-  sf::RenderWindow& window;
-  std::shared_ptr<Camera> camera;
-  std::shared_ptr<SpriteAtlas> spriteAtlas;
+    EntityModel* model;
+    sf::RenderWindow& window;
+    std::shared_ptr<Camera> camera;
+    std::shared_ptr<SpriteAtlas> spriteAtlas;
 };
 
 #endif

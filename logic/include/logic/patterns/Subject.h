@@ -6,15 +6,15 @@
 
 class Subject {
 private:
-  std::vector<std::weak_ptr<Observer>> observers;
+    std::vector<std::weak_ptr<Observer>> observers;
 
 public:
-  void attach(const std::shared_ptr<Observer>& o);
-  void detach(const std::shared_ptr<Observer>& o);
-  virtual ~Subject() = default;
+    void attach(const std::shared_ptr<Observer>& o);
+    void detach(const std::shared_ptr<Observer>& o);
+    virtual ~Subject() = default;
 
 protected:
-  void notify(GameEvent event);
+    void notify(GameEvent event);
 };
 
 #endif
