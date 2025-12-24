@@ -56,18 +56,18 @@ namespace representation {
  */
 class PacManView : public EntityView {
 private:
-    sf::RectangleShape shape; // Fallback yellow rectangle
+    sf::RectangleShape shape;  // Fallback yellow rectangle
 
     // Normal animation state
-    float animationTimer;  // Accumulates deltaTime
-    int currentMouthFrame; // 0-2: closed, half, full open
-    float frameDuration;   // 0.1s between frames
+    float animationTimer;      // Accumulates deltaTime
+    int currentMouthFrame;     // 0-2: closed, half, full open
+    float frameDuration;       // 0.1s between frames
 
     // Death animation state
     bool playingDeathAnimation;
-    int deathFrame; // 0-10: death animation progress
+    int deathFrame;            // 0-10: death animation progress
     float deathAnimationTimer;
-    float deathFrameDuration; // 0.18s per death frame
+    float deathFrameDuration;  // 0.18s per death frame
 
 public:
     /**
@@ -79,7 +79,7 @@ public:
      * @param atlas Sprite atlas for textures
      */
     PacManView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-               std::shared_ptr<SpriteAtlas> atlas);
+               std::shared_ptr<SpriteAtlas> atlas, int z = 100);  // Default z=100 (foreground)
 
     /**
      * @brief Handle game events (death, respawn)

@@ -7,8 +7,8 @@
 namespace representation {
 
 CoinView::CoinView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-                   std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, std::move(cam), std::move(atlas)) {
+                   std::shared_ptr<SpriteAtlas> atlas, int z)
+    : EntityView(model, win, std::move(cam), std::move(atlas), z) {
     shape.setRadius(5.f);
     shape.setFillColor(sf::Color::White);
 }
@@ -49,7 +49,7 @@ void CoinView::draw() {
 
             if (spriteWidth > 0 && spriteHeight > 0) {
                 float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
-                float desiredSize = gridCellSize * 0.4f; // 40% of cell
+                float desiredSize = gridCellSize * 0.4f;  // 40% of cell
 
                 float scaleX = desiredSize / spriteWidth;
                 float scaleY = desiredSize / spriteHeight;

@@ -22,11 +22,11 @@ namespace representation {
  */
 class WallView : public EntityView {
 private:
-    sf::RectangleShape shape; // Blue rectangle
+    sf::RectangleShape shape;  // Blue rectangle
 
 public:
     WallView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-             std::shared_ptr<SpriteAtlas> atlas);
+             std::shared_ptr<SpriteAtlas> atlas, int z = 0);  // Default z=0 (background)
 
     void update(logic::GameEvent) override;
     void draw() override;

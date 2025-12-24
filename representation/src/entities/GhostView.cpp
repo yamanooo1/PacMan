@@ -8,9 +8,9 @@
 
 namespace representation {
 
+using logic::Ghost;
 using logic::Direction;
 using logic::GameEvent;
-using logic::Ghost;
 
 /**
  * @brief Initialize GhostView with default red appearance
@@ -19,8 +19,8 @@ using logic::Ghost;
  * to configure actual ghost appearance.
  */
 GhostView::GhostView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-                     std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, std::move(cam), std::move(atlas)), spriteType(SpriteGhostType::RED), animationTimer(0.0f),
+                     std::shared_ptr<SpriteAtlas> atlas, int z)
+    : EntityView(model, win, std::move(cam), std::move(atlas), z), spriteType(SpriteGhostType::RED), animationTimer(0.0f),
       currentFrame(0), frameDuration(0.15f), flashTimer(0.0f), showWhite(false) {
     shape.setRadius(20.f);
     shape.setFillColor(sf::Color::Red);
@@ -56,7 +56,7 @@ void GhostView::updateAnimation(float deltaTime) {
 
         if (flashTimer >= 0.2f) {
             flashTimer = 0.0f;
-            showWhite = !showWhite; // Toggle blue ↔ white
+            showWhite = !showWhite;  // Toggle blue ↔ white
         }
     } else {
         // Reset flash state when not in ending phase
@@ -110,7 +110,7 @@ void GhostView::draw() {
                 // Fear mode sprite selection
                 int fearFrame = currentFrame;
                 if (showWhite) {
-                    fearFrame += 2; // Offset to white frames (2-3)
+                    fearFrame += 2;  // Offset to white frames (2-3)
                 }
 
                 rect = spriteAtlas->getFearSprite(fearFrame);
@@ -160,7 +160,7 @@ void GhostView::draw() {
     }
 
     window.draw(shape);
-    shape.setFillColor(originalColor); // Restore color
+    shape.setFillColor(originalColor);  // Restore color
 }
 
 } // namespace representation

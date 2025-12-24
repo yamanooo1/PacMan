@@ -182,6 +182,12 @@ std::unique_ptr<logic::Fruit> ConcreteFactory::createFruit(float x, float y) {
  * Views handle their own visibility checks (isDead, etc.).
  */
 void ConcreteFactory::drawAll() {
+    // Sort by z-order before rendering
+    std::sort(views.begin(), views.end(),
+        [](const auto& a, const auto& b) {
+            return a->getZOrder() < b->getZOrder();
+        });
+
     for (const auto& view : views) {
         view->draw();
     }

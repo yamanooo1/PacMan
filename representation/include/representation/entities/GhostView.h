@@ -59,17 +59,17 @@ namespace representation {
  */
 class GhostView : public EntityView {
 private:
-    sf::CircleShape shape;      // Fallback colored circle
-    SpriteGhostType spriteType; // RED, PINK, CYAN, ORANGE
+    sf::CircleShape shape;         // Fallback colored circle
+    SpriteGhostType spriteType;    // RED, PINK, CYAN, ORANGE
 
     // Animation state
-    float animationTimer; // Frame timer
-    int currentFrame;     // 0 or 1 (2-frame animation)
-    float frameDuration;  // 0.15s per frame
+    float animationTimer;          // Frame timer
+    int currentFrame;              // 0 or 1 (2-frame animation)
+    float frameDuration;           // 0.15s per frame
 
     // Fear mode flashing
-    float flashTimer; // Flash cycle timer
-    bool showWhite;   // true = white, false = blue
+    float flashTimer;              // Flash cycle timer
+    bool showWhite;                // true = white, false = blue
 
 public:
     /**
@@ -83,7 +83,7 @@ public:
      * @param atlas Sprite atlas
      */
     GhostView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-              std::shared_ptr<SpriteAtlas> atlas);
+              std::shared_ptr<SpriteAtlas> atlas, int z = 100);  // Default z=100 (foreground)
 
     /**
      * @brief Handle game events (currently no-op)

@@ -89,10 +89,12 @@ public:
      * @param win SFML window for rendering
      * @param cam Camera for grid-to-screen transformation
      * @param atlas SpriteAtlas for texture/sprite lookup
+     * @param z Z-order for rendering (lower = background, higher = foreground)
+     *          Default values: Walls=0, Coins/Fruits=10, PacMan/Ghosts=100
      */
     explicit EntityView(logic::EntityModel* m, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-                        std::shared_ptr<SpriteAtlas> atlas)
-        : model(m), window(win), camera(std::move(cam)), spriteAtlas(std::move(atlas)) {}
+                        std::shared_ptr<SpriteAtlas> atlas, int z = 0)
+        : model(m), window(win), camera(std::move(cam)), spriteAtlas(std::move(atlas)), zOrder(z) {}
 
     ~EntityView() override = default;
 
@@ -139,11 +141,22 @@ public:
      */
     [[nodiscard]] logic::EntityModel* getModel() const { return model; }
 
+    /**
+     * @brief Get z-order for rendering depth sorting
+     *
+     * Lower values render first (background), higher values last (foreground).
+     * Used by ConcreteFactory::drawAll() to sort views before rendering.
+     *
+     * @return Z-order value (0=background, 100=foreground)
+     */
+    [[nodiscard]] int getZOrder() const { return zOrder; }
+
 protected:
-    logic::EntityModel* model;                // Observed model (raw pointer)
-    sf::RenderWindow& window;                 // SFML rendering target
-    std::shared_ptr<Camera> camera;           // Coordinate transformer
-    std::shared_ptr<SpriteAtlas> spriteAtlas; // Sprite sheet manager
+    logic::EntityModel* model;                  // Observed model (raw pointer)
+    sf::RenderWindow& window;                   // SFML rendering target
+    std::shared_ptr<Camera> camera;             // Coordinate transformer
+    std::shared_ptr<SpriteAtlas> spriteAtlas;   // Sprite sheet manager
+    int zOrder;                                 // Render depth (0=back, 100=front)
 };
 
 } // namespace representation

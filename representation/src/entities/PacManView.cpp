@@ -15,8 +15,8 @@ using logic::GameEvent;
  * Initial state: closed mouth, no death animation
  */
 PacManView::PacManView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-                       std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, std::move(cam), std::move(atlas)), animationTimer(0.0f), currentMouthFrame(0),
+                       std::shared_ptr<SpriteAtlas> atlas, int z)
+    : EntityView(model, win, std::move(cam), std::move(atlas), z), animationTimer(0.0f), currentMouthFrame(0),
       frameDuration(0.1f), playingDeathAnimation(false), deathFrame(0), deathAnimationTimer(0.0f),
       deathFrameDuration(0.18f) {
     shape.setFillColor(sf::Color::Yellow);
@@ -79,7 +79,7 @@ void PacManView::updateAnimation(float deltaTime) {
             deathFrame++;
 
             if (deathFrame > 10) {
-                deathFrame = 10; // Hold on last frame
+                deathFrame = 10;  // Hold on last frame
             }
         }
 
@@ -99,10 +99,10 @@ void PacManView::updateAnimation(float deltaTime) {
 
             if (animationTimer >= frameDuration) {
                 animationTimer = 0.0f;
-                currentMouthFrame = (currentMouthFrame + 1) % 3; // Cycle 0→1→2→0
+                currentMouthFrame = (currentMouthFrame + 1) % 3;  // Cycle 0→1→2→0
             }
         } else {
-            currentMouthFrame = 0; // Closed mouth when static
+            currentMouthFrame = 0;  // Closed mouth when static
         }
 
         prevX = currentX;

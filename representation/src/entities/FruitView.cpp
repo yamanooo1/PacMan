@@ -7,8 +7,8 @@
 namespace representation {
 
 FruitView::FruitView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-                     std::shared_ptr<SpriteAtlas> atlas)
-    : EntityView(model, win, std::move(cam), std::move(atlas)) {
+                     std::shared_ptr<SpriteAtlas> atlas, int z)
+    : EntityView(model, win, std::move(cam), std::move(atlas), z) {
     shape.setRadius(8.f);
     shape.setFillColor(sf::Color::Green);
 }
@@ -45,7 +45,7 @@ void FruitView::draw() {
 
             if (spriteWidth > 0 && spriteHeight > 0) {
                 float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
-                float desiredSize = gridCellSize * 0.7f; // 70% of cell
+                float desiredSize = gridCellSize * 0.7f;  // 70% of cell
 
                 float scaleX = desiredSize / spriteWidth;
                 float scaleY = desiredSize / spriteHeight;

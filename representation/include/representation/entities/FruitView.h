@@ -22,11 +22,11 @@ namespace representation {
  */
 class FruitView : public EntityView {
 private:
-    sf::CircleShape shape; // Fallback green circle
+    sf::CircleShape shape;  // Fallback green circle
 
 public:
     FruitView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
-              std::shared_ptr<SpriteAtlas> atlas);
+              std::shared_ptr<SpriteAtlas> atlas, int z = 10);  // Default z=10 (mid-layer)
 
     void update(logic::GameEvent) override;
     void draw() override;
