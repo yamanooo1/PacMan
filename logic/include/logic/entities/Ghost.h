@@ -3,6 +3,8 @@
 #include "../core/EntityModel.h"
 #include <vector>
 
+namespace logic {
+
 class World;
 class PacMan;
 
@@ -59,5 +61,7 @@ public:
     [[nodiscard]] bool isFearModeEnding() const { return fearModeEnding; }
     void setFearModeEnding(bool ending) { fearModeEnding = ending; }
 };
+
+} // namespace logic
 
 #endif

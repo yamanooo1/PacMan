@@ -3,6 +3,8 @@
 #include "../../../logic/include/logic/systems/Lives.h"
 #include "../../../logic/include/logic/systems/Score.h"
 
+namespace representation {
+
 HUD::HUD(sf::RenderWindow& win, int height) : window(win), hudHeight(height), fontLoaded(false) {}
 
 void HUD::loadFont(const std::string& fontPath) {
@@ -11,7 +13,7 @@ void HUD::loadFont(const std::string& fontPath) {
     }
 }
 
-void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
+void HUD::draw(logic::World* world, logic::Score* score, logic::Lives* lives, int currentLevel) {
     if (!score || !lives)
         return;
 
@@ -61,7 +63,7 @@ void HUD::draw(World* world, Score* score, Lives* lives, int currentLevel) {
     window.draw(levelText);
 }
 
-void HUD::drawReadyText(World* world) {
+void HUD::drawReadyText(logic::World* world) {
     if (!world || !fontLoaded)
         return;
     if (!world->isReadyStateActive())
@@ -92,7 +94,7 @@ void HUD::drawReadyText(World* world) {
     window.draw(readyText);
 }
 
-void HUD::drawLevelClearedText(World* world) {
+void HUD::drawLevelClearedText(logic::World* world) {
     if (!world || !fontLoaded)
         return;
     if (!world->isLevelClearedDisplayActive())
@@ -122,3 +124,5 @@ void HUD::drawLevelClearedText(World* world) {
 
     window.draw(clearedText);
 }
+
+} // namespace representation

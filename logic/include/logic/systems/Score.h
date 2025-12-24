@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace logic {
+
 struct ScoreEntry {
     std::string playerName;
     int score;
@@ -40,5 +42,7 @@ public:
     std::vector<ScoreEntry> getHighScores() const { return highScores; }
     void setScore(int newScore) { currentScore = newScore; }
 };
+
+} // namespace logic
 
 #endif

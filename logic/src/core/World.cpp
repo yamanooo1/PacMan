@@ -11,6 +11,8 @@
 #include <fstream>
 #include <sstream>
 
+namespace logic {
+
 World::World(AbstractFactory* f, int level)
     : mapWidth(0), mapHeight(0), currentLevel(level),
       ghostSpeedMultiplier(1.0f + static_cast<float>((level - 1)) * 0.09f),
@@ -603,3 +605,5 @@ void World::checkLevelComplete() {
         }
     }
 }
+
+} // namespace logic

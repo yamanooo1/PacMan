@@ -1,5 +1,7 @@
 #include "../../include/representation/systems/SoundManager.h"
 
+namespace representation {
+
 SoundManager::SoundManager()
     : soundVolume(50.0f), musicVolume(30.0f), soundsLoaded(false), movementSoundPlaying(false),
       fearModeSoundPlaying(false) {}
@@ -207,3 +209,5 @@ void SoundManager::unmuteSounds() { setSoundVolume(50.0f); }
 void SoundManager::muteMusic() { setMusicVolume(0.0f); }
 
 void SoundManager::unmuteMusic() { setMusicVolume(30.0f); }
+
+} // namespace representation

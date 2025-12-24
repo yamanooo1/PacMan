@@ -5,7 +5,11 @@
 #include <map>
 #include <memory>
 
+namespace logic {
 enum class Direction;
+}
+
+namespace representation {
 
 enum class PacManFrame { CLOSED, HALF_OPEN, FULL_OPEN };
 
@@ -31,9 +35,9 @@ class SpriteAtlas {
 private:
     std::shared_ptr<sf::Texture> spriteTexture;
 
-    std::map<Direction, std::map<PacManFrame, sf::IntRect>> pacmanSprites;
+    std::map<logic::Direction, std::map<PacManFrame, sf::IntRect>> pacmanSprites;
     std::map<DeathFrame, sf::IntRect> deathSprites;
-    std::map<SpriteGhostType, std::map<Direction, std::map<GhostFrame, sf::IntRect>>> ghostSprites;
+    std::map<SpriteGhostType, std::map<logic::Direction, std::map<GhostFrame, sf::IntRect>>> ghostSprites;
     std::map<int, sf::IntRect> fearSprites;
 
     sf::IntRect coinSprite;
@@ -49,14 +53,16 @@ public:
 
     [[nodiscard]] std::shared_ptr<sf::Texture> getTexture() const { return spriteTexture; }
 
-    [[nodiscard]] sf::IntRect getPacManSprite(Direction dir, PacManFrame frame) const;
+    [[nodiscard]] sf::IntRect getPacManSprite(logic::Direction dir, PacManFrame frame) const;
     [[nodiscard]] sf::IntRect getDeathSprite(DeathFrame frame) const;
 
-    [[nodiscard]] sf::IntRect getGhostSprite(SpriteGhostType type, Direction dir, GhostFrame frame) const;
+    [[nodiscard]] sf::IntRect getGhostSprite(SpriteGhostType type, logic::Direction dir, GhostFrame frame) const;
     [[nodiscard]] sf::IntRect getFearSprite(int frame) const;
 
     [[nodiscard]] sf::IntRect getCoinSprite() const { return coinSprite; }
     [[nodiscard]] sf::IntRect getFruitSprite() const { return fruitSprite; }
 };
+
+} // namespace representation
 
 #endif

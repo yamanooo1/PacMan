@@ -2,6 +2,8 @@
 #define PACMAN_FRUIT_H
 #include "Collectable.h"
 
+namespace logic {
+
 class Fruit : public Collectable {
 public:
     Fruit(float x, float y);
@@ -9,5 +11,7 @@ public:
 
     void onCollected() override;
 };
+
+} // namespace logic
 
 #endif

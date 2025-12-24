@@ -2,6 +2,8 @@
 #define PACMAN_PACMAN_H
 #include "../core/EntityModel.h"
 
+namespace logic {
+
 class PacMan : public EntityModel {
 private:
     float speed;
@@ -29,5 +31,7 @@ public:
     void notifyDirectionChange();
     void hitWall();
 };
+
+} // namespace logic
 
 #endif

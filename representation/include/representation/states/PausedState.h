@@ -4,6 +4,8 @@
 #include "State.h"
 #include <SFML/Graphics.hpp>
 
+namespace representation {
+
 class PausedState : public State {
 private:
     sf::Font font;
@@ -35,5 +37,7 @@ public:
 private:
     void setupTexts();
 };
+
+} // namespace representation
 
 #endif

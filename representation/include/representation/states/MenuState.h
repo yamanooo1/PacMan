@@ -4,6 +4,8 @@
 #include "State.h"
 #include <SFML/Graphics.hpp>
 
+namespace representation {
+
 class MenuState : public State {
 private:
     sf::Font font;
@@ -50,5 +52,7 @@ private:
     void setupLeaderboard();
     bool isMouseOverButton(const sf::RectangleShape& button, sf::RenderWindow& window);
 };
+
+} // namespace representation
 
 #endif

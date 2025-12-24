@@ -1,6 +1,8 @@
 #include "../../include/logic/patterns/Subject.h"
 #include <algorithm>
 
+namespace logic {
+
 void Subject::attach(const std::shared_ptr<Observer>& o) {
     if (o) {
         observers.push_back(o);
@@ -30,3 +32,5 @@ void Subject::notify(GameEvent event) {
                                    }),
                     observers.end());
 }
+
+} // namespace logic

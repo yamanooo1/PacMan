@@ -2,6 +2,8 @@
 #define PACMAN_COLLECTABLES_H
 #include "../core/EntityModel.h"
 
+namespace logic {
+
 class Collectable : public EntityModel {
 public:
     Collectable(float x, float y, float width, float height);
@@ -11,5 +13,7 @@ public:
 
     void onCollisionWithPacMan() override;
 };
+
+} // namespace logic
 
 #endif

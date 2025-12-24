@@ -1,6 +1,8 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../../logic/include/logic/core/EntityModel.h"
 
+namespace representation {
+
 SpriteAtlas::SpriteAtlas() : spriteTexture(std::make_shared<sf::Texture>()) {}
 
 bool SpriteAtlas::loadFromFile(const std::string& filepath) {
@@ -14,25 +16,25 @@ bool SpriteAtlas::loadFromFile(const std::string& filepath) {
 }
 
 void SpriteAtlas::defineAllSpriteRegions() {
-    pacmanSprites[Direction::RIGHT][PacManFrame::CLOSED] = sf::IntRect(853, 5, 33, 33);
-    pacmanSprites[Direction::RIGHT][PacManFrame::HALF_OPEN] = sf::IntRect(853, 55, 33, 33);
-    pacmanSprites[Direction::RIGHT][PacManFrame::FULL_OPEN] = sf::IntRect(853, 105, 33, 33);
+    pacmanSprites[logic::Direction::RIGHT][PacManFrame::CLOSED] = sf::IntRect(853, 5, 33, 33);
+    pacmanSprites[logic::Direction::RIGHT][PacManFrame::HALF_OPEN] = sf::IntRect(853, 55, 33, 33);
+    pacmanSprites[logic::Direction::RIGHT][PacManFrame::FULL_OPEN] = sf::IntRect(853, 105, 33, 33);
 
-    pacmanSprites[Direction::DOWN][PacManFrame::CLOSED] = sf::IntRect(852, 155, 33, 33);
-    pacmanSprites[Direction::DOWN][PacManFrame::HALF_OPEN] = sf::IntRect(852, 205, 33, 33);
-    pacmanSprites[Direction::DOWN][PacManFrame::FULL_OPEN] = sf::IntRect(852, 255, 33, 33);
+    pacmanSprites[logic::Direction::DOWN][PacManFrame::CLOSED] = sf::IntRect(852, 155, 33, 33);
+    pacmanSprites[logic::Direction::DOWN][PacManFrame::HALF_OPEN] = sf::IntRect(852, 205, 33, 33);
+    pacmanSprites[logic::Direction::DOWN][PacManFrame::FULL_OPEN] = sf::IntRect(852, 255, 33, 33);
 
-    pacmanSprites[Direction::LEFT][PacManFrame::CLOSED] = sf::IntRect(853, 305, 33, 33);
-    pacmanSprites[Direction::LEFT][PacManFrame::HALF_OPEN] = sf::IntRect(853, 355, 33, 33);
-    pacmanSprites[Direction::LEFT][PacManFrame::FULL_OPEN] = sf::IntRect(853, 405, 33, 33);
+    pacmanSprites[logic::Direction::LEFT][PacManFrame::CLOSED] = sf::IntRect(853, 305, 33, 33);
+    pacmanSprites[logic::Direction::LEFT][PacManFrame::HALF_OPEN] = sf::IntRect(853, 355, 33, 33);
+    pacmanSprites[logic::Direction::LEFT][PacManFrame::FULL_OPEN] = sf::IntRect(853, 405, 33, 33);
 
-    pacmanSprites[Direction::UP][PacManFrame::CLOSED] = sf::IntRect(853, 454, 33, 33);
-    pacmanSprites[Direction::UP][PacManFrame::HALF_OPEN] = sf::IntRect(853, 504, 33, 33);
-    pacmanSprites[Direction::UP][PacManFrame::FULL_OPEN] = sf::IntRect(853, 554, 33, 33);
+    pacmanSprites[logic::Direction::UP][PacManFrame::CLOSED] = sf::IntRect(853, 454, 33, 33);
+    pacmanSprites[logic::Direction::UP][PacManFrame::HALF_OPEN] = sf::IntRect(853, 504, 33, 33);
+    pacmanSprites[logic::Direction::UP][PacManFrame::FULL_OPEN] = sf::IntRect(853, 554, 33, 33);
 
-    pacmanSprites[Direction::NONE][PacManFrame::CLOSED] = sf::IntRect(853, 5, 33, 33);
-    pacmanSprites[Direction::NONE][PacManFrame::HALF_OPEN] = sf::IntRect(853, 5, 33, 33);
-    pacmanSprites[Direction::NONE][PacManFrame::FULL_OPEN] = sf::IntRect(853, 5, 33, 33);
+    pacmanSprites[logic::Direction::NONE][PacManFrame::CLOSED] = sf::IntRect(853, 5, 33, 33);
+    pacmanSprites[logic::Direction::NONE][PacManFrame::HALF_OPEN] = sf::IntRect(853, 5, 33, 33);
+    pacmanSprites[logic::Direction::NONE][PacManFrame::FULL_OPEN] = sf::IntRect(853, 5, 33, 33);
 
     deathSprites[DeathFrame::FRAME_0] = sf::IntRect(351, 7, 33, 33);
     deathSprites[DeathFrame::FRAME_1] = sf::IntRect(351, 57, 33, 33);
@@ -46,41 +48,41 @@ void SpriteAtlas::defineAllSpriteRegions() {
     deathSprites[DeathFrame::FRAME_9] = sf::IntRect(351, 457, 33, 33);
     deathSprites[DeathFrame::FRAME_10] = sf::IntRect(351, 517, 33, 33);
 
-    ghostSprites[SpriteGhostType::RED][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(1, 4, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(1, 54, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(1, 104, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(1, 154, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(1, 204, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(1, 254, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(1, 304, 35, 35);
-    ghostSprites[SpriteGhostType::RED][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(1, 354, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(1, 4, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(1, 54, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(1, 104, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(1, 154, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(1, 204, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(1, 254, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(1, 304, 35, 35);
+    ghostSprites[SpriteGhostType::RED][logic::Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(1, 354, 35, 35);
 
-    ghostSprites[SpriteGhostType::PINK][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(51, 4, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(51, 54, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(51, 104, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(51, 154, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(51, 204, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(51, 254, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(51, 304, 35, 35);
-    ghostSprites[SpriteGhostType::PINK][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(51, 354, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(51, 4, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(51, 54, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(51, 104, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(51, 154, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(51, 204, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(51, 254, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(51, 304, 35, 35);
+    ghostSprites[SpriteGhostType::PINK][logic::Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(51, 354, 35, 35);
 
-    ghostSprites[SpriteGhostType::CYAN][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(101, 4, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(101, 54, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(101, 104, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(101, 154, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(101, 204, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(101, 254, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(101, 304, 35, 35);
-    ghostSprites[SpriteGhostType::CYAN][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(101, 354, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(101, 4, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(101, 54, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(101, 104, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(101, 154, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(101, 204, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(101, 254, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(101, 304, 35, 35);
+    ghostSprites[SpriteGhostType::CYAN][logic::Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(101, 354, 35, 35);
 
-    ghostSprites[SpriteGhostType::ORANGE][Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(151, 4, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(151, 54, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(151, 104, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(151, 154, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(151, 204, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(151, 254, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(151, 304, 35, 35);
-    ghostSprites[SpriteGhostType::ORANGE][Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(151, 354, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::RIGHT][GhostFrame::FRAME_1] = sf::IntRect(151, 4, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::RIGHT][GhostFrame::FRAME_2] = sf::IntRect(151, 54, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::DOWN][GhostFrame::FRAME_1] = sf::IntRect(151, 104, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::DOWN][GhostFrame::FRAME_2] = sf::IntRect(151, 154, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::LEFT][GhostFrame::FRAME_1] = sf::IntRect(151, 204, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::LEFT][GhostFrame::FRAME_2] = sf::IntRect(151, 254, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::UP][GhostFrame::FRAME_1] = sf::IntRect(151, 304, 35, 35);
+    ghostSprites[SpriteGhostType::ORANGE][logic::Direction::UP][GhostFrame::FRAME_2] = sf::IntRect(151, 354, 35, 35);
 
     fearSprites[0] = sf::IntRect(1, 554, 35, 35);
     fearSprites[1] = sf::IntRect(1, 604, 35, 35);
@@ -92,7 +94,7 @@ void SpriteAtlas::defineAllSpriteRegions() {
     fruitSprite = sf::IntRect(601, 200, 33, 42);
 }
 
-sf::IntRect SpriteAtlas::getPacManSprite(Direction dir, PacManFrame frame) const {
+sf::IntRect SpriteAtlas::getPacManSprite(logic::Direction dir, PacManFrame frame) const {
     auto dirIt = pacmanSprites.find(dir);
     if (dirIt != pacmanSprites.end()) {
         auto frameIt = dirIt->second.find(frame);
@@ -112,7 +114,7 @@ sf::IntRect SpriteAtlas::getDeathSprite(DeathFrame frame) const {
     return {351, 7, 33, 33};
 }
 
-sf::IntRect SpriteAtlas::getGhostSprite(SpriteGhostType type, Direction dir, GhostFrame frame) const {
+sf::IntRect SpriteAtlas::getGhostSprite(SpriteGhostType type, logic::Direction dir, GhostFrame frame) const {
     auto typeIt = ghostSprites.find(type);
     if (typeIt != ghostSprites.end()) {
         auto dirIt = typeIt->second.find(dir);
@@ -134,3 +136,5 @@ sf::IntRect SpriteAtlas::getFearSprite(int frame) const {
     }
     return {1, 554, 35, 35};
 }
+
+} // namespace representation

@@ -3,6 +3,8 @@
 #include "../../include/representation/states/MenuState.h"
 #include "../../include/representation/states/StateManager.h"
 
+namespace representation {
+
 Game::Game() : window(nullptr), stateManager(nullptr), isRunning(false) {}
 
 Game::~Game() = default;
@@ -25,7 +27,7 @@ void Game::run() {
         return;
     }
 
-    Stopwatch& stopwatch = Stopwatch::getInstance();
+    logic::Stopwatch& stopwatch = logic::Stopwatch::getInstance();
 
     while (window->isOpen() && isRunning) {
         stopwatch.tick();
@@ -78,3 +80,5 @@ void Game::handleEvents() {
         stateManager->handleEvents(*window);
     }
 }
+
+} // namespace representation

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 
+namespace logic {
+
 ScoreEntry::ScoreEntry(std::string name, int s) : playerName(std::move(name)), score(s) {}
 
 Score::Score()
@@ -134,3 +136,5 @@ void Score::addHighScore(const std::string& playerName, int score) {
 
     saveHighScores();
 }
+
+} // namespace logic

@@ -3,6 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
+namespace representation {
+
 class StateManager;
 
 class State {
@@ -24,5 +26,7 @@ protected:
 
     friend class StateManager;
 };
+
+} // namespace representation
 
 #endif

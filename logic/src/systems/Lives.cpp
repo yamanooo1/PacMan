@@ -1,5 +1,7 @@
 #include "../../include/logic/systems/Lives.h"
 
+namespace logic {
+
 Lives::Lives(int startingLives) : remainingLives(startingLives), maxLives(startingLives) {}
 
 void Lives::update(GameEvent event) {
@@ -12,3 +14,5 @@ void Lives::reset(int lives) {
     remainingLives = lives;
     maxLives = lives;
 }
+
+} // namespace logic

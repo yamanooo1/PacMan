@@ -5,6 +5,8 @@
 #include <cmath>
 #include <vector>
 
+namespace logic {
+
 Ghost::Ghost(float x, float y, GhostType t, GhostColor c, float waitTime, float speedMultiplier)
     : EntityModel(x, y, 0.8f, 0.8f), type(t), color(c), state(GhostState::WAITING), waitTimer(waitTime),
       originalWaitTime(waitTime), speed(2.5f * speedMultiplier), normalSpeed(2.5f * speedMultiplier), fearSpeed(1.5f),
@@ -605,3 +607,5 @@ void Ghost::exitFearMode() {
     lastDecisionGridX = -999;
     lastDecisionGridY = -999;
 }
+
+} // namespace logic

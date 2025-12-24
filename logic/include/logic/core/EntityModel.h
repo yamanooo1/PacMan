@@ -3,6 +3,8 @@
 #include "../patterns/Subject.h"
 #include <utility>
 
+namespace logic {
+
 enum class Direction { UP, DOWN, LEFT, RIGHT, NONE };
 
 class EntityModel : public Subject {
@@ -33,5 +35,7 @@ public:
 
     virtual void onCollisionWithPacMan();
 };
+
+} // namespace logic
 
 #endif

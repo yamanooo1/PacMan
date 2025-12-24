@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-    Game game;
+    representation::Game game;
 
     if (!game.initialize()) {
         std::cerr << "Failed to initialize game!" << std::endl;
@@ -13,5 +13,3 @@ int main() {
 
     return 0;
 }
-
-// todo:: exit button

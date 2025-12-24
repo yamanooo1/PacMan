@@ -1,6 +1,8 @@
 #ifndef PACMAN_CAMERA_H
 #define PACMAN_CAMERA_H
 
+namespace representation {
+
 class Camera {
 private:
     float windowWidth;
@@ -28,5 +30,7 @@ public:
     [[nodiscard]] float getWindowWidth() const { return windowWidth; }
     [[nodiscard]] float getWindowHeight() const { return windowHeight; }
 };
+
+} // namespace representation
 
 #endif

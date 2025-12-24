@@ -1,5 +1,7 @@
 #include "../../include/representation/core/Camera.h"
 
+namespace representation {
+
 Camera::Camera(float winWidth, float winHeight, float mapW, float mapH)
     : windowWidth(winWidth), windowHeight(winHeight), mapWidth(mapW), mapHeight(mapH), scaleX(0.0f), scaleY(0.0f) {
     updateScale();
@@ -44,3 +46,5 @@ float Camera::screenToGridY(float screenY) const {
     }
     return 0.0f;
 }
+
+} // namespace representation

@@ -14,6 +14,17 @@
 #include "../../include/representation/entities/WallView.h"
 #include <algorithm>
 
+namespace representation {
+
+using logic::PacMan;
+using logic::Ghost;
+using logic::Wall;
+using logic::Coin;
+using logic::Fruit;
+using logic::GhostType;
+using logic::GhostColor;
+using logic::Stopwatch;
+
 ConcreteFactory::ConcreteFactory(sf::RenderWindow& win, std::shared_ptr<Camera> cam)
     : window(win), camera(std::move(cam)), spriteAtlas(std::make_shared<SpriteAtlas>()), soundObserver(nullptr) {}
 
@@ -27,9 +38,9 @@ bool ConcreteFactory::loadSprites(const std::string& filepath) {
     return spriteAtlas->loadFromFile(filepath);
 }
 
-std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
-    auto model = std::make_unique<PacMan>(x, y);
-    PacMan* modelPtr = model.get();
+std::unique_ptr<logic::PacMan> ConcreteFactory::createPacMan(float x, float y) {
+    auto model = std::make_unique<logic::PacMan>(x, y);
+    logic::PacMan* modelPtr = model.get();
 
     auto view = std::make_shared<PacManView>(modelPtr, window, camera, spriteAtlas);
     modelPtr->attach(view);
@@ -42,27 +53,27 @@ std::unique_ptr<PacMan> ConcreteFactory::createPacMan(float x, float y) {
     return model;
 }
 
-std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType type, GhostColor color, float waitTime,
+std::unique_ptr<logic::Ghost> ConcreteFactory::createGhost(float x, float y, logic::GhostType type, logic::GhostColor color, float waitTime,
                                                     float speedMultiplier) {
-    auto model = std::make_unique<Ghost>(x, y, type, color, waitTime, speedMultiplier);
-    Ghost* modelPtr = model.get();
+    auto model = std::make_unique<logic::Ghost>(x, y, type, color, waitTime, speedMultiplier);
+    logic::Ghost* modelPtr = model.get();
 
     auto view = std::make_shared<GhostView>(modelPtr, window, camera, spriteAtlas);
 
     switch (color) {
-    case GhostColor::RED:
+    case logic::GhostColor::RED:
         view->setColor(sf::Color::Red);
         view->setSpriteType(SpriteGhostType::RED);
         break;
-    case GhostColor::PINK:
+    case logic::GhostColor::PINK:
         view->setColor(sf::Color::Magenta);
         view->setSpriteType(SpriteGhostType::PINK);
         break;
-    case GhostColor::CYAN:
+    case logic::GhostColor::CYAN:
         view->setColor(sf::Color::Cyan);
         view->setSpriteType(SpriteGhostType::CYAN);
         break;
-    case GhostColor::ORANGE:
+    case logic::GhostColor::ORANGE:
         view->setColor(sf::Color(255, 165, 0));
         view->setSpriteType(SpriteGhostType::ORANGE);
         break;
@@ -78,9 +89,9 @@ std::unique_ptr<Ghost> ConcreteFactory::createGhost(float x, float y, GhostType 
     return model;
 }
 
-std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, float h) {
-    auto model = std::make_unique<Wall>(x, y, w, h);
-    Wall* modelPtr = model.get();
+std::unique_ptr<logic::Wall> ConcreteFactory::createWall(float x, float y, float w, float h) {
+    auto model = std::make_unique<logic::Wall>(x, y, w, h);
+    logic::Wall* modelPtr = model.get();
 
     auto view = std::make_shared<WallView>(modelPtr, window, camera, spriteAtlas);
     modelPtr->attach(view);
@@ -89,9 +100,9 @@ std::unique_ptr<Wall> ConcreteFactory::createWall(float x, float y, float w, flo
     return model;
 }
 
-std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
-    auto model = std::make_unique<Coin>(x, y);
-    Coin* modelPtr = model.get();
+std::unique_ptr<logic::Coin> ConcreteFactory::createCoin(float x, float y) {
+    auto model = std::make_unique<logic::Coin>(x, y);
+    logic::Coin* modelPtr = model.get();
 
     auto view = std::make_shared<CoinView>(modelPtr, window, camera, spriteAtlas);
     modelPtr->attach(view);
@@ -104,9 +115,9 @@ std::unique_ptr<Coin> ConcreteFactory::createCoin(float x, float y) {
     return model;
 }
 
-std::unique_ptr<Fruit> ConcreteFactory::createFruit(float x, float y) {
-    auto model = std::make_unique<Fruit>(x, y);
-    Fruit* modelPtr = model.get();
+std::unique_ptr<logic::Fruit> ConcreteFactory::createFruit(float x, float y) {
+    auto model = std::make_unique<logic::Fruit>(x, y);
+    logic::Fruit* modelPtr = model.get();
 
     auto view = std::make_shared<FruitView>(modelPtr, window, camera, spriteAtlas);
     modelPtr->attach(view);
@@ -132,10 +143,12 @@ void ConcreteFactory::removeDeadViews() {
 }
 
 void ConcreteFactory::updateAll() {
-    Stopwatch& stopwatch = Stopwatch::getInstance();
+    logic::Stopwatch& stopwatch = logic::Stopwatch::getInstance();
     float deltaTime = stopwatch.getDeltaTime();
 
     for (const auto& view : views) {
         view->updateAnimation(deltaTime);
     }
 }
+
+} // namespace representation

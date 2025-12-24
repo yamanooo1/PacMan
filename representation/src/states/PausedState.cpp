@@ -3,6 +3,8 @@
 #include "../../include/representation/states/StateManager.h"
 #include "../../include/representation/systems/SoundManager.h"
 
+namespace representation {
+
 PausedState::PausedState()
     : fontLoaded(false), resumeRequested(false), menuRequested(false), windowWidth(800.0f), windowHeight(860.0f) {
     if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
@@ -99,3 +101,5 @@ void PausedState::render(sf::RenderWindow& window) {
     window.draw(resumeText);
     window.draw(menuText);
 }
+
+} // namespace representation

@@ -4,6 +4,8 @@
 #include "representation/states/StateManager.h"
 #include "representation/systems/SoundManager.h"
 
+namespace representation {
+
 MenuState::MenuState()
     : fontLoaded(false), isPlayButtonHovered(false), isExitButtonHovered(false), windowWidth(800.0f),
       windowHeight(860.0f) {
@@ -139,7 +141,7 @@ void MenuState::setupLeaderboard() {
     if (!fontLoaded)
         return;
 
-    Score tempScore;
+    logic::Score tempScore;
     tempScore.loadHighScores();
     auto highScores = tempScore.getHighScores();
 
@@ -273,3 +275,5 @@ void MenuState::render(sf::RenderWindow& window) {
     window.draw(exitButton);
     window.draw(exitButtonText);
 }
+
+} // namespace representation

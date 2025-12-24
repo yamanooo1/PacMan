@@ -3,6 +3,8 @@
 #include "../patterns/Observer.h"
 #include <memory>
 
+namespace logic {
+
 class Lives : public Observer, public std::enable_shared_from_this<Lives> {
 private:
     int remainingLives;
@@ -20,5 +22,7 @@ public:
 
     void reset(int lives = 3);
 };
+
+} // namespace logic
 
 #endif

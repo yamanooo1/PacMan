@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+namespace representation {
+
 class StateManager;
 
 class Game {
@@ -23,5 +25,7 @@ public:
 
     [[nodiscard]] sf::RenderWindow* getWindow() const { return window.get(); }
 };
+
+} // namespace representation
 
 #endif

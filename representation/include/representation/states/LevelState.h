@@ -10,6 +10,8 @@
 #include <memory>
 #include <string>
 
+namespace representation {
+
 class ConcreteFactory;
 
 class LevelState : public State {
@@ -28,11 +30,11 @@ private:
     bool loadLevel();
     void handleInput();
 
-    std::shared_ptr<Lives> lives;
-    std::shared_ptr<Score> score;
+    std::shared_ptr<logic::Lives> lives;
+    std::shared_ptr<logic::Score> score;
     std::shared_ptr<Camera> camera;
     std::unique_ptr<HUD> hud;
-    std::unique_ptr<World> world;
+    std::unique_ptr<logic::World> world;
     std::unique_ptr<ConcreteFactory> factory;
 
     int currentLevel;
@@ -44,5 +46,7 @@ private:
     float windowHeight;
     static constexpr float HUD_HEIGHT = 60.0f;
 };
+
+} // namespace representation
 
 #endif

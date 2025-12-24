@@ -2,6 +2,8 @@
 #define PACMAN_ABSTRACTFACTORY_H
 #include <memory>
 
+namespace logic {
+
 class PacMan;
 class Ghost;
 class Wall;
@@ -25,5 +27,7 @@ public:
 
     virtual void removeDeadViews() = 0;
 };
+
+} // namespace logic
 
 #endif

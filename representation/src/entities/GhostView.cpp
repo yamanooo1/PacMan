@@ -6,7 +6,13 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../include/representation/entities/GhostView.h"
 
-GhostView::GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+namespace representation {
+
+using logic::Ghost;
+using logic::Direction;
+using logic::GameEvent;
+
+GhostView::GhostView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                      std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, win, std::move(cam), std::move(atlas)), spriteType(SpriteGhostType::RED), animationTimer(0.0f),
       currentFrame(0), frameDuration(0.15f), flashTimer(0.0f), showWhite(false) {
@@ -14,7 +20,7 @@ GhostView::GhostView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<
     shape.setFillColor(sf::Color::Red);
 }
 
-void GhostView::update(GameEvent event) {}
+void GhostView::update(logic::GameEvent event) {}
 
 void GhostView::updateAnimation(float deltaTime) {
     animationTimer += deltaTime;
@@ -24,7 +30,7 @@ void GhostView::updateAnimation(float deltaTime) {
         currentFrame = (currentFrame + 1) % 2;
     }
 
-    Ghost* ghost = static_cast<Ghost*>(model);
+    logic::Ghost* ghost = static_cast<logic::Ghost*>(model);
     if (ghost && ghost->shouldShowFearMode() && ghost->isFearModeEnding()) {
         flashTimer += deltaTime;
 
@@ -48,7 +54,7 @@ void GhostView::draw() {
     float screenX = camera->gridToScreenX(centerX);
     float screenY = camera->gridToScreenY(centerY);
 
-    Ghost* ghost = static_cast<Ghost*>(model);
+    logic::Ghost* ghost = static_cast<logic::Ghost*>(model);
     bool shouldShowFear = (ghost && ghost->shouldShowFearMode());
 
     if (spriteAtlas) {
@@ -68,7 +74,7 @@ void GhostView::draw() {
 
                 rect = spriteAtlas->getFearSprite(fearFrame);
             } else {
-                Direction dir = model->getDirection();
+                logic::Direction dir = model->getDirection();
                 GhostFrame frame = (currentFrame == 0) ? GhostFrame::FRAME_1 : GhostFrame::FRAME_2;
                 rect = spriteAtlas->getGhostSprite(spriteType, dir, frame);
             }
@@ -111,3 +117,5 @@ void GhostView::draw() {
     window.draw(shape);
     shape.setFillColor(originalColor);
 }
+
+} // namespace representation

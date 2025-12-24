@@ -4,7 +4,12 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../include/representation/entities/PacManView.h"
 
-PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+namespace representation {
+
+using logic::Direction;
+using logic::GameEvent;
+
+PacManView::PacManView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                        std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, win, std::move(cam), std::move(atlas)), animationTimer(0.0f), currentMouthFrame(0),
       frameDuration(0.1f), playingDeathAnimation(false), deathFrame(0), deathAnimationTimer(0.0f),
@@ -12,9 +17,9 @@ PacManView::PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_pt
     shape.setFillColor(sf::Color::Yellow);
 }
 
-void PacManView::update(GameEvent event) {
+void PacManView::update(logic::GameEvent event) {
     switch (event) {
-    case GameEvent::PACMAN_DIED:
+    case logic::GameEvent::PACMAN_DIED:
         playingDeathAnimation = true;
         deathFrame = 0;
         deathAnimationTimer = 0.0f;
@@ -22,7 +27,7 @@ void PacManView::update(GameEvent event) {
         animationTimer = 0.0f;
         break;
 
-    case GameEvent::DIRECTION_CHANGED:
+    case logic::GameEvent::DIRECTION_CHANGED:
         if (playingDeathAnimation && deathFrame >= 10) {
             playingDeathAnimation = false;
             deathFrame = 0;
@@ -58,7 +63,7 @@ void PacManView::updateAnimation(float deltaTime) {
         auto [currentX, currentY] = model->getPosition();
         bool actuallyMoving = (std::abs(currentX - prevX) > 0.001f || std::abs(currentY - prevY) > 0.001f);
 
-        if (actuallyMoving && model->getDirection() != Direction::NONE) {
+        if (actuallyMoving && model->getDirection() != logic::Direction::NONE) {
             animationTimer += deltaTime;
 
             if (animationTimer >= frameDuration) {
@@ -98,7 +103,7 @@ void PacManView::draw() {
                     auto frame = static_cast<DeathFrame>(deathFrame);
                     rect = spriteAtlas->getDeathSprite(frame);
                 } else {
-                    Direction dir = model->getDirection();
+                    logic::Direction dir = model->getDirection();
 
                     PacManFrame frame;
                     switch (currentMouthFrame) {
@@ -157,3 +162,5 @@ void PacManView::draw() {
 
     window.draw(shape);
 }
+
+} // namespace representation

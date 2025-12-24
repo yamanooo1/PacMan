@@ -5,6 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
+namespace representation {
+
 class VictoryState : public State {
 private:
     sf::Font font;
@@ -55,5 +57,7 @@ private:
     void handleTextInput(sf::Uint32 unicode);
     void submitHighScore();
 };
+
+} // namespace representation
 
 #endif

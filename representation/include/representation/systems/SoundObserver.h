@@ -5,12 +5,16 @@
 #include "SoundManager.h"
 #include <memory>
 
-class SoundObserver : public Observer, public std::enable_shared_from_this<SoundObserver> {
+namespace representation {
+
+class SoundObserver : public logic::Observer, public std::enable_shared_from_this<SoundObserver> {
 public:
     SoundObserver();
     ~SoundObserver() override = default;
 
-    void update(GameEvent event) override;
+    void update(logic::GameEvent event) override;
 };
+
+} // namespace representation
 
 #endif

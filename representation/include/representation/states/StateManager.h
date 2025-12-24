@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+namespace representation {
+
 class State;
 
 class StateManager {
@@ -40,5 +42,7 @@ private:
     float currentWindowWidth = 800.0f;
     float currentWindowHeight = 860.0f;
 };
+
+} // namespace representation
 
 #endif

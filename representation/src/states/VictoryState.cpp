@@ -6,12 +6,14 @@
 #include <cctype>
 #include <map>
 
+namespace representation {
+
 VictoryState::VictoryState(int nextLevelNum, int score)
     : fontLoaded(false), continueRequested(false), menuRequested(false), spaceWasPressed(false), mWasPressed(false),
       nextLevel(nextLevelNum), finalScore(score), isGameOver(nextLevelNum == 0), qualifiesForHighScore(false),
       isEnteringName(false), nameSubmitted(false), playerNameInput(""), windowWidth(800.0f), windowHeight(860.0f) {
     if (isGameOver && score > 0) {
-        Score tempScore;
+        logic::Score tempScore;
         tempScore.loadHighScores();
         qualifiesForHighScore = tempScore.isHighScore(score);
 
@@ -234,7 +236,7 @@ void VictoryState::submitHighScore() {
         playerNameInput = "PLAYER";
     }
 
-    Score tempScore;
+    logic::Score tempScore;
     tempScore.loadHighScores();
     tempScore.addHighScore(playerNameInput, finalScore);
 
@@ -283,3 +285,5 @@ void VictoryState::render(sf::RenderWindow& window) {
         }
     }
 }
+
+} // namespace representation

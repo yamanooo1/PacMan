@@ -1,6 +1,8 @@
 #include "../../include/logic/entities/PacMan.h"
 #include <cmath>
 
+namespace logic {
+
 PacMan::PacMan(float x, float y)
     : EntityModel(x, y, 0.8f, 0.8f), speed(4.0f), desiredDirection(Direction::LEFT), spawnX(x), spawnY(y) {
     setDirection(Direction::LEFT);
@@ -68,3 +70,5 @@ void PacMan::update(float deltaTime, bool canMove) {
         setPosition(x, y);
     }
 }
+
+} // namespace logic

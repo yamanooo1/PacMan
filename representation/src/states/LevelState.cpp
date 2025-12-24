@@ -13,6 +13,8 @@
 #include "../../include/representation/systems/SoundObserver.h"
 #include <cmath>
 
+namespace representation {
+
 LevelState::~LevelState() = default;
 
 LevelState::LevelState(int level, int startingScore)
@@ -53,10 +55,10 @@ bool LevelState::loadLevel() {
     float gameHeight = windowHeight - HUD_HEIGHT;
     camera = std::make_shared<Camera>(windowWidth, gameHeight, 10, 10);
 
-    score = std::make_shared<Score>();
+    score = std::make_shared<logic::Score>();
     score->setScore(initialScore);
 
-    lives = std::make_shared<Lives>(3);
+    lives = std::make_shared<logic::Lives>(3);
 
     return true;
 }
@@ -148,7 +150,7 @@ void LevelState::update(float deltaTime) {
 
     handleInput();
 
-    PacMan* pacman = world->getPacMan();
+    logic::PacMan* pacman = world->getPacMan();
 
     bool isNormalGameplay = (pacman && lives && !lives->isGameOver() && world && !world->isDeathAnimationActive() &&
                              !world->isReadyStateActive() && !world->isLevelClearedDisplayActive());
@@ -162,8 +164,8 @@ void LevelState::update(float deltaTime) {
 
         bool actuallyMoving = (std::abs(currentX - prevX) > 0.001f || std::abs(currentY - prevY) > 0.001f);
 
-        Direction currentDirection = pacman->getDirection();
-        bool wantsToMove = (currentDirection != Direction::NONE);
+        logic::Direction currentDirection = pacman->getDirection();
+        bool wantsToMove = (currentDirection != logic::Direction::NONE);
 
         static float timeSinceLastCoin = 999.0f;
 
@@ -227,7 +229,7 @@ void LevelState::render(sf::RenderWindow& window) {
         hud = std::make_unique<HUD>(window, static_cast<int>(HUD_HEIGHT));
         hud->loadFont("../../resources/fonts/font-emulogic/emulogic.ttf");
 
-        world = std::make_unique<World>(factory.get(), currentLevel);
+        world = std::make_unique<logic::World>(factory.get(), currentLevel);
         world->setScore(score);
         world->setLives(lives);
 
@@ -254,17 +256,19 @@ void LevelState::handleInput() {
     if (!world)
         return;
 
-    PacMan* pacman = world->getPacMan();
+    logic::PacMan* pacman = world->getPacMan();
     if (!pacman)
         return;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-        pacman->setDesiredDirection(Direction::LEFT);
+        pacman->setDesiredDirection(logic::Direction::LEFT);
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-        pacman->setDesiredDirection(Direction::RIGHT);
+        pacman->setDesiredDirection(logic::Direction::RIGHT);
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-        pacman->setDesiredDirection(Direction::UP);
+        pacman->setDesiredDirection(logic::Direction::UP);
     } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-        pacman->setDesiredDirection(Direction::DOWN);
+        pacman->setDesiredDirection(logic::Direction::DOWN);
     }
 }
+
+} // namespace representation

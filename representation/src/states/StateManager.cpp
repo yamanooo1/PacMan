@@ -1,6 +1,8 @@
 #include "../../include/representation/states/StateManager.h"
 #include "../../include/representation/states/State.h"
 
+namespace representation {
+
 StateManager::StateManager() {}
 
 void StateManager::pushState(std::unique_ptr<State> state) {
@@ -131,3 +133,5 @@ void StateManager::processPendingChanges() {
     pendingAction = PendingAction::None;
     pendingState = nullptr;
 }
+
+} // namespace representation

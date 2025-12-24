@@ -4,14 +4,16 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../include/representation/entities/CoinView.h"
 
-CoinView::CoinView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+namespace representation {
+
+CoinView::CoinView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                    std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, win, std::move(cam), std::move(atlas)) {
     shape.setRadius(5.f);
     shape.setFillColor(sf::Color::White);
 }
 
-void CoinView::update(GameEvent event) {}
+void CoinView::update(logic::GameEvent event) {}
 
 void CoinView::draw() {
     if (!model || !camera)
@@ -63,3 +65,5 @@ void CoinView::draw() {
 
     window.draw(shape);
 }
+
+} // namespace representation

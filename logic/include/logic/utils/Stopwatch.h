@@ -2,6 +2,8 @@
 #define PACMAN_STOPWATCH_H
 #include <chrono>
 
+namespace logic {
+
 class Stopwatch {
 private:
     using Clock = std::chrono::high_resolution_clock;
@@ -42,5 +44,7 @@ public:
         return elapsed.count();
     }
 };
+
+} // namespace logic
 
 #endif

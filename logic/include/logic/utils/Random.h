@@ -2,6 +2,8 @@
 #define PACMAN_RANDOM_H
 #include <random>
 
+namespace logic {
+
 class Random {
 private:
     std::mt19937 generator;
@@ -29,5 +31,7 @@ public:
 
     bool getBool() { return getInt(0, 1) == 1; }
 };
+
+} // namespace logic
 
 #endif

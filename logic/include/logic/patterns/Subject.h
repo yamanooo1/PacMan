@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+namespace logic {
+
 class Subject {
 private:
     std::vector<std::weak_ptr<Observer>> observers;
@@ -16,5 +18,7 @@ public:
 protected:
     void notify(GameEvent event);
 };
+
+} // namespace logic
 
 #endif

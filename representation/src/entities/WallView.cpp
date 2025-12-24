@@ -4,7 +4,9 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../include/representation/entities/WallView.h"
 
-WallView::WallView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+namespace representation {
+
+WallView::WallView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                    std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, win, std::move(cam), std::move(atlas)) {
     if (model) {
@@ -13,7 +15,7 @@ WallView::WallView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Ca
     shape.setFillColor(sf::Color::Blue);
 }
 
-void WallView::update(GameEvent event) {}
+void WallView::update(logic::GameEvent event) {}
 
 void WallView::draw() {
     if (!model || !camera)
@@ -30,3 +32,5 @@ void WallView::draw() {
 
     window.draw(shape);
 }
+
+} // namespace representation

@@ -6,6 +6,8 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+namespace representation {
+
 class PacManView : public EntityView {
 private:
     sf::RectangleShape shape;
@@ -20,12 +22,14 @@ private:
     float deathFrameDuration;
 
 public:
-    PacManView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+    PacManView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                std::shared_ptr<SpriteAtlas> atlas);
 
-    void update(GameEvent event) override;
+    void update(logic::GameEvent event) override;
     void updateAnimation(float deltaTime) override;
     void draw() override;
 };
+
+} // namespace representation
 
 #endif

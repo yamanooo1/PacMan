@@ -5,16 +5,20 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+namespace representation {
+
 class WallView : public EntityView {
 private:
     sf::RectangleShape shape;
 
 public:
-    WallView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+    WallView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
              std::shared_ptr<SpriteAtlas> atlas);
 
-    void update(GameEvent) override;
+    void update(logic::GameEvent) override;
     void draw() override;
 };
+
+} // namespace representation
 
 #endif

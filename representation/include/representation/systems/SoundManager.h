@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+namespace representation {
+
 enum class SoundEffect { FRUIT_COLLECTED, GHOST_EATEN, PACMAN_DIED, LEVEL_START };
 
 class SoundManager {
@@ -68,5 +70,7 @@ public:
 
     bool isLoaded() const { return soundsLoaded; }
 };
+
+} // namespace representation
 
 #endif

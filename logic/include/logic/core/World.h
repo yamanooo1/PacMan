@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+namespace logic {
+
 class PacMan;
 class Ghost;
 enum class GhostType;
@@ -110,5 +112,7 @@ public:
     [[nodiscard]] bool isExitPosition(int gridX, int gridY) const;
     [[nodiscard]] std::vector<std::pair<int, int>> getExitPositions() const;
 };
+
+} // namespace logic
 
 #endif

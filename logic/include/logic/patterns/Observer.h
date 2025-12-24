@@ -1,6 +1,8 @@
 #ifndef PACMAN_OBSERVER_H
 #define PACMAN_OBSERVER_H
 
+namespace logic {
+
 enum class GameEvent {
     COIN_COLLECTED,
     GHOST_EATEN,
@@ -16,5 +18,7 @@ public:
     virtual ~Observer() = default;
     virtual void update(GameEvent event) = 0;
 };
+
+} // namespace logic
 
 #endif

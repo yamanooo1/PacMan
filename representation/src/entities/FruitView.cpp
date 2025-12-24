@@ -4,14 +4,16 @@
 #include "../../include/representation/core/SpriteAtlas.h"
 #include "../../include/representation/entities/FruitView.h"
 
-FruitView::FruitView(EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
+namespace representation {
+
+FruitView::FruitView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,
                      std::shared_ptr<SpriteAtlas> atlas)
     : EntityView(model, win, std::move(cam), std::move(atlas)) {
     shape.setRadius(8.f);
     shape.setFillColor(sf::Color::Green);
 }
 
-void FruitView::update(GameEvent event) {}
+void FruitView::update(logic::GameEvent event) {}
 
 void FruitView::draw() {
     if (!model || !camera)
@@ -63,3 +65,5 @@ void FruitView::draw() {
 
     window.draw(shape);
 }
+
+} // namespace representation
