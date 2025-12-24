@@ -7,9 +7,22 @@
 
 namespace representation {
 
+/**
+ * @brief WallView - renders maze walls
+ *
+ * Characteristics:
+ * - Static (no animation)
+ * - Large: Full grid cell (1.0×1.0)
+ * - Blue color
+ * - No collision response needed (logic handles)
+ *
+ * Rendering:
+ * - Blue rectangles (no sprite - procedural)
+ * - Fills entire grid cell
+ */
 class WallView : public EntityView {
 private:
-    sf::RectangleShape shape;
+    sf::RectangleShape shape; // Blue rectangle
 
 public:
     WallView(logic::EntityModel* model, sf::RenderWindow& win, std::shared_ptr<Camera> cam,

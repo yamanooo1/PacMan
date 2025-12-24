@@ -48,7 +48,7 @@ void Score::update(GameEvent event) {
         int points = static_cast<int>(30 * decayFactor);
         currentScore += points;
 
-        lastCoinTime = currentTime;  // Reset decay timer
+        lastCoinTime = currentTime; // Reset decay timer
         break;
     }
 
@@ -135,7 +135,7 @@ void Score::loadHighScores(const std::string& filepath) {
 
     std::ifstream file(scoresFilePath);
     if (!file.is_open()) {
-        return;  // File doesn't exist yet (first run)
+        return; // File doesn't exist yet (first run)
     }
 
     std::string line;
@@ -161,7 +161,7 @@ void Score::loadHighScores(const std::string& filepath) {
 void Score::saveHighScores() const {
     std::ofstream file(scoresFilePath);
     if (!file.is_open()) {
-        return;  // Can't write file (permissions issue)
+        return; // Can't write file (permissions issue)
     }
 
     for (const auto& entry : highScores) {

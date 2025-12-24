@@ -35,10 +35,10 @@ enum class Direction { UP, DOWN, LEFT, RIGHT, NONE };
  */
 class EntityModel : public Subject {
 private:
-    float x, y;                  // Grid-based position (not pixels)
-    const float width, height;   // Entity dimensions in grid units
-    Direction direction;         // Current movement direction
-    bool dead;                   // Lifecycle flag for garbage collection
+    float x, y;                // Grid-based position (not pixels)
+    const float width, height; // Entity dimensions in grid units
+    Direction direction;       // Current movement direction
+    bool dead;                 // Lifecycle flag for garbage collection
 
 public:
     /**

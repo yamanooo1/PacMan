@@ -85,7 +85,7 @@ void Ghost::update(float deltaTime, World* world, const PacMan* pacman) {
                 lastDecisionGridY = gridY;
             }
         }
-        return;  // No movement while waiting
+        return; // No movement while waiting
     }
 
     // EXITING state: navigate to exit marker ('w' in map)
@@ -107,7 +107,7 @@ void Ghost::update(float deltaTime, World* world, const PacMan* pacman) {
                 state = GhostState::CHASING;
             }
 
-            hasLeftSpawn = true;  // Prevent re-entry
+            hasLeftSpawn = true; // Prevent re-entry
 
             // Choose initial hunting direction
             Direction chaseDir = chooseNextDirection(gridX, gridY, world, pacman);
@@ -279,7 +279,7 @@ Direction Ghost::chooseDirectionToExit(int gridX, int gridY, const World* world)
     auto exitPositions = world->getExitPositions();
 
     if (exitPositions.empty()) {
-        return Direction::UP;  // Fallback if no exits defined
+        return Direction::UP; // Fallback if no exits defined
     }
 
     // Find nearest exit marker
@@ -379,7 +379,7 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, const Wo
     // First pass: add all valid directions except opposite
     for (Direction dir : allDirections) {
         if (dir == opposite)
-            continue;  // Skip opposite for now
+            continue; // Skip opposite for now
 
         int nextGridX = gridX;
         int nextGridY = gridY;
@@ -402,9 +402,9 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, const Wo
 
         // Check validity
         if (world->hasWallInGridCell(nextGridX, nextGridY))
-            continue;  // Wall blocks path
+            continue; // Wall blocks path
         if (hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY))
-            continue;  // Can't re-enter spawn
+            continue; // Can't re-enter spawn
 
         viable.push_back(dir);
     }
@@ -436,7 +436,7 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, const Wo
         bool wouldEnterSpawn = hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY);
 
         if (!hasWall && !wouldEnterSpawn) {
-            viable.push_back(opposite);  // Allow opposite as last resort
+            viable.push_back(opposite); // Allow opposite as last resort
         }
     }
 
@@ -465,7 +465,7 @@ std::vector<Direction> Ghost::getViableDirections(int gridX, int gridY, const Wo
         bool wouldEnterSpawn = hasLeftSpawn && isInSpawnArea(nextGridX, nextGridY);
 
         if (!hasWall && !wouldEnterSpawn) {
-            viable.push_back(opposite);  // Forced turn-around
+            viable.push_back(opposite); // Forced turn-around
         }
     }
 
@@ -512,9 +512,9 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, const World* world, c
     auto viable = getViableDirections(gridX, gridY, world);
 
     if (viable.empty())
-        return getDirection();  // Stuck, keep trying current direction
+        return getDirection(); // Stuck, keep trying current direction
     if (viable.size() == 1)
-        return viable[0];  // Only one option, take it
+        return viable[0]; // Only one option, take it
 
     Random& random = Random::getInstance();
 
@@ -619,7 +619,7 @@ Direction Ghost::chooseNextDirection(int gridX, int gridY, const World* world, c
     }
 
     // Find direction(s) that optimize distance to target
-    bool shouldMaximize = (state == GhostState::FEAR);  // Flee instead of chase
+    bool shouldMaximize = (state == GhostState::FEAR); // Flee instead of chase
 
     std::vector<Direction> bestDirections;
     int bestDistance = shouldMaximize ? -1 : 999999;
@@ -703,7 +703,7 @@ void Ghost::enterFearMode() {
 
     // Special case: not yet out of spawn
     if (state == GhostState::WAITING || state == GhostState::EXITING) {
-        shouldEnterFearWhenLeaving = true;  // Activate fear when reaching exit
+        shouldEnterFearWhenLeaving = true; // Activate fear when reaching exit
         return;
     }
 

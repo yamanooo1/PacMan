@@ -34,9 +34,9 @@ namespace logic {
  */
 class PacMan : public EntityModel {
 private:
-    float speed;                    // Movement speed in grid units per second
-    Direction desiredDirection;     // Player's input (may be blocked by wall)
-    float spawnX, spawnY;          // Respawn position after death
+    float speed;                // Movement speed in grid units per second
+    Direction desiredDirection; // Player's input (may be blocked by wall)
+    float spawnX, spawnY;       // Respawn position after death
 
     /**
      * @brief Check if PacMan is aligned with grid center

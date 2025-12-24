@@ -5,6 +5,9 @@
 
 namespace representation {
 
+/**
+ * @brief Initialize PausedState with default window size
+ */
 PausedState::PausedState()
     : fontLoaded(false), resumeRequested(false), menuRequested(false), windowWidth(800.0f), windowHeight(860.0f) {
     if (font.loadFromFile("../../resources/fonts/font-emulogic/emulogic.ttf")) {
@@ -14,6 +17,9 @@ PausedState::PausedState()
     setupTexts();
 }
 
+/**
+ * @brief Rebuild UI for new window dimensions
+ */
 void PausedState::onWindowResize(float width, float height) {
     windowWidth = width;
     windowHeight = height;
@@ -21,6 +27,16 @@ void PausedState::onWindowResize(float width, float height) {
     setupTexts();
 }
 
+/**
+ * @brief Setup centered pause text elements
+ *
+ * Text hierarchy:
+ * 1. "PAUSED" - Large yellow (50pt) at 29%
+ * 2. "Press SPACE to Resume" - Medium white (18pt) at 46.5%
+ * 3. "Press M for Menu" - Medium cyan (18pt) at 55.8%
+ *
+ * All texts centered horizontally.
+ */
 void PausedState::setupTexts() {
     if (!fontLoaded)
         return;
@@ -53,17 +69,34 @@ void PausedState::setupTexts() {
     menuText.setPosition(windowWidth * 0.5f, windowHeight * 0.558f);
 }
 
+/**
+ * @brief Start pause music, stop game music
+ */
 void PausedState::onEnter() {
     SoundManager& soundManager = SoundManager::getInstance();
     soundManager.stopMusic();
     soundManager.playPauseMusic(true);
 }
 
+/**
+ * @brief Stop pause music (LevelState will resume its music)
+ */
 void PausedState::onExit() {
     SoundManager& soundManager = SoundManager::getInstance();
     soundManager.stopMusic();
 }
 
+/**
+ * @brief Handle resume (SPACE) and menu (M) inputs
+ *
+ * Static tracking:
+ * - spaceWasPressed: Prevent holding SPACE to repeatedly resume
+ * - mWasPressed: Prevent holding M to spam menu
+ *
+ * Actions:
+ * - SPACE: popState() → return to LevelState
+ * - M: clearAndPushState(MenuState) → abandon game, go to menu
+ */
 void PausedState::handleEvents(sf::RenderWindow& window) {
     static bool spaceWasPressed = false;
     static bool mWasPressed = false;
@@ -71,12 +104,14 @@ void PausedState::handleEvents(sf::RenderWindow& window) {
     bool spaceIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
     bool mIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::M);
 
+    // Resume on SPACE release
     if (spaceIsPressed && !spaceWasPressed) {
         if (stateManager) {
             stateManager->popState();
         }
     }
 
+    // Menu on M release
     if (mIsPressed && !mWasPressed) {
         if (stateManager) {
             stateManager->clearAndPushState(std::make_unique<MenuState>());
@@ -89,10 +124,17 @@ void PausedState::handleEvents(sf::RenderWindow& window) {
 
 void PausedState::update(float deltaTime) {}
 
+/**
+ * @brief Render dark overlay with pause text
+ *
+ * Overlay: Black rectangle with alpha 180 (semi-transparent)
+ * Allows game beneath to be visible but darkened.
+ */
 void PausedState::render(sf::RenderWindow& window) {
     if (!fontLoaded)
         return;
 
+    // Dark overlay (70% opacity)
     sf::RectangleShape overlay(sf::Vector2f(windowWidth, windowHeight));
     overlay.setFillColor(sf::Color(0, 0, 0, 180));
     window.draw(overlay);

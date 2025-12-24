@@ -15,13 +15,13 @@ namespace logic {
  * - Audio Cues: WALL_HIT (for sound effects)
  */
 enum class GameEvent {
-    COIN_COLLECTED,      // Score +10-30 (decay based), play eating sound
-    GHOST_EATEN,         // Score +200, play ghost eaten sound
-    FRUIT_COLLECTED,     // Score +50, activate fear mode, play fruit sound
-    PACMAN_DIED,         // Lives -1, trigger death animation, stop movement sound
-    LEVEL_CLEARED,       // Score +1000, transition to next level
-    DIRECTION_CHANGED,   // Update PacMan animation direction
-    WALL_HIT             // Stop movement, play wall hit sound (optional)
+    COIN_COLLECTED,    // Score +10-30 (decay based), play eating sound
+    GHOST_EATEN,       // Score +200, play ghost eaten sound
+    FRUIT_COLLECTED,   // Score +50, activate fear mode, play fruit sound
+    PACMAN_DIED,       // Lives -1, trigger death animation, stop movement sound
+    LEVEL_CLEARED,     // Score +1000, transition to next level
+    DIRECTION_CHANGED, // Update PacMan animation direction
+    WALL_HIT           // Stop movement, play wall hit sound (optional)
 };
 
 /**

@@ -38,8 +38,8 @@ namespace logic {
  */
 class Lives : public Observer, public std::enable_shared_from_this<Lives> {
 private:
-    int remainingLives;  // Current life count (can be 0)
-    int maxLives;        // Starting life count (for reset)
+    int remainingLives; // Current life count (can be 0)
+    int maxLives;       // Starting life count (for reset)
 
 public:
     /**

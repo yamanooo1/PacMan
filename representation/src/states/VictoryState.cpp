@@ -8,10 +8,21 @@
 
 namespace representation {
 
+/**
+ * @brief Initialize VictoryState and check high score qualification
+ *
+ * Qualification check:
+ * - Only for game over (nextLevel == 0)
+ * - Only if score > 0
+ * - Checks if score beats 5th place
+ * - Enables name input if qualified
+ */
 VictoryState::VictoryState(int nextLevelNum, int score)
     : fontLoaded(false), continueRequested(false), menuRequested(false), spaceWasPressed(false), mWasPressed(false),
       nextLevel(nextLevelNum), finalScore(score), isGameOver(nextLevelNum == 0), qualifiesForHighScore(false),
       isEnteringName(false), nameSubmitted(false), playerNameInput(""), windowWidth(800.0f), windowHeight(860.0f) {
+
+    // Check high score qualification
     if (isGameOver && score > 0) {
         logic::Score tempScore;
         tempScore.loadHighScores();
@@ -42,6 +53,19 @@ void VictoryState::onWindowResize(float width, float height) {
     }
 }
 
+/**
+ * @brief Setup title, score, and action texts
+ *
+ * Title varies by mode:
+ * - Level complete: "LEVEL CLEARED!" (yellow)
+ * - Game over: "GAME OVER" (red)
+ *
+ * Positions (% from top):
+ * - Title: 23.3%
+ * - Score: 32.6%
+ * - Continue: 64% (level complete only)
+ * - Menu: 69.8%
+ */
 void VictoryState::setupTexts() {
     if (!fontLoaded)
         return;
@@ -71,7 +95,7 @@ void VictoryState::setupTexts() {
 
     continueText.setFont(font);
     if (isGameOver) {
-        continueText.setString("");
+        continueText.setString(""); // No continue on game over
     } else {
         continueText.setString("Press SPACE for Next Level");
         continueText.setCharacterSize(16);
@@ -92,6 +116,15 @@ void VictoryState::setupTexts() {
     menuText.setPosition(windowWidth * 0.5f, windowHeight * 0.698f);
 }
 
+/**
+ * @brief Setup name input UI for high score entry
+ *
+ * Components:
+ * - Prompt: "NEW HIGH SCORE!\nEnter your name:" (41.9% from top)
+ * - Input box: Yellow outlined (50% from top, 37.5% width × 5.8% height)
+ * - Input text: Display user typing (inside box)
+ * - Hint: "Use keyboard - Press ENTER when done" (59.3% from top)
+ */
 void VictoryState::setupNameInput() {
     if (!fontLoaded)
         return;
@@ -106,6 +139,7 @@ void VictoryState::setupNameInput() {
     namePromptText.setOrigin(promptBounds.width / 2.f, promptBounds.height / 2.f);
     namePromptText.setPosition(windowWidth * 0.5f, windowHeight * 0.419f);
 
+    // Input box
     float boxWidth = windowWidth * 0.375f;
     float boxHeight = windowHeight * 0.058f;
 
@@ -115,6 +149,7 @@ void VictoryState::setupNameInput() {
     nameInputBox.setOutlineColor(sf::Color::Yellow);
     nameInputBox.setOutlineThickness(3.f);
 
+    // Input text (empty initially)
     nameInputText.setFont(font);
     nameInputText.setString("");
     nameInputText.setCharacterSize(24);
@@ -127,8 +162,30 @@ void VictoryState::onEnter() {}
 
 void VictoryState::onExit() {}
 
+/**
+ * @brief Handle name input or navigation keys
+ *
+ * Two modes:
+ *
+ * 1. **Name Entry Mode** (isEnteringName && !nameSubmitted):
+ *    - A-Z: Append character (max 10)
+ *    - 0-9: Append digit (max 10)
+ *    - Backspace: Remove last character
+ *    - Enter: Submit name (if not empty)
+ *    - All keys use static tracking
+ *
+ * 2. **Navigation Mode**:
+ *    - SPACE: Next level (if level complete)
+ *    - M: Return to menu
+ *
+ * Key Mapping:
+ * - Static map initialized once
+ * - Maps sf::Keyboard::Key → char
+ * - Uppercase only (A-Z, 0-9)
+ */
 void VictoryState::handleEvents(sf::RenderWindow& window) {
     if (isEnteringName && !nameSubmitted) {
+        // Backspace handling
         static bool backspaceWasPressed = false;
         bool backspaceIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace);
 
@@ -140,10 +197,12 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
         }
         backspaceWasPressed = backspaceIsPressed;
 
+        // Character input (A-Z, 0-9)
         if (playerNameInput.length() < 10) {
             static std::map<sf::Keyboard::Key, char> keyMap;
             static bool keyMapInitialized = false;
 
+            // Initialize key mapping once
             if (!keyMapInitialized) {
                 keyMap[sf::Keyboard::A] = 'A';
                 keyMap[sf::Keyboard::B] = 'B';
@@ -184,6 +243,7 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
                 keyMapInitialized = true;
             }
 
+            // Track each key separately
             static std::map<sf::Keyboard::Key, bool> keyWasPressed;
 
             for (const auto& pair : keyMap) {
@@ -199,6 +259,7 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
 
         nameInputText.setString(playerNameInput);
 
+        // Enter to submit
         static bool enterWasPressed = false;
         bool enterIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Enter);
 
@@ -207,18 +268,21 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
         }
         enterWasPressed = enterIsPressed;
 
-        return;
+        return; // Skip navigation while entering name
     }
 
+    // Navigation mode
     bool spaceIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
     bool mIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::M);
 
+    // SPACE for next level (level complete only)
     if (!isGameOver && spaceIsPressed && !spaceWasPressed) {
         if (stateManager) {
             stateManager->clearAndPushState(std::make_unique<LevelState>(nextLevel, finalScore));
         }
     }
 
+    // M for menu
     if (mIsPressed && !mWasPressed) {
         if (stateManager) {
             stateManager->clearAndPushState(std::make_unique<MenuState>());
@@ -231,6 +295,16 @@ void VictoryState::handleEvents(sf::RenderWindow& window) {
 
 void VictoryState::handleTextInput(sf::Uint32 unicode) {}
 
+/**
+ * @brief Submit name and score to leaderboard
+ *
+ * Process:
+ * 1. Default empty name to "PLAYER"
+ * 2. Load current high scores
+ * 3. Add new entry
+ * 4. Save to file (sorted top 5)
+ * 5. Return to menu
+ */
 void VictoryState::submitHighScore() {
     if (playerNameInput.empty()) {
         playerNameInput = "PLAYER";
@@ -243,6 +317,7 @@ void VictoryState::submitHighScore() {
     nameSubmitted = true;
     isEnteringName = false;
 
+    // Auto-transition to menu after submission
     if (isGameOver && stateManager) {
         stateManager->clearAndPushState(std::make_unique<MenuState>());
     }
@@ -250,10 +325,25 @@ void VictoryState::submitHighScore() {
 
 void VictoryState::update(float deltaTime) {}
 
+/**
+ * @brief Render victory/game over screen
+ *
+ * Rendering logic:
+ * 1. Dark overlay (alpha 200)
+ * 2. Title + score (always)
+ * 3. If entering name:
+ *    - Name prompt
+ *    - Input box + text
+ *    - Hint text
+ * 4. Else (navigation):
+ *    - Continue text (level complete only)
+ *    - Menu text
+ */
 void VictoryState::render(sf::RenderWindow& window) {
     if (!fontLoaded)
         return;
 
+    // Dark overlay
     sf::RectangleShape overlay(sf::Vector2f(windowWidth, windowHeight));
     overlay.setFillColor(sf::Color(0, 0, 0, 200));
     window.draw(overlay);
@@ -262,10 +352,12 @@ void VictoryState::render(sf::RenderWindow& window) {
     window.draw(scoreText);
 
     if (isEnteringName && !nameSubmitted) {
+        // High score entry UI
         window.draw(namePromptText);
         window.draw(nameInputBox);
         window.draw(nameInputText);
 
+        // Hint text
         sf::Text hintText;
         hintText.setFont(font);
         hintText.setString("Use keyboard - Press ENTER when done");
@@ -277,6 +369,7 @@ void VictoryState::render(sf::RenderWindow& window) {
         hintText.setPosition(windowWidth * 0.5f, windowHeight * 0.593f);
         window.draw(hintText);
     } else {
+        // Navigation UI (skip if just submitted on game over)
         if (!(nameSubmitted && isGameOver)) {
             if (!isGameOver) {
                 window.draw(continueText);

@@ -76,22 +76,22 @@ enum class GhostState { WAITING, EXITING, CHASING, FEAR };
  */
 class Ghost : public EntityModel {
 private:
-    GhostType type;              // AI personality (RANDOM/AMBUSHER/CHASER)
-    GhostColor color;            // Visual identifier (RED/PINK/CYAN/ORANGE)
-    GhostState state;            // Current state machine state
+    GhostType type;   // AI personality (RANDOM/AMBUSHER/CHASER)
+    GhostColor color; // Visual identifier (RED/PINK/CYAN/ORANGE)
+    GhostState state; // Current state machine state
 
-    float waitTimer;             // Time remaining before exiting spawn
-    float originalWaitTime;      // Initial wait time (for respawn)
+    float waitTimer;        // Time remaining before exiting spawn
+    float originalWaitTime; // Initial wait time (for respawn)
 
-    float speed;                 // Current movement speed
-    float normalSpeed;           // Speed during CHASING state
-    float fearSpeed;             // Speed during FEAR state (slower)
+    float speed;       // Current movement speed
+    float normalSpeed; // Speed during CHASING state
+    float fearSpeed;   // Speed during FEAR state (slower)
 
-    int lastDecisionGridX;       // Last grid position where direction was chosen
-    int lastDecisionGridY;       // (prevents constant recalculation at same spot)
+    int lastDecisionGridX; // Last grid position where direction was chosen
+    int lastDecisionGridY; // (prevents constant recalculation at same spot)
 
-    bool hasLeftSpawn;           // True after first exit (prevents re-entering spawn)
-    bool fearModeEnding;         // True in last 2 seconds of fear mode (flashing)
+    bool hasLeftSpawn;               // True after first exit (prevents re-entering spawn)
+    bool fearModeEnding;             // True in last 2 seconds of fear mode (flashing)
     bool shouldEnterFearWhenLeaving; // Queued fear mode activation after exiting
 
     /**

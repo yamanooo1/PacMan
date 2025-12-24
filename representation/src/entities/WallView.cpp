@@ -17,6 +17,12 @@ WallView::WallView(logic::EntityModel* model, sf::RenderWindow& win, std::shared
 
 void WallView::update(logic::GameEvent event) {}
 
+/**
+ * @brief Render wall rectangle
+ *
+ * Simple blue rectangle filling grid cell.
+ * Size updated on each draw for dynamic window resize.
+ */
 void WallView::draw() {
     if (!model || !camera)
         return;

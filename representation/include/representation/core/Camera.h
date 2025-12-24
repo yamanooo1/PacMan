@@ -3,13 +3,28 @@
 
 namespace representation {
 
+/**
+ * @brief Camera - coordinate conversion between grid space and screen space
+ *
+ * Transforms between:
+ * - Grid coordinates (logic): 10.5, 15.3
+ * - Screen coordinates (pixels): Based on window size
+ *
+ * Scaling: scaleX = windowWidth / mapWidth (e.g., 800px / 21 cells = 38px/cell)
+ *
+ * Usage:
+ * ```cpp
+ * float screenX = camera->gridToScreenX(gridX);
+ * sprite.setPosition(screenX, screenY);
+ * ```
+ */
 class Camera {
 private:
     float windowWidth;
     float windowHeight;
     float mapWidth;
     float mapHeight;
-    float scaleX;
+    float scaleX; // Pixels per grid unit
     float scaleY;
 
     void updateScale();

@@ -55,9 +55,9 @@ private:
     using Clock = std::chrono::high_resolution_clock;
     using TimePoint = std::chrono::time_point<Clock>;
 
-    TimePoint startTime;  // Game start time (for elapsed time)
-    TimePoint lastTime;   // Last tick time (for delta time)
-    float deltaTime;      // Time since last tick (seconds)
+    TimePoint startTime; // Game start time (for elapsed time)
+    TimePoint lastTime;  // Last tick time (for delta time)
+    float deltaTime;     // Time since last tick (seconds)
 
     /**
      * @brief Private constructor for singleton pattern

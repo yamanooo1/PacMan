@@ -49,7 +49,7 @@ namespace logic {
  */
 class Random {
 private:
-    std::mt19937 generator;  // Mersenne Twister PRNG
+    std::mt19937 generator; // Mersenne Twister PRNG
 
     /**
      * @brief Private constructor for singleton pattern

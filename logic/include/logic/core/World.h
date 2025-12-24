@@ -78,52 +78,52 @@ class Lives;
 class World {
 private:
     // Entity management
-    std::vector<std::unique_ptr<EntityModel>> entities;  // All game entities
-    std::vector<Ghost*> ghosts;  // Quick access to ghost pointers (subset of entities)
+    std::vector<std::unique_ptr<EntityModel>> entities; // All game entities
+    std::vector<Ghost*> ghosts;                         // Quick access to ghost pointers (subset of entities)
 
     // Map properties
-    int mapWidth;   // Grid width (typically 21)
-    int mapHeight;  // Grid height (typically 21)
+    int mapWidth;  // Grid width (typically 21)
+    int mapHeight; // Grid height (typically 21)
 
     // Difficulty scaling
-    int currentLevel;              // Current level number (1-based)
-    float ghostSpeedMultiplier;    // Speed increase per level
-    float fearDurationMultiplier;  // Fear duration decrease per level
+    int currentLevel;             // Current level number (1-based)
+    float ghostSpeedMultiplier;   // Speed increase per level
+    float fearDurationMultiplier; // Fear duration decrease per level
 
     // Factory for entity creation (bridges logic ↔ representation)
     AbstractFactory* factory;
 
     // Key entity references
-    PacMan* pacman;  // Player entity (raw pointer into entities vector)
+    PacMan* pacman; // Player entity (raw pointer into entities vector)
 
     // System references (owned by LevelState)
-    std::shared_ptr<Score> score;  // Points tracking and high scores
-    std::shared_ptr<Lives> lives;  // Life counter and game over detection
+    std::shared_ptr<Score> score; // Points tracking and high scores
+    std::shared_ptr<Lives> lives; // Life counter and game over detection
 
     // Spawn positions (for respawn after death)
     float pacmanSpawnX, pacmanSpawnY;
     std::vector<std::pair<float, float>> ghostSpawnPositions;
 
     // Fear mode state
-    bool fearModeActive;      // True when ghosts are vulnerable
-    float fearModeTimer;      // Time remaining in fear mode
-    float fearModeDuration;   // Total fear duration (scaled by level)
+    bool fearModeActive;    // True when ghosts are vulnerable
+    float fearModeTimer;    // Time remaining in fear mode
+    float fearModeDuration; // Total fear duration (scaled by level)
 
     // Death animation state
-    bool deathAnimationActive;  // True during PacMan death sequence
-    float deathAnimationTimer;  // Time remaining in animation
-    float deathAnimationDuration;  // Total animation length (2.0s)
+    bool deathAnimationActive;    // True during PacMan death sequence
+    float deathAnimationTimer;    // Time remaining in animation
+    float deathAnimationDuration; // Total animation length (2.0s)
 
     // Ready state (pre-game countdown)
-    bool readyStateActive;   // True during "READY!" message
-    float readyStateTimer;   // Time remaining before gameplay
-    float readyStateDuration;  // Total countdown (4.7s)
+    bool readyStateActive;    // True during "READY!" message
+    float readyStateTimer;    // Time remaining before gameplay
+    float readyStateDuration; // Total countdown (4.7s)
 
     // Level completion state
-    bool levelCleared;               // True when all collectables collected
-    bool levelClearedDisplayActive;  // True during "LEVEL CLEARED!" message
-    float levelClearedDisplayTimer;  // Time remaining for message display
-    float levelClearedDisplayDuration;  // Display duration (3.0s)
+    bool levelCleared;                 // True when all collectables collected
+    bool levelClearedDisplayActive;    // True during "LEVEL CLEARED!" message
+    float levelClearedDisplayTimer;    // Time remaining for message display
+    float levelClearedDisplayDuration; // Display duration (3.0s)
 
     // Ghost spawn area exits (positions marked 'w' in map)
     std::vector<std::pair<int, int>> exitPositions;

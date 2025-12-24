@@ -15,6 +15,11 @@ FruitView::FruitView(logic::EntityModel* model, sf::RenderWindow& win, std::shar
 
 void FruitView::update(logic::GameEvent event) {}
 
+/**
+ * @brief Render fruit sprite (power pellet)
+ *
+ * Scaling: 70% of grid cell (larger than coin, smaller than entities)
+ */
 void FruitView::draw() {
     if (!model || !camera)
         return;
@@ -40,7 +45,7 @@ void FruitView::draw() {
 
             if (spriteWidth > 0 && spriteHeight > 0) {
                 float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
-                float desiredSize = gridCellSize * 0.7f;
+                float desiredSize = gridCellSize * 0.7f; // 70% of cell
 
                 float scaleX = desiredSize / spriteWidth;
                 float scaleY = desiredSize / spriteHeight;
@@ -55,6 +60,7 @@ void FruitView::draw() {
         }
     }
 
+    // Fallback: green circle (50% of cell)
     float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
     float desiredSize = gridCellSize * 0.5f;
     float radius = desiredSize / 2.f;

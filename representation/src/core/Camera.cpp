@@ -7,6 +7,11 @@ Camera::Camera(float winWidth, float winHeight, float mapW, float mapH)
     updateScale();
 }
 
+/**
+ * @brief Recalculate scale factors (pixels per grid cell)
+ *
+ * Example: 800px window / 21 cells = 38.09 px/cell
+ */
 void Camera::updateScale() {
     if (mapWidth > 0 && mapHeight > 0) {
         scaleX = windowWidth / mapWidth;

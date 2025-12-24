@@ -52,7 +52,7 @@ void PacMan::respawn() {
     setPosition(spawnX, spawnY);
     setDirection(Direction::LEFT);
     desiredDirection = Direction::NONE;
-    notify(GameEvent::DIRECTION_CHANGED);  // Reset view animation
+    notify(GameEvent::DIRECTION_CHANGED); // Reset view animation
 }
 
 void PacMan::setSpawnPosition(float x, float y) {
@@ -85,8 +85,7 @@ bool PacMan::isAlignedWithGrid() const {
     // Check if near 0.0, 0.5, or 1.0 (grid boundaries and centers)
     return (std::abs(fractX - 0.5f) < tolerance || std::abs(fractX) < tolerance ||
             std::abs(fractX - 1.0f) < tolerance) &&
-           (std::abs(fractY - 0.5f) < tolerance || std::abs(fractY) < tolerance ||
-            std::abs(fractY - 1.0f) < tolerance);
+           (std::abs(fractY - 0.5f) < tolerance || std::abs(fractY) < tolerance || std::abs(fractY - 1.0f) < tolerance);
 }
 
 /**

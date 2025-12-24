@@ -15,6 +15,15 @@ CoinView::CoinView(logic::EntityModel* model, sf::RenderWindow& win, std::shared
 
 void CoinView::update(logic::GameEvent event) {}
 
+/**
+ * @brief Render coin sprite centered on grid position
+ *
+ * Early exits:
+ * - No model/camera
+ * - Model is dead (collected)
+ *
+ * Scaling: 40% of grid cell (smaller than entities)
+ */
 void CoinView::draw() {
     if (!model || !camera)
         return;
@@ -40,7 +49,7 @@ void CoinView::draw() {
 
             if (spriteWidth > 0 && spriteHeight > 0) {
                 float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
-                float desiredSize = gridCellSize * 0.4f;
+                float desiredSize = gridCellSize * 0.4f; // 40% of cell
 
                 float scaleX = desiredSize / spriteWidth;
                 float scaleY = desiredSize / spriteHeight;
@@ -55,6 +64,7 @@ void CoinView::draw() {
         }
     }
 
+    // Fallback: white circle (30% of cell)
     float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
     float desiredSize = gridCellSize * 0.3f;
     float radius = desiredSize / 2.f;

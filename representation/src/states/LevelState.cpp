@@ -13,6 +13,73 @@
 #include "../../include/representation/systems/SoundObserver.h"
 #include <cmath>
 
+/**
+ * LevelState.cpp - Active Gameplay Implementation
+ *
+ * KEY METHODS:
+ *
+ * LevelState():
+ *   - Store level and score
+ *   - Set map file path
+ *
+ * loadLevel():
+ *   - Create camera (game area = window height - 60px)
+ *   - Create score system (with carried score)
+ *   - Create lives system (3 lives)
+ *
+ * onEnter():
+ *   - Load sounds (if first time)
+ *   - Stop music
+ *   - Play background music (level 1 only)
+ *
+ * First render():
+ *   - Create factory (needs window reference)
+ *   - Load sprite sheet
+ *   - Attach sound observer
+ *   - Create HUD
+ *   - Create world (pass factory)
+ *   - Attach score/lives to world
+ *   - Load map (creates entities)
+ *   - Start READY! state
+ *
+ * handleInput():
+ *   - Map keys → setDesiredDirection()
+ *
+ * update(deltaTime):
+ *   - Count coins before update
+ *   - world->update(deltaTime)
+ *   - Count coins after update
+ *   - Manage movement sound based on:
+ *     * Movement detection
+ *     * Coin collection timing
+ *     * Special state flags
+ *   - Handle state transitions:
+ *     * Game over → VictoryState(0, score)
+ *     * Level cleared → VictoryState(nextLevel, score)
+ *
+ * render():
+ *   - Lazy init (first call only)
+ *   - factory->updateAll() (animations)
+ *   - factory->drawAll() (entities)
+ *   - hud->draw() (UI)
+ *   - hud->drawReadyText() (if ready state)
+ *   - hud->drawLevelClearedText() (if cleared)
+ *
+ * SOUND MANAGEMENT COMPLEXITY:
+ *
+ * Movement sound plays when:
+ *   actuallyMoving (position delta > 0.001)
+ *   AND wantsToMove (direction != NONE)
+ *   AND timeSinceLastCoin < 0.3s
+ *   AND coinsRemaining > 0
+ *   AND isNormalGameplay (not death/ready/cleared)
+ *
+ * Special state handling resets timeSinceLastCoin.
+ *
+ * The original .cpp file (424 lines) is preserved as-is.
+ * This file documents the architecture and key logic flows.
+ */
+
 namespace representation {
 
 LevelState::~LevelState() = default;

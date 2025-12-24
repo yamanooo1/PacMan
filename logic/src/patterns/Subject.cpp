@@ -30,7 +30,7 @@ void Subject::detach(const std::shared_ptr<Observer>& o) {
     observers.erase(std::remove_if(observers.begin(), observers.end(),
                                    [&o](const std::weak_ptr<Observer>& weak) {
                                        auto locked = weak.lock();
-                                       return !locked || locked == o;  // Remove if expired or matches
+                                       return !locked || locked == o; // Remove if expired or matches
                                    }),
                     observers.end());
 }
@@ -55,10 +55,10 @@ void Subject::notify(GameEvent event) {
     observers.erase(std::remove_if(observers.begin(), observers.end(),
                                    [&event](const std::weak_ptr<Observer>& weak) {
                                        if (auto observer = weak.lock()) {
-                                           observer->update(event);  // Notify if still alive
-                                           return false;             // Keep in list
+                                           observer->update(event); // Notify if still alive
+                                           return false;            // Keep in list
                                        }
-                                       return true;  // Remove if expired
+                                       return true; // Remove if expired
                                    }),
                     observers.end());
 }
