@@ -72,11 +72,12 @@ void PausedState::setupTexts() {
 /**
  * @brief Start pause music, stop game music
  */
-void PausedState::onEnter() {
-    SoundManager& soundManager = SoundManager::getInstance();
-    soundManager.stopMusic();
-    soundManager.playPauseMusic(true);
-}
+    void PausedState::onEnter() {
+        SoundManager& soundManager = SoundManager::getInstance();
+        soundManager.stopMusic();
+        soundManager.stopAllSounds();  // Stop ook sound effects
+        soundManager.playPauseMusic(true);
+    }
 
 /**
  * @brief Stop pause music (LevelState will resume its music)

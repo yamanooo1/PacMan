@@ -19,6 +19,16 @@ SoundManager& SoundManager::getInstance() {
     return instance;
 }
 
+    void SoundManager::stopAllSounds() {
+        for (auto& [effect, sounds] : soundPlayers) {
+            for (auto& sound : sounds) {
+                if (sound.getStatus() == sf::Sound::Playing) {
+                    sound.stop();
+                }
+            }
+        }
+    }
+
 /**
  * @brief Load all sound files from directory
  *

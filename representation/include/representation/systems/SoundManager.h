@@ -278,6 +278,13 @@ public:
      * @return true if at least some files loaded
      */
     bool isLoaded() const { return soundsLoaded; }
+
+    /**
+ * @brief Stop all currently playing sound effects
+ *
+ * Useful when pausing or transitioning states.
+ */
+    void stopAllSounds();
 };
 
 } // namespace representation

@@ -130,29 +130,28 @@ bool LevelState::loadLevel() {
     return true;
 }
 
-void LevelState::handleEvents(sf::RenderWindow& window) {
+    void LevelState::handleEvents(sf::RenderWindow& window) {
+        static bool escWasPressed = false;
+        bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
 
-    if (world && world->isDeathAnimationActive()) {
-        return;  // Geen input tijdens death animation
-    }
-
-    if (world && world->isLevelCleared()) {
-        return;
-    }
-
-    static bool escWasPressed = false;
-    bool escIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
-
-    if (escIsPressed && !escWasPressed) {
-        pauseRequested = true;
-
-        if (stateManager) {
-            stateManager->pushState(std::make_unique<PausedState>());
+        // Blokkeer input tijdens speciale states
+        if (world && (world->isDeathAnimationActive() || world->isLevelCleared())) {
+            // CONSUMEER de ESC key - markeer als "al verwerkt"
+            escWasPressed = true;  // Forceer naar true om trigger te voorkomen
+            return;
         }
-    }
 
-    escWasPressed = escIsPressed;
-}
+        // Normale pause handling
+        if (escIsPressed && !escWasPressed) {
+            pauseRequested = true;
+
+            if (stateManager) {
+                stateManager->pushState(std::make_unique<PausedState>());
+            }
+        }
+
+        escWasPressed = escIsPressed;
+    }
 
 void LevelState::update(float deltaTime) {
     if (pauseRequested) {
