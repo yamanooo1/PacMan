@@ -488,17 +488,17 @@ bool Ghost::isAtIntersection(int gridX, int gridY, World* world) const {
  *
  * Three strategies:
  *
- * 1. RANDOM (Orange ghost):
+ * 1. RANDOM (Pink ghost):
  *    - 50% chance: pick random direction
  *    - 50% chance: continue current direction
  *    - Unpredictable, easier to evade
  *
- * 2. CHASER (Red ghost):
+ * 2. CHASER (Red/Orange ghost):
  *    - Target PacMan's current position directly
  *    - Minimize manhattan distance
  *    - Aggressive, relentless pursuit
  *
- * 3. AMBUSHER (Pink/Cyan ghosts):
+ * 3. AMBUSHER (Blue/Cyan ghosts):
  *    - Target 4 cells ahead of PacMan
  *    - If already closer to target than PacMan → chase PacMan directly
  *    - Strategic positioning for ambush
