@@ -45,7 +45,7 @@ void FruitView::draw() {
 
             if (spriteWidth > 0 && spriteHeight > 0) {
                 float gridCellSize = std::min(camera->getScaleX(), camera->getScaleY());
-                float desiredSize = gridCellSize * 0.7f;  // 70% of cell
+                float desiredSize = gridCellSize * 0.7f; // 70% of cell
 
                 float scaleX = desiredSize / spriteWidth;
                 float scaleY = desiredSize / spriteHeight;

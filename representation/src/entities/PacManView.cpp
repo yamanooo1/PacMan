@@ -79,7 +79,7 @@ void PacManView::updateAnimation(float deltaTime) {
             deathFrame++;
 
             if (deathFrame > 10) {
-                deathFrame = 10;  // Hold on last frame
+                deathFrame = 10; // Hold on last frame
             }
         }
 
@@ -99,10 +99,10 @@ void PacManView::updateAnimation(float deltaTime) {
 
             if (animationTimer >= frameDuration) {
                 animationTimer = 0.0f;
-                currentMouthFrame = (currentMouthFrame + 1) % 3;  // Cycle 0→1→2→0
+                currentMouthFrame = (currentMouthFrame + 1) % 3; // Cycle 0→1→2→0
             }
         } else {
-            currentMouthFrame = 0;  // Closed mouth when static
+            currentMouthFrame = 0; // Closed mouth when static
         }
 
         prevX = currentX;

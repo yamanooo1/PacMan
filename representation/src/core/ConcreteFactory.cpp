@@ -183,10 +183,7 @@ std::unique_ptr<logic::Fruit> ConcreteFactory::createFruit(float x, float y) {
  */
 void ConcreteFactory::drawAll() {
     // Sort by z-order before rendering
-    std::sort(views.begin(), views.end(),
-        [](const auto& a, const auto& b) {
-            return a->getZOrder() < b->getZOrder();
-        });
+    std::sort(views.begin(), views.end(), [](const auto& a, const auto& b) { return a->getZOrder() < b->getZOrder(); });
 
     for (const auto& view : views) {
         view->draw();
