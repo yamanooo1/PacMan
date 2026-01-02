@@ -131,6 +131,11 @@ bool LevelState::loadLevel() {
 }
 
 void LevelState::handleEvents(sf::RenderWindow& window) {
+
+    if (world && world->isDeathAnimationActive()) {
+        return;  // Geen input tijdens death animation
+    }
+
     if (world && world->isLevelCleared()) {
         return;
     }
