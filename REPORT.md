@@ -98,5 +98,3 @@ If I started over:
 Overall fun project. Got to work with game logic, AI, graphics, state machines. Ghost AI debugging was frustrating but interesting. Learned a lot about software architecture and C++ I didn't know before.
 
 ---
-
-**Word count: ~1250 words (~2 pages)**
