@@ -1,7 +1,7 @@
 # Pac-Man Game Architecture - Design Rationale Report
 
-**Eray Yaman Ayyildiz - s0243673 - 04/01/2026**  
-**GitHub: https://github.com/[jouw-github]/PacMan**
+**Yaman Haj Ahmad - s0241093 - 04/01/2026**  
+**GitHub: https://github.com/yamanooo1/PacMan**
 
 ---
 
