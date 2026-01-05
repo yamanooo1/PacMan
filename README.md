@@ -1,4 +1,6 @@
 # PacMan Game
+Yaman Haj Ahmad
+s0241093
 
 A C++ implementation of PacMan using SFML, featuring ghost AI, level progression, and score tracking.
 
